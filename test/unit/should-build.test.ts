@@ -41,6 +41,9 @@ describe('scripts/should-build.sh', () => {
   it('builds (exit 1) when app files changed alongside skills', () => {
     expect(run(repoWith([['app/a.ts'], ['skills/nuxt/README.md', 'app/b.ts']]))).toBe(1)
   })
+  it('skips when only agent config, repo CLAUDE.md or workflows changed', () => {
+    expect(run(repoWith([['app/a.ts'], ['CLAUDE.md', '.claude/rules/x.md', '.github/workflows/ci.yml']]))).toBe(0)
+  })
   it('builds when content/docs changed (app content, not bundle content)', () => {
     expect(run(repoWith([['app/a.ts'], ['content/docs/getting-started.md']]))).toBe(1)
   })

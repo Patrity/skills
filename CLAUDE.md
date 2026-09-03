@@ -27,5 +27,12 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - nuxt-umami config is baked at build time; `NUXT_PUBLIC_UMAMI_ID` is a Production-only build env var.
 - `UDashboardPanel`: named slots only, no `grow`. `UTree`: `v-model` = item object, `v-model:expanded` = key strings, pass `get-key`.
 
+## Production (verified 2026-09-03)
+- https://skills.patrity.com on Vercel team `patritys-projects`, project `skills`; repo `Patrity/skills` is public. Vercel CLI is linked from this directory (`.vercel/`, gitignored).
+- Env (Vercel): `NUXT_SKILLS_SOURCE=github`, `NUXT_PUBLIC_SITE_URL`, `UMAMI_DOMAINS`, `NUXT_REVALIDATE_SECRET` (sensitive; same value as the GitHub Actions secret `REVALIDATE_SECRET`), `NUXT_GITHUB_TOKEN` (sensitive), `NUXT_PUBLIC_UMAMI_ID` (production only). Do NOT set `NUXT_PUBLIC_GITHUB_*` unless overriding — empty values override the config defaults and break every GitHub URL.
+- `invalidateByTag('skills')` DOES purge ISR entries: after `POST /api/revalidate` the next hit is `x-vercel-cache: STALE`, then `HIT`. No bypass-token fallback needed.
+- A skills-only push is ignored by Vercel (`scripts/should-build.sh`) and the `revalidate` workflow puts the new sha on the CDN in ~5 s. A redeploy of the same commit (env changes) always builds.
+- Env changes need a redeploy: `vercel redeploy <latest-production-url> --scope patritys-projects`.
+
 ## Self-improvement
 - When a convention or gotcha emerges, add it here (short) or as a rule/skill (long). Mirror substantive docs to MyMind (project `skills`) and track deferred work as MyMind tasks.
