@@ -10,12 +10,26 @@ const props = defineProps<{
 const { tree } = useGithubUrls()
 const { trackDownload, trackSource } = useAnalytics()
 const downloadUrl = computed(() => `/api/skills/${props.skill.slug}/download`)
+
+// The whole card navigates, but the title link, the author link and the Source /
+// Download buttons keep their own behaviour — bail out when the click started
+// inside one of them, otherwise the card would navigate on top of them.
+function onCardClick(e: MouseEvent) {
+  if ((e.target as HTMLElement | null)?.closest('a,button')) return
+  navigateTo(`/skill/${props.skill.slug}`)
+}
 </script>
 
 <template>
   <UPageCard
     variant="subtle"
-    :ui="{ container: 'gap-3', footer: 'w-full' }"
+    class="cursor-pointer"
+    :ui="{
+      root: 'transition-shadow hover:ring-primary/40 hover:shadow-sm',
+      container: 'gap-3',
+      footer: 'w-full'
+    }"
+    @click="onCardClick"
   >
     <!--
       UPageCard (v4.11) only auto-renders #title/#description as part of the

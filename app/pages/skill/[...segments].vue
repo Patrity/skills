@@ -58,6 +58,9 @@ const view = ref<'rendered' | 'source'>('rendered')
 const treeOpen = ref(false)
 const contentEl = ref<HTMLElement>()
 
+// Code (CodeMirror) gets the whole panel; prose keeps a reading measure.
+const showCode = computed(() => !!file.value && file.value.kind === 'text' && !(isMarkdown.value && view.value === 'rendered'))
+
 watch(currentPath, () => {
   view.value = 'rendered'
   contentEl.value?.scrollTo({ top: 0 })
@@ -159,7 +162,7 @@ onMounted(() => trackSkillView(slug.value))
           ref="contentEl"
           class="h-full overflow-y-auto"
         >
-          <div class="mx-auto max-w-4xl p-4 sm:p-6 flex flex-col gap-6">
+          <div :class="[showCode ? 'w-full' : 'mx-auto max-w-4xl', 'p-4 sm:p-6 flex flex-col gap-6']">
             <SkillMetaCard
               v-if="isReadme"
               :skill="skill"
