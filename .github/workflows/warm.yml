@@ -6,6 +6,12 @@ on:
   deployment_status:
   workflow_dispatch:
 
+# Two deploys in quick succession would otherwise warm the older build's URLs on top of the
+# newer one. Only the latest run matters.
+concurrency:
+  group: warm
+  cancel-in-progress: true
+
 jobs:
   warm:
     # Verified against repos/Patrity/skills/deployments: Vercel names the environment
@@ -13,6 +19,8 @@ jobs:
     # `environment_url` is the per-deploy *.vercel.app host, never vars.SITE_URL.
     if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
     steps:
       - name: Show the deployment payload
         if: github.event_name == 'deployment_status'
@@ -32,5 +40,25 @@ jobs:
 
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
+      # deployment_status fires before the alias necessarily points at the new build, and the
+      # payload URLs are keyed by build id: warming too early fills entries for the build that
+      # is on its way out. Wait until the site serves the build id this deployment reports.
+      - name: Wait for the site to serve this deployment
+        if: github.event_name == 'deployment_status'
+        env:
+          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+        run: |
+          set -euo pipefail
+          target=$(curl -fsS --max-time 30 --retry 1 "$DEPLOY_URL/_nuxt/builds/latest.json" | jq -r .id)
+          echo "deployment build id: $target"
+          for i in $(seq 1 20); do
+            live=$(curl -fsS --max-time 30 "$SITE_URL/_nuxt/builds/latest.json" | jq -r .id || true)
+            if [ "$live" = "$target" ]; then echo "site serving $live"; exit 0; fi
+            echo "attempt $i: site serving $live"
+            sleep 5
+          done
+          echo "site never picked up $target"
+          exit 1
+
       - name: Warm caches
-        run: bash scripts/warm-cache.sh "${{ vars.SITE_URL }}"
+        run: bash scripts/warm-cache.sh "$SITE_URL"

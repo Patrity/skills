@@ -7,16 +7,18 @@
 // hits /api/_mdc/highlight once per fenced block.
 import type { MarkdownBody } from '~~/shared/types/skills'
 
-defineProps<{
+withDefaults(defineProps<{
   body: MarkdownBody
-}>()
+  /** Frontmatter, as `<MDC>` passed it: MDCRenderer interpolates `{{ }}` in the body with it. */
+  data?: Record<string, unknown> | null
+}>(), { data: null })
 </script>
 
 <template>
   <article class="skill-prose">
     <MDCRenderer
       :body="body"
-      :data="{}"
+      :data="data ?? {}"
       tag="div"
     />
   </article>

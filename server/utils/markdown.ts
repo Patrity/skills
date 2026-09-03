@@ -1,6 +1,6 @@
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import type { Highlighter } from '@nuxtjs/mdc'
-import type { MarkdownBody } from '~~/shared/types/skills'
+import type { MarkdownRender } from '~~/shared/types/skills'
 
 // `#mdc-highlighter` is the Shiki instance @nuxtjs/mdc generates from `mdc.highlight`
 // in nuxt.config. The module aliases it into the Nitro bundle (module.mjs pushes it onto
@@ -24,14 +24,16 @@ function getHighlighter(): Promise<Highlighter> {
  *
  * Throws with `label` in the message; the caller picks the status code.
  */
-export async function renderMarkdown(md: string, label: string): Promise<MarkdownBody> {
+export async function renderMarkdown(md: string, label: string): Promise<MarkdownRender> {
   try {
-    const { body } = await parseMarkdown(md, {
+    const { body, data } = await parseMarkdown(md, {
       highlight: { highlighter: await getHighlighter() },
       toc: false,
       contentHeading: false
     })
-    return body
+    // `data` is the frontmatter (contentHeading is off, so no synthesised title/description).
+    // <MDC> handed the same object to <MDCRenderer :data>, which interpolates {{ }} with it.
+    return { body, data: data as Record<string, unknown> }
   } catch (err) {
     throw new Error(`Failed to render markdown for ${label}`, { cause: err })
   }

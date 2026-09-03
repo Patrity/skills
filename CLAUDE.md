@@ -22,7 +22,7 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - `shared/types/skills.ts` — DTOs used on both sides.
 
 ## Constraints that bit before
-- Vercel ISR ignores query strings: never put cache-varying input in `?query` on a cached route.
+- Every distinct query string is a separate ISR cache entry (no `allowQuery` is emitted): keep cache-varying input in the path, and warm payload URLs with the exact `?_b=<buildId>` the client sends.
 - Runtime Cache items ≤ 2 MB: cache per bundle, never the whole snapshot.
 - `mdc.highlight.langs` stays a short allow-list; `headings.anchorLinks: false`.
 - nuxt-umami config is baked at build time; `NUXT_PUBLIC_UMAMI_ID` is a Production-only build env var.

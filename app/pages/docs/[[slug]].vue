@@ -9,13 +9,21 @@ const slug = computed(() => (typeof route.params.slug === 'string' && route.para
 // Server-rendered: /api/docs/<slug> ships the parsed MDC AST, so the browser never runs the
 // markdown parser or the per-code-block highlight round trips.
 const { data: doc, error } = await useFetch<DocResponse>(() => `/api/docs/${encodeURIComponent(slug.value)}`)
-function notFound() {
-  return createError({ statusCode: 404, statusMessage: 'Doc not found', fatal: true })
+
+// /docs/** is ISR: a transient 5xx must stay a 5xx (Vercel keeps serving the stale page),
+// because a 404 would be cached and pin the doc as permanently missing.
+function docError(err: { statusCode?: number } | null | undefined) {
+  const statusCode = err?.statusCode ?? 500
+  return createError({
+    statusCode,
+    statusMessage: statusCode === 404 ? 'Doc not found' : 'Docs are temporarily unavailable',
+    fatal: true
+  })
 }
-if (error.value) throw notFound()
+if (error.value) throw docError(error.value)
 // One route record covers every slug, so setup does not re-run when the slug changes.
 watch(error, (err) => {
-  if (err) showError(notFound())
+  if (err) showError(docError(err))
 })
 
 const navOpen = ref(false)
@@ -99,6 +107,7 @@ useSeoMeta({
             <MarkdownView
               v-if="doc"
               :body="doc.body"
+              :data="doc.data"
             />
           </div>
         </div>

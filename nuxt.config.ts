@@ -33,8 +33,9 @@ export default defineNuxtConfig({
   },
 
   // ISR on Vercel. Every cached response is tagged so POST /api/revalidate can
-  // invalidateByTag('skills'). Vercel ISR ignores query strings, which is why the
-  // file endpoint encodes the path in the URL (see server/api/skills/[slug]/file/).
+  // invalidateByTag('skills'). Each distinct query string is its own cache entry, which is
+  // why the file endpoint encodes the path in the URL (see server/api/skills/[slug]/file/)
+  // instead of passing it as `?path=`.
   routeRules: {
     '/': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },

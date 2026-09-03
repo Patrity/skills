@@ -51,4 +51,6 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Warm caches
-        run: bash scripts/warm-cache.sh "${{ vars.SITE_URL }}"
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: bash scripts/warm-cache.sh "$SITE_URL"

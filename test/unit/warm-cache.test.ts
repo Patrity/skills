@@ -69,4 +69,35 @@ describe('buildWarmUrls', () => {
     expect(urls).not.toContain('/skill/demo/my%20docs')
     expect(new Set(urls).size).toBe(urls.length)
   })
+
+  it('warms the payload behind every sitemap page too, not just the bundle files', () => {
+    expect(urls).toContain('/docs/getting-started/_payload.json')
+    expect(urls).toContain('/docs/frontmatter/_payload.json')
+    expect(urls).toContain('/docs/_payload.json')
+    expect(urls).toContain('/skills/_payload.json')
+    // The site root's payload sits at /_payload.json, not //_payload.json.
+    expect(urls).toContain('/_payload.json')
+  })
+})
+
+// The ISR cache key includes the query string, and the client always asks for
+// `?_b=<buildId>`, so a bare payload URL fills an entry no browser ever requests.
+describe('buildWarmUrls with a build id', () => {
+  const urls = buildWarmUrls(sitemap, [detail], 'ae943e82-ec05-4981-8881-ea2cd48aac1f')
+
+  it('stamps every payload URL with the build id and no other URL', () => {
+    const payloads = urls.filter(u => u.includes('_payload.json'))
+    expect(payloads.length).toBeGreaterThan(0)
+    expect(payloads.every(u => u.endsWith('/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f'))).toBe(true)
+    expect(urls.filter(u => u.includes('?')).length).toBe(payloads.length)
+  })
+
+  it('keeps the path encoding it uses without a build id', () => {
+    expect(urls).toContain('/skill/demo/my%20docs/a%20b.md/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f')
+    expect(urls).toContain('/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f')
+  })
+
+  it('escapes a build id that is not URL-safe', () => {
+    expect(buildWarmUrls(sitemap, [], 'a b&c')).toContain('/_payload.json?_b=a%20b%26c')
+  })
 })

@@ -2,6 +2,7 @@
 import { preloadPayload } from '#app'
 import type { TreeItem } from '@nuxt/ui'
 import type { TreeNode } from '~~/shared/types/skills'
+import { encodePathSegments } from '~~/shared/utils/paths'
 
 const props = defineProps<{
   tree: TreeNode[]
@@ -83,11 +84,20 @@ function onSelect(e: Event) {
 const nuxtApp = useNuxtApp()
 const preloaded = new Set<string>()
 
-function prefetch(item: SkillTreeItem) {
-  if (item.nodeType !== 'file' || preloaded.has(item.path)) return
-  preloaded.add(item.path)
+/**
+ * Delegated so the whole row counts, not just the label glyphs. `data-slot="link"` is the row
+ * element itself and never contains a nested row (children live in a sibling `ul`), so the
+ * `data-tree-path` inside it always belongs to the row being hovered. Only files carry the
+ * attribute, which is what keeps directories out.
+ */
+function onPointerOver(event: PointerEvent) {
+  const row = (event.target as Element | null)?.closest?.('[data-slot="link"]')
+  const path = row?.querySelector<HTMLElement>('[data-tree-path]')?.dataset.treePath
+  if (!path || preloaded.has(path)) return
+  preloaded.add(path)
   // preloadPayload reads the Nuxt app off the context, which a DOM handler is outside of.
-  void nuxtApp.runWithContext(() => preloadPayload(`/skill/${props.slug}/${item.path}`).catch(() => {}))
+  const url = `/skill/${encodeURIComponent(props.slug)}/${encodePathSegments(path)}`
+  void nuxtApp.runWithContext(() => preloadPayload(url).catch(() => {}))
 }
 </script>
 
@@ -100,10 +110,12 @@ function prefetch(item: SkillTreeItem) {
     size="sm"
     class="p-2"
     @select="onSelect"
+    @pointerover="onPointerOver"
   >
     <template #item-label="{ item }">
-      <!-- Plain inline span: a block child here would break the label's truncation. -->
-      <span @mouseenter="prefetch(item)">{{ item.label }}</span>
+      <!-- Plain inline span: a block child here would break the label's truncation. The
+           attribute is what onPointerOver maps a hovered row back to. -->
+      <span :data-tree-path="item.nodeType === 'file' ? item.path : undefined">{{ item.label }}</span>
     </template>
   </UTree>
 </template>

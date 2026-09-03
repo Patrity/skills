@@ -22,17 +22,29 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-# These three fetches are also what warms /sitemap.xml, /api/skills and /api/skills/<slug>,
+fetch() { curl -fsS --max-time 30 --retry 1 "$@"; }
+
+# These fetches are also what warms /sitemap.xml, /api/skills and /api/skills/<slug>,
 # which is why buildWarmUrls leaves them out of its list.
-curl -fsS "$SITE/sitemap.xml" -o "$tmp/sitemap.xml"
-curl -fsS "$SITE/api/skills" -o "$tmp/skills.json"
+fetch "$SITE/sitemap.xml" -o "$tmp/sitemap.xml"
+fetch "$SITE/api/skills" -o "$tmp/skills.json"
+
+# A Vercel ISR cache key includes the query string, and the client asks for
+# `<route>/_payload.json?_b=<buildId>`, so warm exactly that URL and no other.
+build_id="$(fetch "$SITE/_nuxt/builds/latest.json" 2>/dev/null | jq -r '.id // empty' || true)"
+if [ -z "$build_id" ]; then
+  echo "warm-cache.sh: could not read a build id from $SITE/_nuxt/builds/latest.json;" \
+       "payload URLs will be warmed without ?_b= and may not be the ones clients request" >&2
+else
+  echo "warm-cache.sh: build id $build_id"
+fi
 
 n=0
 while IFS= read -r slug; do
   [ -n "$slug" ] || continue
   n=$((n + 1))
   encoded="$(jq -rn --arg s "$slug" '$s|@uri')"
-  curl -fsS "$SITE/api/skills/$encoded" -o "$tmp/detail-$n.json"
+  fetch "$SITE/api/skills/$encoded" -o "$tmp/detail-$n.json"
 done < <(jq -r '.skills[].slug' "$tmp/skills.json")
 
 if [ "$n" -eq 0 ]; then
@@ -41,13 +53,15 @@ if [ "$n" -eq 0 ]; then
 fi
 
 "$root/node_modules/.bin/tsx" "$root/scripts/warm-cache-urls.ts" \
-  "$tmp/sitemap.xml" "$tmp"/detail-*.json > "$tmp/paths.txt"
+  "$tmp/sitemap.xml" "$build_id" "$tmp"/detail-*.json > "$tmp/paths.txt"
 
 total="$(wc -l < "$tmp/paths.txt" | tr -d ' ')"
 echo "warm-cache.sh: warming $total URLs on $SITE ($n bundles)"
 
-sed "s|^|$SITE|" "$tmp/paths.txt" \
-  | xargs -P 8 -n 1 curl -s -o /dev/null -w '%{http_code} %{time_total}s %{url}\n' \
+# NUL-delimited: an apostrophe in a filename would otherwise break xargs' quote parsing.
+sed "s|^|$SITE|" "$tmp/paths.txt" | tr '\n' '\0' \
+  | xargs -0 -P 8 -n 1 curl -s --max-time 30 --retry 1 -o /dev/null \
+      -w '%{http_code} %{time_total}s %{url}\n' \
   > "$tmp/results.txt"
 
 sort -k1,1 "$tmp/results.txt" | awk '{ count[$1]++ } END { for (c in count) printf "  %s  %d\n", c, count[c] }'

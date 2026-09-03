@@ -3,6 +3,12 @@ import type { MDCRoot } from '@nuxtjs/mdc'
 /** Markdown parsed to the MDC AST on the server; `<MDCRenderer :body>` renders it as-is. */
 export type MarkdownBody = MDCRoot
 
+/** What `renderMarkdown` produces: the AST plus the frontmatter `<MDCRenderer :data>` interpolates. */
+export interface MarkdownRender {
+  body: MarkdownBody
+  data: Record<string, unknown>
+}
+
 export type ContentBadge = 'skills' | 'rules' | 'hooks' | 'settings' | 'claude-md'
 export type FileKind = 'text' | 'binary' | 'oversized'
 export type Language
@@ -68,6 +74,11 @@ export interface SkillFileResponse {
   content: string | null
   /** Raw YAML between the --- fences for markdown files that have frontmatter. */
   frontmatterRaw: string | null
-  /** Server-parsed MDC AST for markdown; null for every other kind or language. */
+  /**
+   * Server-parsed MDC AST for markdown; null for every other kind or language, and for
+   * markdown too big to be worth rendering (the page falls back to the source view).
+   */
   body: MarkdownBody | null
+  /** Frontmatter for a rendered markdown file, passed to `<MDCRenderer :data>`. Null with `body`. */
+  data: Record<string, unknown> | null
 }

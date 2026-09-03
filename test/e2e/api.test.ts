@@ -53,10 +53,11 @@ describe('GET /api/skills/:slug/file/*', () => {
     expect(res.frontmatterRaw).toContain('name: Demo')
     expect(res.content).toContain('# Demo bundle')
   })
-  it('ships a server-parsed MDC AST for markdown so the browser never parses or highlights', async () => {
+  it('ships a server-parsed MDC AST plus its frontmatter so the browser never parses or highlights', async () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/README.md')
     expect(res.body?.type).toBe('root')
     expect(res.body!.children.length).toBeGreaterThan(0)
+    expect(res.data).toMatchObject({ name: 'Demo' })
   })
   it('returns nested code files with the detected language', async () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/skills/demo-skill/fetch.py')
@@ -64,6 +65,7 @@ describe('GET /api/skills/:slug/file/*', () => {
     expect(res.frontmatterRaw).toBeNull()
     expect(res.content).toContain('print(')
     expect(res.body).toBeNull()
+    expect(res.data).toBeNull()
   })
   it('returns binary files without content', async () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/assets/blob.bin')
@@ -108,6 +110,7 @@ describe('GET /api/docs/:slug', () => {
     expect(res.entry).toMatchObject({ slug: 'getting-started', title: 'Getting started' })
     expect(res.body.type).toBe('root')
     expect(res.body.children.length).toBeGreaterThan(0)
+    expect(res.data).toEqual({})
   })
   it('404s for a slug that is not in the nav', async () => {
     expect((await fetch('/api/docs/nope')).status).toBe(404)

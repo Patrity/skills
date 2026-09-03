@@ -2,6 +2,7 @@
 import type { BreadcrumbItem } from '@nuxt/ui'
 import type { TreeNode } from '~~/shared/types/skills'
 import { isMarkdownPath } from '~~/shared/utils/language'
+import { encodePathSegments } from '~~/shared/utils/paths'
 import { formatBytes } from '~~/shared/utils/format'
 import { compactBreadcrumbs } from '~~/shared/utils/breadcrumbs'
 
@@ -59,8 +60,11 @@ const view = ref<'rendered' | 'source'>('rendered')
 const treeOpen = ref(false)
 const contentEl = ref<HTMLElement>()
 
-// Code (CodeMirror) gets the whole panel; prose keeps a reading measure.
-const showCode = computed(() => !!file.value && file.value.kind === 'text' && !(isMarkdown.value && view.value === 'rendered'))
+// Code (CodeMirror) gets the whole panel; prose keeps a reading measure. Markdown with no
+// server-rendered body (too large to render) falls through to the code view, so it gets the
+// full width too.
+const showCode = computed(() => !!file.value && file.value.kind === 'text'
+  && !(isMarkdown.value && view.value === 'rendered' && !!file.value.body))
 
 watch(currentPath, () => {
   view.value = 'rendered'
@@ -69,7 +73,7 @@ watch(currentPath, () => {
 
 function onSelect(path: string) {
   treeOpen.value = false
-  navigateTo(`/skill/${slug.value}/${path}`)
+  navigateTo(`/skill/${slug.value}/${encodePathSegments(path)}`)
 }
 
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -223,6 +227,7 @@ onMounted(() => trackSkillView(slug.value))
                 <MarkdownView
                   v-if="isMarkdown && view === 'rendered' && file.body"
                   :body="file.body"
+                  :data="file.data"
                 />
                 <CodeView
                   v-else
