@@ -269,3 +269,50 @@ describe('createSnapshotStore when the cache itself throws', () => {
     warn.mockRestore()
   })
 })
+
+describe('runtime cache warnings are throttled to once per outage', () => {
+  // cacheWarned is module-scoped, and other tests above leave it in whatever state
+  // their last cache call produced. vi.resetModules() + a dynamic re-import gives this
+  // test its own fresh copy of the module (cacheWarned starts false) so it is not
+  // order-dependent on anything that ran before it.
+  it('warns once for repeated cache.get failures, resets on a success, and warns again for a later failure', async () => {
+    vi.resetModules()
+    const fresh = await import('../../server/lib/skills/store')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    let getCalls = 0
+    const cache: StoreCache = {
+      async get() {
+        getCalls++
+        // 3rd call "recovers": a structurally valid hit short-circuits before any
+        // cache.set is attempted, isolating this test to get()'s warn/reset behaviour.
+        if (getCalls === 3) {
+          return {
+            meta: { sha: 'cached', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'github' },
+            skills: []
+          }
+        }
+        throw new Error('cache get boom')
+      },
+      // Always fails too: a real outage takes get and set down together. Without this,
+      // the write-back after a get-miss would succeed and reset the flag mid-outage.
+      async set() {
+        throw new Error('cache set boom')
+      }
+    }
+
+    const store = fresh.createSnapshotStore({ source: fakeSource([snapshot('a')]), cache, memoTtl: 0 })
+
+    await store.getManifests() // get #1 throws -> warns (1st)
+    await store.getManifests() // get #2 throws -> already warned, suppressed
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    await store.getManifests() // get #3 succeeds -> resets the flag
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    await store.getManifests() // get #4 throws -> flag was reset, warns again (2nd)
+    expect(warn).toHaveBeenCalledTimes(2)
+
+    warn.mockRestore()
+  })
+})

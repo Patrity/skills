@@ -80,15 +80,26 @@ function isValidManifestRecord(hit: unknown): hit is ManifestRecord {
 }
 
 /**
- * A Runtime Cache outage must never take the site down: any failure here is logged
- * once and treated as a miss (get) or silently dropped (set), falling through to the
- * source instead of throwing.
+ * A Runtime Cache outage must never take the site down: any failure here is treated as
+ * a miss (get) or silently dropped (set), falling through to the source instead of
+ * throwing. `cacheWarned` keeps that from spamming the logs on every request during a
+ * sustained outage: only the first failure since the last successful cache call warns.
  */
+let cacheWarned = false
+
+function warnCacheFailure(err: unknown): void {
+  if (cacheWarned) return
+  cacheWarned = true
+  console.warn('[skills] runtime cache unavailable:', err instanceof Error ? err.message : String(err))
+}
+
 async function safeCacheGet(cache: StoreCache, key: string): Promise<unknown | null> {
   try {
-    return await cache.get(key)
+    const result = await cache.get(key)
+    cacheWarned = false
+    return result
   } catch (err) {
-    console.warn('[skills] runtime cache unavailable:', err instanceof Error ? err.message : String(err))
+    warnCacheFailure(err)
     return null
   }
 }
@@ -96,8 +107,9 @@ async function safeCacheGet(cache: StoreCache, key: string): Promise<unknown | n
 async function safeCacheSet(cache: StoreCache, key: string, value: unknown, options?: { ttl?: number, tags?: string[] }): Promise<void> {
   try {
     await cache.set(key, value, options)
+    cacheWarned = false
   } catch (err) {
-    console.warn('[skills] runtime cache unavailable:', err instanceof Error ? err.message : String(err))
+    warnCacheFailure(err)
   }
 }
 
