@@ -1,0 +1,39 @@
+name: revalidate
+
+# A push that touches bundle content doesn't deploy (see vercel.json ignoreCommand);
+# instead purge the `skills` cache tag and confirm the site serves this commit.
+on:
+  push:
+    branches: [main]
+    paths: ['skills/**']
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge and warm
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+        run: |
+          set -euo pipefail
+          out=$(curl -fsS -X POST -H "Authorization: Bearer $REVALIDATE_SECRET" "$SITE_URL/api/revalidate")
+          echo "$out"
+          sha=$(echo "$out" | jq -r .sha)
+          if [ "$sha" != "$GITHUB_SHA" ]; then
+            echo "revalidate returned $sha, expected $GITHUB_SHA"
+            exit 1
+          fi
+
+      - name: Wait for the CDN to serve the new snapshot
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            sha=$(curl -fsS "$SITE_URL/api/skills" | jq -r .sha)
+            if [ "$sha" = "$GITHUB_SHA" ]; then echo "CDN serving $sha"; exit 0; fi
+            echo "attempt $i: CDN still serving $sha"
+            sleep 5
+          done
+          echo "CDN never caught up"
+          exit 1
