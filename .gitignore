@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+.data
+.vercel
+.env
+.env.*
+!.env.example
+.playwright-cli
+.DS_Store
+logs
+*.log
+.claude/settings.local.json
+.claude/worktrees

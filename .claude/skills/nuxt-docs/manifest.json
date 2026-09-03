@@ -1,0 +1,47 @@
+{
+  "source": "https://github.com/nuxt/nuxt",
+  "branch": "main",
+  "docs_path": "docs",
+  "topics": {
+    "usefetch": {
+      "last_fetch": "2026-03-26T06:57:35.367671",
+      "source_path": "4.api/2.composables/use-fetch.md"
+    },
+    "configuration": {
+      "last_fetch": "2026-01-05T16:18:27.080067",
+      "source_path": "1.getting-started/03.configuration.md"
+    },
+    "deployment": {
+      "last_fetch": "2026-06-03T13:51:44.047074",
+      "source_path": "1.getting-started/16.deployment.md"
+    },
+    "routing": {
+      "last_fetch": "2026-03-14T22:49:21.731517",
+      "source_path": "1.getting-started/07.routing.md"
+    },
+    "config": {
+      "last_fetch": "2026-06-08T22:11:10.777275",
+      "source_path": "4.api/6.nuxt-config.md"
+    },
+    "error-handling": {
+      "last_fetch": "2026-03-24T06:15:45.196853",
+      "source_path": "1.getting-started/12.error-handling.md"
+    },
+    "navigateto": {
+      "last_fetch": "2026-03-26T06:08:41.930636",
+      "source_path": "4.api/3.utils/navigate-to.md"
+    },
+    "data-fetching": {
+      "last_fetch": "2026-03-26T06:57:50.962353",
+      "source_path": "1.getting-started/10.data-fetching.md"
+    },
+    "prerendering": {
+      "last_fetch": "2026-06-03T13:51:49.277310",
+      "source_path": "1.getting-started/15.prerendering.md"
+    },
+    "server": {
+      "last_fetch": "2026-03-27T08:33:40.091744",
+      "source_path": "1.getting-started/13.server.md"
+    }
+  }
+}
