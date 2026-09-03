@@ -1,6 +1,7 @@
 import { unzipSync } from 'fflate'
 import type { BundleFiles, RawBundle } from './types'
 import { isExcludedPath } from './exclusions'
+import { isSafeRelativePath } from './paths'
 
 /** `<owner>-<repo>-<sha7>/skills/<slug>/<rest…>` — anything shallower is repo noise. */
 const BUNDLE_ENTRY_RE = /^[^/]+\/skills\/[^/]+\/.+/
@@ -24,7 +25,9 @@ export function extractBundles(zip: Uint8Array | ArrayBuffer): RawBundle[] {
     const [, , slug, ...rest] = name.split('/')
     if (!slug || rest.length === 0 || slug.startsWith('.')) continue
     const rel = rest.join('/')
-    if (isExcludedPath(rel)) continue
+    // Defence in depth: BUNDLE_ENTRY_RE and isExcludedPath already keep this well-formed
+    // in practice, but a crafted zip entry must never be trusted to stay inside the bundle.
+    if (!isSafeRelativePath(rel) || isExcludedPath(rel)) continue
     if (!bySlug.has(slug)) bySlug.set(slug, {})
     bySlug.get(slug)![rel] = bytes ?? new Uint8Array(0)
   }

@@ -63,6 +63,44 @@ function decodeBundle(record: BundleRecord): BundleFiles {
   return out
 }
 
+/** Guards against a cache entry written by an older/incompatible build of this store. */
+function isValidManifestRecord(hit: unknown): hit is ManifestRecord {
+  if (!hit || typeof hit !== 'object') return false
+  const { meta, skills } = hit as { meta?: unknown, skills?: unknown }
+  if (!meta || typeof meta !== 'object') return false
+  const m = meta as Record<string, unknown>
+  if (typeof m.sha !== 'string' || typeof m.committedAt !== 'string' || typeof m.fetchedAt !== 'string') return false
+  if (m.source !== 'fs' && m.source !== 'github') return false
+  if (!Array.isArray(skills)) return false
+  return skills.every((s) => {
+    if (!s || typeof s !== 'object') return false
+    const skill = s as Record<string, unknown>
+    return typeof skill.slug === 'string' && Array.isArray(skill.tree)
+  })
+}
+
+/**
+ * A Runtime Cache outage must never take the site down: any failure here is logged
+ * once and treated as a miss (get) or silently dropped (set), falling through to the
+ * source instead of throwing.
+ */
+async function safeCacheGet(cache: StoreCache, key: string): Promise<unknown | null> {
+  try {
+    return await cache.get(key)
+  } catch (err) {
+    console.warn('[skills] runtime cache unavailable:', err instanceof Error ? err.message : String(err))
+    return null
+  }
+}
+
+async function safeCacheSet(cache: StoreCache, key: string, value: unknown, options?: { ttl?: number, tags?: string[] }): Promise<void> {
+  try {
+    await cache.set(key, value, options)
+  } catch (err) {
+    console.warn('[skills] runtime cache unavailable:', err instanceof Error ? err.message : String(err))
+  }
+}
+
 export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
   const source = opts.source
   const cache = opts.cache ?? null
@@ -77,11 +115,11 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
 
   async function writeCache(snap: Snapshot, record: ManifestRecord): Promise<void> {
     if (!cache) return
-    await cache.set(MANIFEST_KEY, record, { ttl: cacheTtl, tags: [CACHE_TAG] })
-    for (const [slug, bundle] of Object.entries(snap.files)) {
+    await safeCacheSet(cache, MANIFEST_KEY, record, { ttl: cacheTtl, tags: [CACHE_TAG] })
+    await Promise.all(Object.entries(snap.files).map(([slug, bundle]) => {
       const encoded = encodeBundle(bundle)
-      if (encoded) await cache.set(bundleKey(slug), encoded, { ttl: cacheTtl, tags: [CACHE_TAG] })
-    }
+      return encoded ? safeCacheSet(cache, bundleKey(slug), encoded, { ttl: cacheTtl, tags: [CACHE_TAG] }) : undefined
+    }))
   }
 
   function loadFromSource(): Promise<Snapshot> {
@@ -104,8 +142,8 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
 
   async function readCachedManifests(): Promise<ManifestRecord | null> {
     if (!cache) return null
-    const hit = await cache.get(MANIFEST_KEY) as ManifestRecord | null
-    return hit && Array.isArray(hit.skills) && hit.meta ? hit : null
+    const hit = await safeCacheGet(cache, MANIFEST_KEY)
+    return isValidManifestRecord(hit) ? hit : null
   }
 
   /**
@@ -141,7 +179,7 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
     if (!skills.some(s => s.slug === slug)) return null
     if (files[slug]) return files[slug]!
     if (cache) {
-      const record = await cache.get(bundleKey(slug)) as BundleRecord | null
+      const record = await safeCacheGet(cache, bundleKey(slug)) as BundleRecord | null
       if (record && record.files) {
         files[slug] = decodeBundle(record)
         return files[slug]!

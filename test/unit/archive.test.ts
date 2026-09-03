@@ -51,6 +51,24 @@ describe('extractBundles', () => {
   it('returns [] for an archive with no skills dir', () => {
     expect(extractBundles(zipSync({ 'x-y-z/README.md': enc('root') }))).toEqual([])
   })
+
+  it('drops entries that traverse outside the bundle via a crafted path (defence in depth)', () => {
+    const bundles = extractBundles(zipSync({
+      'Owner-repo-sha/skills/demo/../x.md': enc('escaped'),
+      'Owner-repo-sha/skills/demo/README.md': enc('ok')
+    }))
+    const demo = bundles.find(b => b.slug === 'demo')!
+    expect(Object.keys(demo.files)).toEqual(['README.md'])
+  })
+
+  it('drops entries with an empty path segment that isExcludedPath does not catch', () => {
+    const bundles = extractBundles(zipSync({
+      'Owner-repo-sha/skills/demo/a//b.md': enc('unsafe'),
+      'Owner-repo-sha/skills/demo/README.md': enc('ok')
+    }))
+    const demo = bundles.find(b => b.slug === 'demo')!
+    expect(Object.keys(demo.files)).toEqual(['README.md'])
+  })
 })
 
 describe('extractBundles on a real git-archive zipball', () => {

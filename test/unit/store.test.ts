@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { bundleKey, CACHE_TAG, createSnapshotStore, MANIFEST_KEY, type StoreCache } from '../../server/lib/skills/store'
 import type { Snapshot, SkillsSource } from '../../server/lib/skills/types'
 import { MAX_FILE_BYTES } from '../../server/lib/skills/exclusions'
@@ -202,5 +202,70 @@ describe('createSnapshotStore when the source fails', () => {
     const source = flakySource(snapshot('a'))
     source.fail()
     await expect(createSnapshotStore({ source, cache: fakeCache() }).getManifests()).rejects.toThrow('source down')
+  })
+})
+
+describe('readCachedManifests validates shape strictly', () => {
+  it('treats a cached record with a malformed meta as a miss and reloads from source', async () => {
+    const cache = fakeCache()
+    cache.store.set(MANIFEST_KEY, {
+      value: { meta: { sha: 'x', committedAt: 'c', fetchedAt: 'f', source: 'not-a-source' }, skills: [] },
+      tags: [CACHE_TAG]
+    })
+    const source = fakeSource([snapshot('fresh')])
+    const result = await createSnapshotStore({ source, cache }).getManifests()
+    expect(result.meta.sha).toBe('fresh')
+    expect(source.calls).toBe(1)
+  })
+
+  it('treats a cached record with a skill missing slug/tree as a miss and reloads from source', async () => {
+    const cache = fakeCache()
+    cache.store.set(MANIFEST_KEY, {
+      value: {
+        meta: { sha: 'x', committedAt: 'c', fetchedAt: 'f', source: 'github' },
+        skills: [{ name: 'no slug or tree' }]
+      },
+      tags: [CACHE_TAG]
+    })
+    const source = fakeSource([snapshot('fresh')])
+    const result = await createSnapshotStore({ source, cache }).getManifests()
+    expect(result.meta.sha).toBe('fresh')
+    expect(source.calls).toBe(1)
+  })
+})
+
+describe('createSnapshotStore when the cache itself throws', () => {
+  it('a throwing cache.get is treated as a miss, warns once, and still serves the manifest', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const cache: StoreCache = {
+      async get() {
+        throw new Error('cache get boom')
+      },
+      async set() {}
+    }
+    const source = fakeSource([snapshot('a')])
+    const result = await createSnapshotStore({ source, cache }).getManifests()
+    expect(result.meta.sha).toBe('a')
+    expect(source.calls).toBe(1)
+    expect(warn).toHaveBeenCalledWith('[skills] runtime cache unavailable:', expect.any(String))
+    warn.mockRestore()
+  })
+
+  it('a throwing cache.set is swallowed and the freshly loaded manifest is still returned', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const cache: StoreCache = {
+      async get() {
+        return null
+      },
+      async set() {
+        throw new Error('cache set boom')
+      }
+    }
+    const source = fakeSource([snapshot('a')])
+    const result = await createSnapshotStore({ source, cache }).getManifests()
+    expect(result.meta.sha).toBe('a')
+    expect(source.calls).toBe(1)
+    expect(warn).toHaveBeenCalledWith('[skills] runtime cache unavailable:', expect.any(String))
+    warn.mockRestore()
   })
 })

@@ -47,6 +47,13 @@ describe('parseFrontmatter', () => {
     expect(r.errors).toEqual(['README.md has no YAML frontmatter'])
   })
 
+  it('reports invalid YAML frontmatter instead of throwing', () => {
+    const r = parseFrontmatter('---\nname: [unclosed\n---\nbody')
+    expect(r.data).toBeNull()
+    expect(r.errors).toHaveLength(1)
+    expect(r.errors[0]).toMatch(/^README\.md frontmatter is not valid YAML: /)
+  })
+
   it('rejects an empty tags array and a bad authorUrl', () => {
     const r = parseFrontmatter('---\nname: X\ndescription: d\ntags: []\nauthor: a\nauthorUrl: not-a-url\n---\n')
     expect(r.errors.some(e => e.startsWith('frontmatter.tags:'))).toBe(true)
@@ -74,5 +81,13 @@ describe('splitFrontmatter', () => {
   it('is stable across repeated identical input (gray-matter cache bug)', () => {
     const src = '---\nname: Repeat\n---\nbody\n'
     expect(splitFrontmatter(src).matter).toBe(splitFrontmatter(src).matter)
+  })
+
+  it('does not throw on unparsable YAML, returning the raw source as content', () => {
+    const src = '---\nname: [unclosed\n---\nbody'
+    const r = splitFrontmatter(src)
+    expect(r.matter).toBe('')
+    expect(r.data).toEqual({})
+    expect(r.content).toBe(src)
   })
 })

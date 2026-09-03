@@ -27,18 +27,31 @@ export interface FrontmatterResult {
  *    identical content would otherwise come back with `parsed.matter === undefined`.
  * 2. An empty string short-circuits before `.matter` is ever assigned, so `.matter`
  *    is `undefined` there too. Both cases collapse to `''`.
+ *
+ * gray-matter throws a `YAMLException` when the frontmatter block itself isn't valid
+ * YAML. That must not take the whole snapshot down: on a parse error this returns the
+ * source untouched (as if there were no frontmatter) with `yamlError` set so
+ * `parseFrontmatter` can report it as a per-bundle validation error instead.
  */
-export function splitFrontmatter(src: string): { matter: string, data: Record<string, unknown>, content: string } {
-  const parsed = matter(src, {})
-  return {
-    matter: parsed.matter ?? '',
-    data: (parsed.data ?? {}) as Record<string, unknown>,
-    content: parsed.content ?? ''
+export function splitFrontmatter(src: string): { matter: string, data: Record<string, unknown>, content: string, yamlError?: string } {
+  try {
+    const parsed = matter(src, {})
+    return {
+      matter: parsed.matter ?? '',
+      data: (parsed.data ?? {}) as Record<string, unknown>,
+      content: parsed.content ?? ''
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return { matter: '', data: {}, content: src, yamlError: message.split('\n')[0] }
   }
 }
 
 export function parseFrontmatter(readme: string): FrontmatterResult {
   const parsed = splitFrontmatter(readme)
+  if (parsed.yamlError) {
+    return { data: null, errors: [`README.md frontmatter is not valid YAML: ${parsed.yamlError}`] }
+  }
   if (!parsed.matter.trim()) {
     return { data: null, errors: ['README.md has no YAML frontmatter'] }
   }
