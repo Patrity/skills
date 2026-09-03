@@ -43,12 +43,15 @@ useSeoMeta({
       class="hidden lg:flex"
     >
       <template #header>
+        <!--
+          #left (not #title/#leading): DashboardNavbar.vue nests <h1 data-slot="title"> inside
+          #left's own default content, unconditionally — overriding #title alone still renders
+          an empty h1. Overriding #left replaces that whole default, so no h1 renders here at all.
+        -->
         <UDashboardNavbar :toggle="false">
-          <template #leading>
+          <template #left>
             <UDashboardSidebarCollapse />
-          </template>
-          <template #title>
-            <span class="text-highlighted font-semibold truncate">Docs</span>
+            <span class="text-sm font-semibold text-highlighted truncate">Docs</span>
           </template>
         </UDashboardNavbar>
       </template>
