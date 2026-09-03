@@ -1,0 +1,87 @@
+<script setup lang="ts">
+import type { TreeItem } from '@nuxt/ui'
+import type { TreeNode } from '~~/shared/types/skills'
+
+const props = defineProps<{
+  tree: TreeNode[]
+  selectedPath: string
+}>()
+
+const emit = defineEmits<{
+  select: [path: string]
+}>()
+
+interface SkillTreeItem extends TreeItem {
+  path: string
+  nodeType: 'file' | 'dir'
+  children?: SkillTreeItem[]
+}
+
+function iconFor(name: string): string {
+  const lower = name.toLowerCase()
+  if (lower === 'readme.md') return 'i-lucide-book-open'
+  if (lower.endsWith('.md')) return 'i-lucide-file-text'
+  if (lower.endsWith('.json')) return 'i-lucide-file-json'
+  if (lower.endsWith('.py')) return 'i-lucide-file-code-2'
+  if (lower.endsWith('.sh') || lower.endsWith('.bash')) return 'i-lucide-terminal'
+  if (lower.endsWith('.yaml') || lower.endsWith('.yml')) return 'i-lucide-file-cog'
+  if (lower.endsWith('.ts') || lower.endsWith('.js')) return 'i-lucide-file-code'
+  return 'i-lucide-file'
+}
+
+function toItems(nodes: TreeNode[]): SkillTreeItem[] {
+  return nodes.map(n => n.type === 'dir'
+    ? { label: n.name, path: n.path, nodeType: 'dir' as const, children: toItems(n.children ?? []) }
+    : { label: n.name, path: n.path, nodeType: 'file' as const, icon: iconFor(n.name) })
+}
+const items = computed(() => toItems(props.tree))
+
+function ancestors(path: string): string[] {
+  const parts = path.split('/')
+  const out: string[] = []
+  for (let i = 1; i < parts.length; i++) out.push(parts.slice(0, i).join('/'))
+  return out
+}
+
+// UTree keys expanded nodes by `get-key` (the path). Start with the selected file's ancestors
+// open and keep adding as the route changes; never collapse on the user's behalf.
+const expanded = ref<string[]>(ancestors(props.selectedPath))
+watch(() => props.selectedPath, (path) => {
+  expanded.value = [...new Set([...expanded.value, ...ancestors(path)])]
+})
+
+function findItem(list: SkillTreeItem[], path: string): SkillTreeItem | undefined {
+  for (const item of list) {
+    if (item.path === path) return item
+    const child = item.children && findItem(item.children, path)
+    if (child) return child
+  }
+  return undefined
+}
+
+// v-model holds the item OBJECT (Nuxt UI v4 Tree), not a key.
+const selected = computed<SkillTreeItem | undefined>({
+  get: () => findItem(items.value, props.selectedPath),
+  set: (item) => {
+    if (item && item.nodeType === 'file' && item.path !== props.selectedPath) emit('select', item.path)
+  }
+})
+
+function onSelect(e: Event) {
+  // Folders toggle open/closed but must not become the selection.
+  const item = (e as CustomEvent<{ value?: SkillTreeItem }>).detail?.value
+  if (item?.nodeType === 'dir') e.preventDefault()
+}
+</script>
+
+<template>
+  <UTree
+    v-model="selected"
+    v-model:expanded="expanded"
+    :items="items"
+    :get-key="(item: SkillTreeItem) => item.path"
+    size="sm"
+    class="p-2"
+    @select="onSelect"
+  />
+</template>
