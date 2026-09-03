@@ -32,7 +32,7 @@ cat nuxt/CLAUDE.md >> CLAUDE.md
 echo '.claude/skills/*/cache/' >> .gitignore
 ```
 
-The fetchers cache what they download under `skills/<name>/cache/`, hence the `.gitignore` line.
+The fetchers cache what they download under `skills/<name>/cache/`, hence the `.gitignore` line. Caches are safe to delete at any time; the next fetch rebuilds them.
 
 ## Requirements
 
