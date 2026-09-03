@@ -37,3 +37,18 @@ jobs:
           done
           echo "CDN never caught up"
           exit 1
+
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      # --ignore-scripts skips `nuxt prepare`: warm-cache.sh only needs tsx.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Warm caches
+        run: bash scripts/warm-cache.sh "${{ vars.SITE_URL }}"

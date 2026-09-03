@@ -11,6 +11,7 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - Always `pnpm`. `pnpm dev` (port 3000, reads `./skills`). `NUXT_SKILLS_DIR=test/fixtures/skills pnpm dev` for the test bundles.
 - `pnpm test:unit` on every change; `pnpm test` (adds the e2e route suite, builds once) before a PR.
 - `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm validate:skills`.
+- `bash scripts/warm-cache.sh <site-url>` re-fills every ISR entry after a purge or a deploy (CI does it automatically).
 - Browser validation: `playwright-cli` via the `browser-testing` skill. Never the Playwright MCP.
 
 ## Layout

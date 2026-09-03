@@ -1,0 +1,36 @@
+name: warm
+
+# Vercel's GitHub integration posts a deployment_status for every deploy. A deploy rebuilds
+# the app, so every ISR entry is cold again: warm them before a real visitor pays for it.
+on:
+  deployment_status:
+  workflow_dispatch:
+
+jobs:
+  warm:
+    # Verified against repos/Patrity/skills/deployments: Vercel names the environment
+    # "Production" (and leaves `production_environment` false, so don't match on that).
+    # `environment_url` is the per-deploy *.vercel.app host, never vars.SITE_URL.
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show the deployment payload
+        if: github.event_name == 'deployment_status'
+        env:
+          DEPLOYMENT: ${{ toJSON(github.event.deployment) }}
+        run: echo "$DEPLOYMENT"
+
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      # --ignore-scripts skips `nuxt prepare`: warm-cache.sh only needs tsx.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Warm caches
+        run: bash scripts/warm-cache.sh "${{ vars.SITE_URL }}"
