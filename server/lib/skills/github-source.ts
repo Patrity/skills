@@ -1,6 +1,6 @@
 import type { SkillsSource } from './types'
 import { buildSnapshot } from './parse-bundle'
-import { extractBundles } from './tarball'
+import { extractBundles } from './archive'
 
 export interface GithubSourceOptions {
   owner: string
@@ -15,7 +15,7 @@ interface CommitResponse {
   commit: { committer: { date: string } }
 }
 
-/** Production source: branch-head lookup, then the repo tarball at that sha. */
+/** Production source: branch-head lookup, then the repo zipball at that sha. */
 export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
   const fetchImpl = opts.fetchImpl ?? globalThis.fetch
   const base = `https://api.github.com/repos/${opts.owner}/${opts.repo}`
@@ -27,7 +27,9 @@ export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
   if (opts.token) headers.authorization = `Bearer ${opts.token}`
 
   async function get(url: string): Promise<Response> {
-    const res = await fetchImpl(url, { headers, redirect: 'follow' })
+    // A hung GitHub request must fail fast: the store keeps serving its stale
+    // snapshot, and a slow 5xx would otherwise burn the whole function timeout.
+    const res = await fetchImpl(url, { headers, redirect: 'follow', signal: AbortSignal.timeout(20_000) })
     if (!res.ok) throw new Error(`github: ${res.status} ${url}`)
     return res
   }
@@ -36,8 +38,11 @@ export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
     async load() {
       const fetchedAt = new Date().toISOString()
       const commit = await (await get(`${base}/commits/${opts.branch}`)).json() as CommitResponse
-      const tgz = await (await get(`${base}/tarball/${commit.sha}`)).arrayBuffer()
-      const bundles = await extractBundles(tgz)
+      const zip = await (await get(`${base}/zipball/${commit.sha}`)).arrayBuffer()
+      const bundles = extractBundles(zip)
+      // An empty result means a truncated/unexpected archive, not an empty repo:
+      // throwing keeps the previous snapshot in place instead of blanking the site.
+      if (bundles.length === 0) throw new Error(`github: archive ${commit.sha} has no skills/ bundles`)
       return buildSnapshot(bundles, {
         sha: commit.sha,
         committedAt: new Date(commit.commit.committer.date).toISOString(),

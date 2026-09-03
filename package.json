@@ -33,7 +33,6 @@
     "codemirror": "^6.0.2",
     "fflate": "^0.8.3",
     "gray-matter": "^4.0.3",
-    "nanotar": "^0.3.0",
     "nuxt": "^4.5.2",
     "nuxt-umami": "^3.2.1",
     "tailwindcss": "^4.3.0",
