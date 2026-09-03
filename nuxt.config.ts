@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     // Server-only. Override with NUXT_GITHUB_TOKEN etc.
     githubToken: '',
     revalidateSecret: '',
-    // 'fs' reads ./skills from disk (dev, CI); 'github' downloads the repo tarball (Vercel).
+    // 'fs' reads ./skills from disk (dev, CI); 'github' downloads the repo zip archive
+    // (Vercel). Read here at build/dev time; the built server honours NUXT_SKILLS_SOURCE.
     skillsSource: process.env.SKILLS_SOURCE ?? (process.env.VERCEL ? 'github' : 'fs'),
     skillsDir: 'skills',
     public: {

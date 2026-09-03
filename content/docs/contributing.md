@@ -37,3 +37,4 @@ Your bundle is live within seconds of the merge.
 - No generated caches. `cache/` directories are ignored anyway, but do not commit them.
 - Keep bundles generic. Project-specific paths, theme mappings or account names belong in the user's own `CLAUDE.md`, not here.
 - Lowercase tags, one concern per bundle.
+- READMEs render as markdown with raw HTML allowed (scripts and event handlers are stripped), so bundle content is trusted at PR-review time — review it as you would any other code you merge.
