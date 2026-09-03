@@ -18,6 +18,11 @@ await setup({
 })
 
 describe('GET /api/skills', () => {
+  it('tags the response for tag-based cache purges', async () => {
+    const res = await fetch('/api/skills')
+    expect(res.headers.get('vercel-cache-tag')).toBe('skills')
+  })
+
   it('lists bundles from the fixture dir, including invalid ones in fs mode', async () => {
     const res = await $fetch<SkillsListResponse>('/api/skills')
     expect(res.source).toBe('fs')
@@ -57,6 +62,12 @@ describe('GET /api/skills/:slug/file/*', () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/assets/blob.bin')
     expect(res.kind).toBe('binary')
     expect(res.content).toBeNull()
+  })
+  it('serves an empty markdown file as an empty string, not a 500', async () => {
+    const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/rules/empty.md')
+    expect(res).toMatchObject({ path: 'rules/empty.md', language: 'markdown', kind: 'text', size: 0 })
+    expect(res.content).toBe('')
+    expect(res.frontmatterRaw).toBeNull()
   })
   it('404s for directories, excluded files and unknown paths', async () => {
     expect((await fetch('/api/skills/demo/file/skills')).status).toBe(404)
@@ -112,5 +123,17 @@ describe('meta routes', () => {
     const xml = await $fetch<string>('/sitemap.xml')
     expect(xml).toContain('<loc>http://localhost:3000/skill/demo</loc>')
     expect(xml).toContain('<loc>http://localhost:3000/skills</loc>')
+  })
+})
+
+describe('skill pages', () => {
+  it('404s for an unknown bundle', async () => {
+    expect((await fetch('/skill/nope')).status).toBe(404)
+  })
+  it('404s for an unknown file inside a known bundle', async () => {
+    expect((await fetch('/skill/demo/nope.md')).status).toBe(404)
+  })
+  it('renders a known bundle', async () => {
+    expect((await fetch('/skill/demo')).status).toBe(200)
   })
 })
