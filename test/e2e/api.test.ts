@@ -52,11 +52,17 @@ describe('GET /api/skills/:slug/file/*', () => {
     expect(res.frontmatterRaw).toContain('name: Demo')
     expect(res.content).toContain('# Demo bundle')
   })
+  it('ships a server-parsed MDC AST for markdown so the browser never parses or highlights', async () => {
+    const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/README.md')
+    expect(res.body?.type).toBe('root')
+    expect(res.body!.children.length).toBeGreaterThan(0)
+  })
   it('returns nested code files with the detected language', async () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/skills/demo-skill/fetch.py')
     expect(res.language).toBe('python')
     expect(res.frontmatterRaw).toBeNull()
     expect(res.content).toContain('print(')
+    expect(res.body).toBeNull()
   })
   it('returns binary files without content', async () => {
     const res = await $fetch<SkillFileResponse>('/api/skills/demo/file/assets/blob.bin')

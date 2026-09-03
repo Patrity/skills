@@ -1,4 +1,4 @@
-import type { SkillFileResponse } from '~~/shared/types/skills'
+import type { MarkdownBody, SkillFileResponse } from '~~/shared/types/skills'
 import { detectLanguage } from '~~/shared/utils/language'
 import { findFile } from '~~/server/lib/skills/tree'
 import { isSafeRelativePath } from '~~/server/lib/skills/paths'
@@ -28,11 +28,21 @@ export default defineEventHandler(async (event): Promise<SkillFileResponse> => {
   const language = detectLanguage(path)
   let content: string | null = null
   let frontmatterRaw: string | null = null
+  let body: MarkdownBody | null = null
   if (node.kind === 'text') {
     content = decoder.decode(bytes)
     if (language === 'markdown') {
       frontmatterRaw = splitFrontmatter(content).matter.trim() || null
+      try {
+        // Rendering here is what keeps the parser and Shiki out of the browser.
+        body = await renderMarkdown(content, `${slug}/${path}`)
+      } catch (err) {
+        // 5xx, not a null body: ISR caches 200s, so a bad render must not be pinned
+        // as an empty page (same reasoning as getBundleFilesOr503).
+        console.error('[skills] markdown render failed:', err)
+        throw createError({ statusCode: 500, statusMessage: 'Could not render this file' })
+      }
     }
   }
-  return { path, language, size: node.size ?? bytes.byteLength, kind: node.kind ?? 'text', content, frontmatterRaw }
+  return { path, language, size: node.size ?? bytes.byteLength, kind: node.kind ?? 'text', content, frontmatterRaw, body }
 })

@@ -1,3 +1,8 @@
+import type { MDCRoot } from '@nuxtjs/mdc'
+
+/** Markdown parsed to the MDC AST on the server; `<MDCRenderer :body>` renders it as-is. */
+export type MarkdownBody = MDCRoot
+
 export type ContentBadge = 'skills' | 'rules' | 'hooks' | 'settings' | 'claude-md'
 export type FileKind = 'text' | 'binary' | 'oversized'
 export type Language
@@ -63,4 +68,6 @@ export interface SkillFileResponse {
   content: string | null
   /** Raw YAML between the --- fences for markdown files that have frontmatter. */
   frontmatterRaw: string | null
+  /** Server-parsed MDC AST for markdown; null for every other kind or language. */
+  body: MarkdownBody | null
 }

@@ -222,6 +222,7 @@ onMounted(() => trackSkillView(slug.value))
 
                 <MarkdownView
                   v-if="isMarkdown && view === 'rendered'"
+                  :body="file.body"
                   :source="file.content ?? ''"
                   :cache-key="`${slug}:${currentPath}`"
                 />
