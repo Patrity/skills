@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
 import { unzipSync } from 'fflate'
 import type { SkillDetailResponse, SkillFileResponse, SkillsListResponse } from '../../shared/types/skills'
+import type { DocResponse } from '../../shared/types/docs'
 
 await setup({
   rootDir: fileURLToPath(new URL('../..', import.meta.url)),
@@ -101,6 +102,18 @@ describe('GET /api/skills/:slug/download', () => {
   })
 })
 
+describe('GET /api/docs/:slug', () => {
+  it('reads the doc out of the server asset bundle and renders it', async () => {
+    const res = await $fetch<DocResponse>('/api/docs/getting-started')
+    expect(res.entry).toMatchObject({ slug: 'getting-started', title: 'Getting started' })
+    expect(res.body.type).toBe('root')
+    expect(res.body.children.length).toBeGreaterThan(0)
+  })
+  it('404s for a slug that is not in the nav', async () => {
+    expect((await fetch('/api/docs/nope')).status).toBe(404)
+  })
+})
+
 describe('POST /api/revalidate', () => {
   it('401s without the bearer secret', async () => {
     expect((await fetch('/api/revalidate', { method: 'POST' })).status).toBe(401)
@@ -129,6 +142,15 @@ describe('meta routes', () => {
     const xml = await $fetch<string>('/sitemap.xml')
     expect(xml).toContain('<loc>http://localhost:3000/skill/demo</loc>')
     expect(xml).toContain('<loc>http://localhost:3000/skills</loc>')
+  })
+})
+
+describe('docs pages', () => {
+  it('renders a known doc', async () => {
+    expect((await fetch('/docs/frontmatter')).status).toBe(200)
+  })
+  it('404s for an unknown doc', async () => {
+    expect((await fetch('/docs/nope')).status).toBe(404)
   })
 })
 

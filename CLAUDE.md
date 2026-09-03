@@ -26,6 +26,9 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - `mdc.highlight.langs` stays a short allow-list; `headings.anchorLinks: false`.
 - nuxt-umami config is baked at build time; `NUXT_PUBLIC_UMAMI_ID` is a Production-only build env var.
 - `UDashboardPanel`: named slots only, no `grow`. `UTree`: `v-model` = item object, `v-model:expanded` = key strings, pass `get-key`.
+- `UDashboardNavbar` nests its `<h1>` inside `#left`'s default content: override `#left` (not `#title`) to keep one h1 per page.
+- Markdown is parsed server-side (`server/utils/markdown.ts` → `MarkdownView :body`). Never `<MDC :value>`: it re-parses in the browser and hits `/api/_mdc/highlight` once per code block.
+- `nitro.serverAssets` needs an absolute `dir`; a relative one mounts an empty store.
 
 ## Production (verified 2026-09-03)
 - https://skills.patrity.com on Vercel team `patritys-projects`, project `skills`; repo `Patrity/skills` is public. Vercel CLI is linked from this directory (`.vercel/`, gitignored).

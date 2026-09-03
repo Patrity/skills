@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/mdc', 'nuxt-umami'],
 
@@ -38,11 +40,20 @@ export default defineNuxtConfig({
     '/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/skill/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/docs/**': { isr: true },
+    '/api/docs/**': { isr: true },
     '/api/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/api/skills/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/sitemap.xml': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } }
   },
+
   compatibilityDate: '2026-09-01',
+
+  // Docs ship with the build (they describe the app, not the bundles), so bundle them as
+  // Nitro server assets: the /api/docs route reads them from memory and a deploy is what
+  // invalidates them.
+  nitro: {
+    serverAssets: [{ baseName: 'docs', dir: fileURLToPath(new URL('./content/docs', import.meta.url)) }]
+  },
 
   eslint: {
     config: { stylistic: { commaDangle: 'never', braceStyle: '1tbs' } }

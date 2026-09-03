@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import type { DocResponse } from '~~/shared/types/docs'
 import { docsNav } from '~~/content/docs/nav'
-import { getDoc } from '~/utils/docs'
 
 const route = useRoute()
 const slug = computed(() => (typeof route.params.slug === 'string' && route.params.slug) || docsNav[0]!.slug)
-const doc = computed(() => getDoc(slug.value))
 
-if (!doc.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Doc not found', fatal: true })
+// Server-rendered: /api/docs/<slug> ships the parsed MDC AST, so the browser never runs the
+// markdown parser or the per-code-block highlight round trips.
+const { data: doc, error } = await useFetch<DocResponse>(() => `/api/docs/${encodeURIComponent(slug.value)}`)
+function notFound() {
+  return createError({ statusCode: 404, statusMessage: 'Doc not found', fatal: true })
 }
+if (error.value) throw notFound()
+// One route record covers every slug, so setup does not re-run when the slug changes.
+watch(error, (err) => {
+  if (err) showError(notFound())
+})
 
 const navOpen = ref(false)
 const items = computed<NavigationMenuItem[]>(() => docsNav.map(d => ({
@@ -68,8 +75,12 @@ useSeoMeta({
       :ui="{ body: 'p-0 sm:p-0 gap-0' }"
     >
       <template #header>
-        <UDashboardNavbar :title="doc?.entry.title">
-          <template #leading>
+        <!--
+          #left override: see the nav panel's header above. The doc's own `# Title` is the
+          page h1, so the navbar must not render a second one.
+        -->
+        <UDashboardNavbar>
+          <template #left>
             <UButton
               icon="i-lucide-list"
               color="neutral"
@@ -78,6 +89,7 @@ useSeoMeta({
               aria-label="Docs navigation"
               @click="navOpen = true"
             />
+            <span class="text-sm font-semibold text-highlighted truncate">{{ doc?.entry.title }}</span>
           </template>
         </UDashboardNavbar>
       </template>
@@ -86,8 +98,7 @@ useSeoMeta({
           <div class="mx-auto max-w-3xl p-4 sm:p-6">
             <MarkdownView
               v-if="doc"
-              :source="doc.source"
-              :cache-key="`docs:${slug}`"
+              :body="doc.body"
             />
           </div>
         </div>

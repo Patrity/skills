@@ -221,10 +221,8 @@ onMounted(() => trackSkillView(slug.value))
                 </UCollapsible>
 
                 <MarkdownView
-                  v-if="isMarkdown && view === 'rendered'"
+                  v-if="isMarkdown && view === 'rendered' && file.body"
                   :body="file.body"
-                  :source="file.content ?? ''"
-                  :cache-key="`${slug}:${currentPath}`"
                 />
                 <CodeView
                   v-else
