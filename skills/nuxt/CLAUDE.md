@@ -1,6 +1,6 @@
-## Nuxt / Nuxt UI
+## Nuxt
 
-- Nuxt 4 + Nuxt UI v4. Before using a Nuxt composable or a `U*` component, invoke the `nuxt-docs` / `nuxt-ui-docs` skills — training-data knowledge of these APIs is stale.
-- Use the `nuxt-ui-templates` skill for composition patterns (dashboard, docs, landing).
-- Rules under `.claude/rules/web-nuxt.md` and `web-vue-ui.md` load automatically when editing `app/**` or `nuxt.config.ts`; follow them.
+- Nuxt **4**. Invoke the `nuxt-docs` skill before using a Nuxt composable (`useFetch`, `useAsyncData`, `useState`, `navigateTo`, …), configuring a module, or touching routing / middleware / Nitro routes — training-data knowledge of these APIs is stale.
+- App code lives under `app/` (the `srcDir`); server routes under `server/`. Secrets come from `runtimeConfig`, never `process.env` in app code.
+- `.claude/rules/web-nuxt.md` loads automatically when editing `app/**`, `server/**` or `nuxt.config.ts`; follow it.
 - Always `pnpm`.
