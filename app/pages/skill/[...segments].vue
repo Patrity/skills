@@ -101,19 +101,24 @@ onMounted(() => trackSkillView(slug.value))
       :ui="{ body: 'p-0 sm:p-0 gap-0' }"
     >
       <template #header>
-        <UDashboardNavbar
-          :title="skill.name"
-          :toggle="false"
-        >
-          <template #leading>
+        <!--
+          Hand-rolled instead of UDashboardNavbar: that component wraps its #title slot
+          in an unconditional <h1> (Nuxt UI v4.11, DashboardNavbar.vue), so a prop→slot
+          swap alone can't stop this panel's label from doubling as a second h1 on the
+          page. Classes mirror the dashboardNavbar theme (root/left) for visual parity.
+        -->
+        <div class="h-(--ui-header-height) shrink-0 flex items-center justify-between border-b border-default px-4 sm:px-6 gap-1.5">
+          <div class="flex items-center gap-1.5 min-w-0">
             <UDashboardSidebarCollapse />
-          </template>
-        </UDashboardNavbar>
+            <span class="flex items-center gap-1.5 font-semibold text-highlighted truncate">{{ skill.name }}</span>
+          </div>
+        </div>
       </template>
       <template #body>
         <SkillTree
           :tree="skill.tree"
           :selected-path="currentPath"
+          :slug="slug"
           @select="onSelect"
         />
       </template>
@@ -124,8 +129,9 @@ onMounted(() => trackSkillView(slug.value))
       :ui="{ body: 'p-0 sm:p-0 gap-0' }"
     >
       <template #header>
-        <UDashboardNavbar>
-          <template #leading>
+        <!-- Hand-rolled: see the tree panel's header above for why this avoids UDashboardNavbar. -->
+        <div class="h-(--ui-header-height) shrink-0 flex items-center justify-between border-b border-default px-4 sm:px-6 gap-1.5">
+          <div class="flex items-center gap-1.5 min-w-0">
             <UButton
               icon="i-lucide-folder-tree"
               color="neutral"
@@ -134,8 +140,6 @@ onMounted(() => trackSkillView(slug.value))
               aria-label="Browse files"
               @click="treeOpen = true"
             />
-          </template>
-          <template #title>
             <!-- A deep file path overflows the navbar on phones; collapse the middle there. -->
             <UBreadcrumb
               :items="breadcrumbs"
@@ -145,8 +149,8 @@ onMounted(() => trackSkillView(slug.value))
               :items="compactBreadcrumbs(breadcrumbs)"
               class="sm:hidden min-w-0"
             />
-          </template>
-          <template #right>
+          </div>
+          <div class="flex items-center shrink-0 gap-1.5">
             <!--
               Nuxt's directory-prefix auto-import only dedups the "Skill" prefix when the
               filename itself already starts with it (SkillCard, SkillBadges, SkillTree,
@@ -159,8 +163,9 @@ onMounted(() => trackSkillView(slug.value))
               :is-markdown="isMarkdown"
               :content="file?.content ?? null"
             />
-          </template>
-        </UDashboardNavbar>
+            <UDashboardSidebarToggle side="right" />
+          </div>
+        </div>
       </template>
 
       <template #body>
@@ -253,6 +258,7 @@ onMounted(() => trackSkillView(slug.value))
         <SkillTree
           :tree="skill.tree"
           :selected-path="currentPath"
+          :slug="slug"
           @select="onSelect"
         />
       </template>

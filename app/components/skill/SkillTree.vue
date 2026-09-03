@@ -5,6 +5,7 @@ import type { TreeNode } from '~~/shared/types/skills'
 const props = defineProps<{
   tree: TreeNode[]
   selectedPath: string
+  slug: string
 }>()
 
 const emit = defineEmits<{
@@ -44,8 +45,10 @@ function ancestors(path: string): string[] {
 }
 
 // UTree keys expanded nodes by `get-key` (the path). Start with the selected file's ancestors
-// open and keep adding as the route changes; never collapse on the user's behalf.
-const expanded = ref<string[]>(ancestors(props.selectedPath))
+// open and keep adding as the route changes; never collapse on the user's behalf. The desktop
+// panel and the mobile slideover each mount their own SkillTree instance, so expansion is
+// lifted into useState (Nuxt's SSR-safe shared state), keyed by slug, so both share it.
+const expanded = useState<string[]>(`skill-tree-expanded:${props.slug}`, () => ancestors(props.selectedPath))
 watch(() => props.selectedPath, (path) => {
   expanded.value = [...new Set([...expanded.value, ...ancestors(path)])]
 })

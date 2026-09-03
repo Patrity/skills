@@ -17,9 +17,9 @@ defineProps<{ skill: SkillManifest }>()
       dropped. Rendered manually here, matching SkillCard.vue's classes.
     -->
     <template #body>
-      <h1 class="text-xl font-semibold text-highlighted">
+      <h2 class="text-xl font-semibold text-highlighted">
         {{ skill.name }}
-      </h1>
+      </h2>
       <p class="mt-1 text-toned">
         {{ skill.description }}
       </p>

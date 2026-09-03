@@ -27,11 +27,20 @@ useSeoMeta({
     :ui="{ body: 'p-0 sm:p-0 gap-0' }"
   >
     <template #header>
-      <UDashboardNavbar title="Home">
-        <template #leading>
+      <!--
+        Hand-rolled instead of UDashboardNavbar: that component wraps its #title slot in an
+        unconditional <h1> (Nuxt UI v4.11, DashboardNavbar.vue), which would double up with
+        the hero's own h1 below. Classes mirror the dashboardNavbar theme for visual parity.
+      -->
+      <div class="h-(--ui-header-height) shrink-0 flex items-center justify-between border-b border-default px-4 sm:px-6 gap-1.5">
+        <div class="flex items-center gap-1.5 min-w-0">
           <UDashboardSidebarCollapse />
-        </template>
-      </UDashboardNavbar>
+          <span class="flex items-center gap-1.5 font-semibold text-highlighted truncate">Home</span>
+        </div>
+        <div class="flex items-center shrink-0 gap-1.5">
+          <UDashboardSidebarToggle side="right" />
+        </div>
+      </div>
     </template>
 
     <template #body>

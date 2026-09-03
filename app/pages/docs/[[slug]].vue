@@ -43,12 +43,12 @@ useSeoMeta({
       class="hidden lg:flex"
     >
       <template #header>
-        <UDashboardNavbar
-          title="Docs"
-          :toggle="false"
-        >
+        <UDashboardNavbar :toggle="false">
           <template #leading>
             <UDashboardSidebarCollapse />
+          </template>
+          <template #title>
+            <span class="text-highlighted font-semibold truncate">Docs</span>
           </template>
         </UDashboardNavbar>
       </template>
