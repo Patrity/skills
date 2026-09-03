@@ -12,3 +12,4 @@ logs
 *.log
 .claude/settings.local.json
 .claude/worktrees
+.superpowers
