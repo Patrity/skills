@@ -2,7 +2,7 @@ import { docsNav } from '~~/content/docs/nav'
 
 export default defineEventHandler(async (event) => {
   const base = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
-  const { meta, skills } = await useSkillsStore().getManifests()
+  const { meta, skills } = await getManifestsOr503()
   const paths = [
     '/',
     '/skills',

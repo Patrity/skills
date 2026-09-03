@@ -1,4 +1,4 @@
 export default defineEventHandler(async () => {
-  const { meta } = await useSkillsStore().getManifests()
+  const { meta } = await getManifestsOr503()
   return { ok: true, ...meta }
 })

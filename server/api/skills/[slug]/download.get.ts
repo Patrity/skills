@@ -3,7 +3,7 @@ import { buildZip } from '~~/server/lib/skills/zip'
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug') ?? ''
   const { meta } = await requirePublicSkill(slug)
-  const files = await useSkillsStore().getBundleFiles(slug)
+  const files = await getBundleFilesOr503(slug)
   if (!files) throw createError({ statusCode: 404, statusMessage: 'Skill not found' })
 
   const zip = buildZip(slug, files, new Date(meta.committedAt))

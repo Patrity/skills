@@ -1,7 +1,7 @@
 import type { SkillsListResponse } from '~~/shared/types/skills'
 
 export default defineEventHandler(async (): Promise<SkillsListResponse> => {
-  const { meta, skills } = await useSkillsStore().getManifests()
+  const { meta, skills } = await getManifestsOr503()
   return {
     ...meta,
     skills: skills

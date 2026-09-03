@@ -49,6 +49,23 @@ function fakeCache(): StoreCache & { store: Map<string, { value: unknown, tags: 
   }
 }
 
+/** Serves `snap` until `fail()` is called, then rejects every load. */
+function flakySource(snap: Snapshot): SkillsSource & { calls: number, fail: () => void } {
+  let broken = false
+  const src = {
+    calls: 0,
+    fail() {
+      broken = true
+    },
+    async load() {
+      src.calls++
+      if (broken) throw new Error('source down')
+      return snap
+    }
+  }
+  return src
+}
+
 describe('createSnapshotStore without a cache (fs/dev)', () => {
   it('reloads from the source on every manifest read', async () => {
     const source = fakeSource([snapshot('a')])
@@ -152,5 +169,38 @@ describe('createSnapshotStore with a cache (Vercel)', () => {
     await store.getManifests()
     expect(await store.getBundleFiles('nope')).toBeNull()
     expect(source.calls).toBe(1)
+  })
+})
+
+describe('createSnapshotStore when the source fails', () => {
+  it('rejects on a cold miss with nothing to serve', async () => {
+    const source = flakySource(snapshot('a'))
+    source.fail()
+    await expect(createSnapshotStore({ source }).getManifests()).rejects.toThrow('source down')
+  })
+
+  it('serves the stale memo once a snapshot has been loaded', async () => {
+    const source = flakySource(snapshot('a'))
+    const store = createSnapshotStore({ source })
+    expect((await store.getManifests()).meta.sha).toBe('a')
+    source.fail()
+    expect((await store.getManifests()).meta.sha).toBe('a')
+    const files = await store.getBundleFiles('demo')
+    expect(new TextDecoder().decode(files!['README.md'])).toBe('hello')
+  })
+
+  it('keeps the previous snapshot when refresh() fails', async () => {
+    const source = flakySource(snapshot('a'))
+    const store = createSnapshotStore({ source })
+    await store.getManifests()
+    source.fail()
+    await expect(store.refresh()).rejects.toThrow('source down')
+    expect((await store.getManifests()).meta.sha).toBe('a')
+  })
+
+  it('rejects on a cold miss with a cache configured but empty', async () => {
+    const source = flakySource(snapshot('a'))
+    source.fail()
+    await expect(createSnapshotStore({ source, cache: fakeCache() }).getManifests()).rejects.toThrow('source down')
   })
 })

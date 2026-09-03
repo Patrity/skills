@@ -108,11 +108,23 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
     return hit && Array.isArray(hit.skills) && hit.meta ? hit : null
   }
 
-  async function getManifests(): Promise<ManifestRecord> {
-    if (!cache) {
+  /**
+   * A source failure must never blank the site: if we already hold a snapshot we keep
+   * serving it (stale) and retry on the next request. Only a cold instance rethrows,
+   * so the route layer can answer 503 rather than a cacheable 404/200.
+   */
+  async function loadOrStale(): Promise<ManifestRecord> {
+    try {
       await loadFromSource()
       return manifests!
+    } catch (err) {
+      if (manifests) return manifests
+      throw err
     }
+  }
+
+  async function getManifests(): Promise<ManifestRecord> {
+    if (!cache) return loadOrStale()
     if (manifests && now() - manifestsAt < memoTtl) return manifests
     const cached = await readCachedManifests()
     if (cached) {
@@ -121,8 +133,7 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
       manifestsAt = now()
       return cached
     }
-    await loadFromSource()
-    return manifests!
+    return loadOrStale()
   }
 
   async function getBundleFiles(slug: string): Promise<BundleFiles | null> {
@@ -140,10 +151,11 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
     return snap.files[slug] ?? null
   }
 
+  /**
+   * Always hits the source. State is swapped only once the load resolves (inside
+   * `loadFromSource`), so a failed refresh leaves the previous snapshot serving.
+   */
   async function refresh(): Promise<SnapshotMeta> {
-    manifests = null
-    manifestsAt = 0
-    files = {}
     const snap = await loadFromSource()
     return pickMeta(snap)
   }
