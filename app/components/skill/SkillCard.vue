@@ -26,8 +26,9 @@ function onCardClick(e: MouseEvent) {
     class="cursor-pointer"
     :ui="{
       root: 'transition-shadow hover:ring-primary/40 hover:shadow-sm',
-      container: 'gap-3',
-      footer: 'w-full'
+      container: 'gap-3 min-w-0',
+      wrapper: 'min-w-0',
+      footer: 'w-full min-w-0'
     }"
     @click="onCardClick"
   >

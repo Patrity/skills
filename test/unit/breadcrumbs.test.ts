@@ -17,6 +17,13 @@ describe('compactBreadcrumbs', () => {
     expect(out.map(i => i.label)).toEqual(['Skills', 'Nuxt UI', '…', 'fetch.py'])
   })
 
+  it('pins the ellipsis crumb so it cannot be shrunk away', () => {
+    const out = compactBreadcrumbs(items('a', 'b', 'c', 'd', 'e'))
+    expect(out[2]).toEqual({ label: '…', ui: { item: 'shrink-0' } })
+    expect(out[2]!.label).toBe('…')
+    expect(out[2]!.ui?.item).toBe('shrink-0')
+  })
+
   it('preserves the last item and its properties', () => {
     const input: BreadcrumbItem[] = [
       { label: 'Skills', to: '/skills' },

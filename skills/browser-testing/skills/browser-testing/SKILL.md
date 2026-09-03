@@ -46,17 +46,21 @@ engine.
 Do not memorise the surface, read it. The installed package carries its own full reference:
 
 ```bash
-playwright-cli --help                 # prints the path to the shipped agent skill
+playwright-cli --help                 # its header carries an "Agent skill: <path>" line
 ```
 
-That skill file (`<global node_modules>/@playwright/cli/skills/playwright-cli/SKILL.md`) documents
-every command — `open`, `goto`, `snapshot`, `click`, `fill`, `select`, `check`, `press`, `eval`,
-`screenshot`, `pdf`, `resize`, `console`, `requests`, `route`, `state-save`/`state-load`, tab and
-session management, `--raw`/`--json` output. Read it when you need a command; **this** skill is the
-workflow, not the manual.
+Read whatever path `--help` prints — that is the file the installed binary actually ships, and it
+is the only path guaranteed to be right for this machine. It lives inside the package's bundled
+`playwright-core` (`.../@playwright/cli/node_modules/playwright-core/lib/tools/cli-client/skill/SKILL.md`),
+which is why it is not worth reconstructing by hand.
 
-(`$(npm root -g)/@playwright/cli/...` usually resolves it too, but `npm root -g` reports the
-configured prefix, which is not always where the binary on your PATH lives — trust `--help`.)
+It documents every command — `open`, `goto`, `snapshot`, `click`, `fill`, `select`, `check`,
+`press`, `eval`, `screenshot`, `pdf`, `resize`, `console`, `requests`, `route`,
+`state-save`/`state-load`, tab and session management, `--raw`/`--json` output. Read it when you
+need a command; **this** skill is the workflow, not the manual.
+
+(Do not derive the path from `$(npm root -g)`: that reports npm's *configured* prefix, which is
+often not where the binary on your PATH actually lives. Trust `--help`.)
 
 ## 3. Get the dev server up first
 
