@@ -1,8 +1,8 @@
-import matter from 'gray-matter'
 import type { SkillFileResponse } from '~~/shared/types/skills'
 import { detectLanguage } from '~~/shared/utils/language'
 import { findFile } from '~~/server/lib/skills/tree'
 import { isSafeRelativePath } from '~~/server/lib/skills/paths'
+import { splitFrontmatter } from '~~/server/lib/skills/frontmatter'
 
 const decoder = new TextDecoder()
 
@@ -20,9 +20,10 @@ export default defineEventHandler(async (event): Promise<SkillFileResponse> => {
   const node = findFile(skill.tree, path)
   if (!node) throw createError({ statusCode: 404, statusMessage: 'File not found' })
 
-  const files = await useSkillsStore().getBundleFiles(slug)
+  const files = await getBundleFilesOr503(slug)
   const bytes = files?.[path]
-  if (!bytes) throw createError({ statusCode: 404, statusMessage: 'File not found' })
+  // `undefined`, not falsy: a zero-byte file is a legitimate hit.
+  if (bytes === undefined) throw createError({ statusCode: 404, statusMessage: 'File not found' })
 
   const language = detectLanguage(path)
   let content: string | null = null
@@ -30,12 +31,7 @@ export default defineEventHandler(async (event): Promise<SkillFileResponse> => {
   if (node.kind === 'text') {
     content = decoder.decode(bytes)
     if (language === 'markdown') {
-      // gray-matter 4.0.3 caches by input string, and its cache-hit path returns
-      // `Object.assign({}, cached)` — but `.matter` is defined non-enumerable on the
-      // cached object, so a second call with identical content loses it. Passing an
-      // (empty) options object skips the cache. See frontmatter.ts for the same fix.
-      const parsed = matter(content, {})
-      frontmatterRaw = parsed.matter.trim() || null
+      frontmatterRaw = splitFrontmatter(content).matter.trim() || null
     }
   }
   return { path, language, size: node.size ?? bytes.byteLength, kind: node.kind ?? 'text', content, frontmatterRaw }

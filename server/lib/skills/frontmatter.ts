@@ -18,13 +18,27 @@ export interface FrontmatterResult {
   errors: string[]
 }
 
+/**
+ * The only place gray-matter is called. Two of its quirks are handled here:
+ *
+ * 1. Pass an (empty) options object so gray-matter skips its internal cache: cache
+ *    hits return `Object.assign({}, cached)`, but gray-matter defines `.matter` (and
+ *    `.language`/`.orig`/`.stringify`) as non-enumerable, so a second call with
+ *    identical content would otherwise come back with `parsed.matter === undefined`.
+ * 2. An empty string short-circuits before `.matter` is ever assigned, so `.matter`
+ *    is `undefined` there too. Both cases collapse to `''`.
+ */
+export function splitFrontmatter(src: string): { matter: string, data: Record<string, unknown>, content: string } {
+  const parsed = matter(src, {})
+  return {
+    matter: parsed.matter ?? '',
+    data: (parsed.data ?? {}) as Record<string, unknown>,
+    content: parsed.content ?? ''
+  }
+}
+
 export function parseFrontmatter(readme: string): FrontmatterResult {
-  // Pass an (empty) options object so gray-matter skips its internal cache:
-  // cache hits return `Object.assign({}, cached)`, but gray-matter defines
-  // `.matter` (and `.language`/`.orig`/`.stringify`) as non-enumerable, so a
-  // second call with identical content would otherwise come back with
-  // `parsed.matter === undefined`. See gray-matter/index.js `matter()`.
-  const parsed = matter(readme, {})
+  const parsed = splitFrontmatter(readme)
   if (!parsed.matter.trim()) {
     return { data: null, errors: ['README.md has no YAML frontmatter'] }
   }
