@@ -29,7 +29,9 @@ describe('createGithubSource', () => {
   it('looks up the branch head, downloads the zipball at that sha, and builds a snapshot', async () => {
     const { impl, calls } = fakeFetch()
     const snap = await createGithubSource({ owner: 'Patrity', repo: 'skills', branch: 'main', fetchImpl: impl }).load()
+    expect(calls.length).toBe(2)
     expect(calls[0]!.url).toBe('https://api.github.com/repos/Patrity/skills/commits/main')
+    expect(calls[0]!.headers['x-github-api-version']).toBe('2022-11-28')
     expect(calls[1]!.url).toBe('https://api.github.com/repos/Patrity/skills/zipball/deadbeefcafe')
     expect(snap).toMatchObject({ sha: 'deadbeefcafe', committedAt: '2026-09-03T12:00:00.000Z', source: 'github' })
     expect(snap.skills.map(s => s.slug)).toEqual(['nuxt'])
