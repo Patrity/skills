@@ -54,10 +54,9 @@ const baseTheme = EditorView.theme({
   '.cm-line': { padding: '0 16px' }
 })
 
-onMounted(() => {
-  if (!host.value) return
+function createView(el: HTMLDivElement) {
   view = new EditorView({
-    parent: host.value,
+    parent: el,
     state: EditorState.create({
       doc: props.code,
       extensions: [
@@ -74,7 +73,11 @@ onMounted(() => {
       ]
     })
   })
-})
+}
+
+watch(host, (el) => {
+  if (el && !view) createView(el)
+}, { immediate: true, flush: 'post' })
 
 watch(() => props.code, (code) => {
   if (view && code !== view.state.doc.toString()) {
