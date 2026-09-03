@@ -1,0 +1,399 @@
+{
+  "source": "https://github.com/nuxt/ui",
+  "branch": "v4",
+  "docs_path": "docs/content/docs/2.components",
+  "last_full_update": null,
+  "last_commit_sha": "9bdb89b0c7585a3a9189ca42c75561396789f927",
+  "components": {
+    "button": {
+      "last_fetch": "2026-08-27T18:02:17.237756",
+      "source_path": "button.md",
+      "cached_file": "cache/button.md"
+    },
+    "modal": {
+      "last_fetch": "2026-07-15T15:04:42.747853",
+      "source_path": "modal.md",
+      "cached_file": "cache/modal.md"
+    },
+    "dashboardpanel": {
+      "last_fetch": "2026-08-27T17:13:34.693696",
+      "source_path": "dashboard-panel.md",
+      "cached_file": "cache/dashboardpanel.md"
+    },
+    "authform": {
+      "last_fetch": "2026-04-10T05:02:25.803044",
+      "source_path": "auth-form.md",
+      "cached_file": "cache/authform.md"
+    },
+    "form": {
+      "last_fetch": "2026-06-03T03:28:13.203499",
+      "source_path": "form.md",
+      "cached_file": "cache/form.md"
+    },
+    "app": {
+      "last_fetch": "2026-08-16T09:41:24.341995",
+      "source_path": "app.md",
+      "cached_file": "cache/app.md"
+    },
+    "badge": {
+      "last_fetch": "2026-08-18T00:50:25.150760",
+      "source_path": "badge.md",
+      "cached_file": "cache/badge.md"
+    },
+    "slideover": {
+      "last_fetch": "2026-06-17T18:01:30.871499",
+      "source_path": "slideover.md",
+      "cached_file": "cache/slideover.md"
+    },
+    "progress": {
+      "last_fetch": "2026-08-16T18:21:35.551306",
+      "source_path": "progress.md",
+      "cached_file": "cache/progress.md"
+    },
+    "toast": {
+      "last_fetch": "2026-02-17T12:41:54.607313",
+      "source_path": "toast.md",
+      "cached_file": "cache/toast.md"
+    },
+    "dashboardgroup": {
+      "last_fetch": "2026-06-02T23:57:29.381235",
+      "source_path": "dashboard-group.md",
+      "cached_file": "cache/dashboardgroup.md"
+    },
+    "dashboardnavbar": {
+      "last_fetch": "2026-08-27T17:13:40.041228",
+      "source_path": "dashboard-navbar.md",
+      "cached_file": "cache/dashboardnavbar.md"
+    },
+    "tabs": {
+      "last_fetch": "2026-06-16T12:36:26.399426",
+      "source_path": "tabs.md",
+      "cached_file": "cache/tabs.md"
+    },
+    "chip": {
+      "last_fetch": "2026-04-17T06:15:14.764578",
+      "source_path": "chip.md",
+      "cached_file": "cache/chip.md"
+    },
+    "tooltip": {
+      "last_fetch": "2026-08-16T09:41:15.934860",
+      "source_path": "tooltip.md",
+      "cached_file": "cache/tooltip.md"
+    },
+    "popover": {
+      "last_fetch": "2026-05-20T15:58:42.056165",
+      "source_path": "popover.md",
+      "cached_file": "cache/popover.md"
+    },
+    "dashboardsidebar": {
+      "last_fetch": "2026-06-02T23:57:28.204751",
+      "source_path": "dashboard-sidebar.md",
+      "cached_file": "cache/dashboardsidebar.md"
+    },
+    "navigationmenu": {
+      "last_fetch": "2026-07-02T05:03:25.764070",
+      "source_path": "navigationmenu.md",
+      "cached_file": "cache/navigationmenu.md"
+    },
+    "tree": {
+      "last_fetch": "2026-06-02T23:57:35.285758",
+      "source_path": "tree.md",
+      "cached_file": "cache/tree.md"
+    },
+    "contextmenu": {
+      "last_fetch": "2026-06-03T14:45:30.073478",
+      "source_path": "context-menu.md",
+      "cached_file": "cache/contextmenu.md"
+    },
+    "editor": {
+      "last_fetch": "2026-03-05T14:53:29.887782",
+      "source_path": "editor.md",
+      "cached_file": "cache/editor.md"
+    },
+    "editortoolbar": {
+      "last_fetch": "2026-01-27T19:21:21.301202",
+      "source_path": "editor-toolbar.md",
+      "cached_file": "cache/editortoolbar.md"
+    },
+    "selectmenu": {
+      "last_fetch": "2026-08-18T02:14:31.879041",
+      "source_path": "select-menu.md",
+      "cached_file": "cache/selectmenu.md"
+    },
+    "select": {
+      "last_fetch": "2026-06-17T22:02:21.908180",
+      "source_path": "select.md",
+      "cached_file": "cache/select.md"
+    },
+    "dashboardtoolbar": {
+      "last_fetch": "2026-01-27T19:04:52.377123",
+      "source_path": "dashboard-toolbar.md",
+      "cached_file": "cache/dashboardtoolbar.md"
+    },
+    "input": {
+      "last_fetch": "2026-08-15T17:29:13.849434",
+      "source_path": "input.md",
+      "cached_file": "cache/input.md"
+    },
+    "inputtags": {
+      "last_fetch": "2026-06-16T21:24:33.796276",
+      "source_path": "input-tags.md",
+      "cached_file": "cache/inputtags.md"
+    },
+    "inputmenu": {
+      "last_fetch": "2026-06-03T17:29:45.037879",
+      "source_path": "input-menu.md",
+      "cached_file": "cache/inputmenu.md"
+    },
+    "page": {
+      "last_fetch": "2026-03-12T22:00:55.475209",
+      "source_path": "page.md",
+      "cached_file": "cache/page.md"
+    },
+    "header": {
+      "last_fetch": "2026-03-30T09:05:59.996868",
+      "source_path": "header.md",
+      "cached_file": "cache/header.md"
+    },
+    "contenttoc": {
+      "last_fetch": "2026-03-12T22:00:56.216310",
+      "source_path": "content-toc.md",
+      "cached_file": "cache/contenttoc.md"
+    },
+    "pagebody": {
+      "last_fetch": "2026-01-28T08:53:11.548569",
+      "source_path": "page-body.md",
+      "cached_file": "cache/pagebody.md"
+    },
+    "pageaside": {
+      "last_fetch": "2026-03-12T22:00:49.450267",
+      "source_path": "page-aside.md",
+      "cached_file": "cache/pageaside.md"
+    },
+    "pagefeature": {
+      "last_fetch": "2026-01-28T10:34:08.694647",
+      "source_path": "page-feature.md",
+      "cached_file": "cache/pagefeature.md"
+    },
+    "pagesection": {
+      "last_fetch": "2026-04-18T13:32:13.707439",
+      "source_path": "page-section.md",
+      "cached_file": "cache/pagesection.md"
+    },
+    "pagehero": {
+      "last_fetch": "2026-03-27T22:20:26.946037",
+      "source_path": "page-hero.md",
+      "cached_file": "cache/pagehero.md"
+    },
+    "pagecard": {
+      "last_fetch": "2026-06-16T22:52:16.373695",
+      "source_path": "page-card.md",
+      "cached_file": "cache/pagecard.md"
+    },
+    "carousel": {
+      "last_fetch": "2026-01-28T10:34:20.612813",
+      "source_path": "carousel.md",
+      "cached_file": "cache/carousel.md"
+    },
+    "pagegrid": {
+      "last_fetch": "2026-01-28T10:34:28.095662",
+      "source_path": "page-grid.md",
+      "cached_file": "cache/pagegrid.md"
+    },
+    "pagecta": {
+      "last_fetch": "2026-04-16T09:28:55.429267",
+      "source_path": "page-cta.md",
+      "cached_file": "cache/pagecta.md"
+    },
+    "formfield": {
+      "last_fetch": "2026-06-15T11:30:59.237830",
+      "source_path": "form-field.md",
+      "cached_file": "cache/formfield.md"
+    },
+    "dashboardsearch": {
+      "last_fetch": "2026-06-03T14:14:16.433201",
+      "source_path": "dashboard-search.md",
+      "cached_file": "cache/dashboardsearch.md"
+    },
+    "commandpalette": {
+      "last_fetch": "2026-06-18T16:32:10.118404",
+      "source_path": "command-palette.md",
+      "cached_file": "cache/commandpalette.md"
+    },
+    "dashboardsearchbutton": {
+      "last_fetch": "2026-06-03T14:14:22.199620",
+      "source_path": "dashboard-search-button.md",
+      "cached_file": "cache/dashboardsearchbutton.md"
+    },
+    "fieldgroup": {
+      "last_fetch": "2026-08-15T17:29:32.951310",
+      "source_path": "field-group.md",
+      "cached_file": "cache/fieldgroup.md"
+    },
+    "table": {
+      "last_fetch": "2026-08-16T19:10:03.013778",
+      "source_path": "table.md",
+      "cached_file": "cache/table.md"
+    },
+    "editormentionmenu": {
+      "last_fetch": "2026-02-07T22:51:10.169961",
+      "source_path": "editor-mention-menu.md",
+      "cached_file": "cache/editormentionmenu.md"
+    },
+    "pagination": {
+      "last_fetch": "2026-03-24T08:31:23.112527",
+      "source_path": "pagination.md",
+      "cached_file": "cache/pagination.md"
+    },
+    "chatprompt": {
+      "last_fetch": "2026-03-05T06:18:17.482657",
+      "source_path": "chat-prompt.md",
+      "cached_file": "cache/chatprompt.md"
+    },
+    "chatmessages": {
+      "last_fetch": "2026-03-05T06:18:25.364337",
+      "source_path": "chat-messages.md",
+      "cached_file": "cache/chatmessages.md"
+    },
+    "chatpromptsubmit": {
+      "last_fetch": "2026-03-05T06:18:27.257234",
+      "source_path": "chat-prompt-submit.md",
+      "cached_file": "cache/chatpromptsubmit.md"
+    },
+    "collapsible": {
+      "last_fetch": "2026-07-15T23:21:40.924645",
+      "source_path": "collapsible.md",
+      "cached_file": "cache/collapsible.md"
+    },
+    "accordion": {
+      "last_fetch": "2026-04-16T09:28:56.364352",
+      "source_path": "accordion.md",
+      "cached_file": "cache/accordion.md"
+    },
+    "pricingplans": {
+      "last_fetch": "2026-03-12T05:12:35.225325",
+      "source_path": "pricing-plans.md",
+      "cached_file": "cache/pricingplans.md"
+    },
+    "pricingtable": {
+      "last_fetch": "2026-04-17T10:53:34.714720",
+      "source_path": "pricing-table.md",
+      "cached_file": "cache/pricingtable.md"
+    },
+    "pageheader": {
+      "last_fetch": "2026-03-12T05:15:53.815172",
+      "source_path": "page-header.md",
+      "cached_file": "cache/pageheader.md"
+    },
+    "footer": {
+      "last_fetch": "2026-04-18T13:32:13.220915",
+      "source_path": "footer.md",
+      "cached_file": "cache/footer.md"
+    },
+    "footercolumns": {
+      "last_fetch": "2026-03-12T06:50:47.239929",
+      "source_path": "footer-columns.md",
+      "cached_file": "cache/footercolumns.md"
+    },
+    "calendar": {
+      "last_fetch": "2026-03-12T13:45:55.716542",
+      "source_path": "calendar.md",
+      "cached_file": "cache/calendar.md"
+    },
+    "textarea": {
+      "last_fetch": "2026-08-27T18:44:58.988921",
+      "source_path": "textarea.md",
+      "cached_file": "cache/textarea.md"
+    },
+    "card": {
+      "last_fetch": "2026-08-16T18:21:32.769209",
+      "source_path": "card.md",
+      "cached_file": "cache/card.md"
+    },
+    "skeleton": {
+      "last_fetch": "2026-06-23T07:40:21.697413",
+      "source_path": "skeleton.md",
+      "cached_file": "cache/skeleton.md"
+    },
+    "switch": {
+      "last_fetch": "2026-07-15T15:04:59.609527",
+      "source_path": "switch.md",
+      "cached_file": "cache/switch.md"
+    },
+    "alert": {
+      "last_fetch": "2026-08-27T23:20:52.877297",
+      "source_path": "alert.md",
+      "cached_file": "cache/alert.md"
+    },
+    "link": {
+      "last_fetch": "2026-08-15T14:56:17.632895",
+      "source_path": "link.md",
+      "cached_file": "cache/link.md"
+    },
+    "stepper": {
+      "last_fetch": "2026-06-10T19:23:41.342916",
+      "source_path": "stepper.md",
+      "cached_file": "cache/stepper.md"
+    },
+    "slider": {
+      "last_fetch": "2026-07-15T23:21:39.639779",
+      "source_path": "slider.md",
+      "cached_file": "cache/slider.md"
+    },
+    "dropdownmenu": {
+      "last_fetch": "2026-08-18T02:14:29.254593",
+      "source_path": "dropdown-menu.md",
+      "cached_file": "cache/dropdownmenu.md"
+    },
+    "pricingplan": {
+      "last_fetch": "2026-04-17T10:53:33.565117",
+      "source_path": "pricing-plan.md",
+      "cached_file": "cache/pricingplan.md"
+    },
+    "dashboardsidebarcollapse": {
+      "last_fetch": "2026-06-10T20:29:51.724280",
+      "source_path": "dashboard-sidebar-collapse.md",
+      "cached_file": "cache/dashboardsidebarcollapse.md"
+    },
+    "separator": {
+      "last_fetch": "2026-08-16T18:21:34.656102",
+      "source_path": "separator.md",
+      "cached_file": "cache/separator.md"
+    },
+    "radio-group": {
+      "last_fetch": "2026-04-17T10:50:19.735695",
+      "source_path": "radio-group.md",
+      "cached_file": "cache/radio-group.md"
+    },
+    "radiogroup": {
+      "last_fetch": "2026-08-18T03:04:13.635891",
+      "source_path": "radio-group.md",
+      "cached_file": "cache/radiogroup.md"
+    },
+    "colorpicker": {
+      "last_fetch": "2026-04-18T20:36:24.165753",
+      "source_path": "color-picker.md",
+      "cached_file": "cache/colorpicker.md"
+    },
+    "avatar": {
+      "last_fetch": "2026-04-21T06:01:14.651613",
+      "source_path": "avatar.md",
+      "cached_file": "cache/avatar.md"
+    },
+    "theme": {
+      "last_fetch": "2026-05-21T08:43:16.886112",
+      "source_path": "theme.md",
+      "cached_file": "cache/theme.md"
+    },
+    "checkbox": {
+      "last_fetch": "2026-07-15T15:05:02.413620",
+      "source_path": "checkbox.md",
+      "cached_file": "cache/checkbox.md"
+    },
+    "icon": {
+      "last_fetch": "2026-08-15T17:03:40.924896",
+      "source_path": "icon.md",
+      "cached_file": "cache/icon.md"
+    }
+  }
+}
