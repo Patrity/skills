@@ -41,9 +41,15 @@ function toggleTag(tag: string) {
   activeTag.value = activeTag.value === tag ? null : tag
 }
 
+const description = 'Browse every Claude Code bundle: search by name, filter by tag, view the source or download a zip.'
+const { public: { siteUrl } } = useRuntimeConfig()
+
 useSeoMeta({
   title: 'All skills',
-  description: 'Browse every Claude Code bundle: search by name, filter by tag, view the source or download a zip.'
+  description,
+  ogTitle: 'All skills',
+  ogDescription: description,
+  ogUrl: `${siteUrl.replace(/\/+$/, '')}/skills`
 })
 </script>
 

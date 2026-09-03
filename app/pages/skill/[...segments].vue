@@ -3,6 +3,7 @@ import type { BreadcrumbItem } from '@nuxt/ui'
 import type { TreeNode } from '~~/shared/types/skills'
 import { isMarkdownPath } from '~~/shared/utils/language'
 import { formatBytes } from '~~/shared/utils/format'
+import { compactBreadcrumbs } from '~~/shared/utils/breadcrumbs'
 
 definePageMeta({
   // One page instance per bundle: moving between files must not remount the tree.
@@ -135,9 +136,14 @@ onMounted(() => trackSkillView(slug.value))
             />
           </template>
           <template #title>
+            <!-- A deep file path overflows the navbar on phones; collapse the middle there. -->
             <UBreadcrumb
               :items="breadcrumbs"
-              class="min-w-0"
+              class="hidden sm:flex min-w-0"
+            />
+            <UBreadcrumb
+              :items="compactBreadcrumbs(breadcrumbs)"
+              class="sm:hidden min-w-0"
             />
           </template>
           <template #right>

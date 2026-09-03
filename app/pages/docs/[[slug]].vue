@@ -21,9 +21,14 @@ const items = computed<NavigationMenuItem[]>(() => docsNav.map(d => ({
   }
 })))
 
+const { public: { siteUrl } } = useRuntimeConfig()
+
 useSeoMeta({
   title: () => doc.value?.entry.title ?? 'Docs',
-  description: () => doc.value?.entry.description ?? ''
+  description: () => doc.value?.entry.description ?? '',
+  ogTitle: () => doc.value?.entry.title ?? 'Docs',
+  ogDescription: () => doc.value?.entry.description ?? '',
+  ogUrl: () => `${siteUrl.replace(/\/+$/, '')}/docs/${slug.value}`
 })
 </script>
 
