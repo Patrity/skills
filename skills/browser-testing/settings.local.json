@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(playwright-cli:*)",
+      "Bash(npm install -g @playwright/cli*)",
+      "Bash(npx playwright:*)"
+    ]
+  }
+}
