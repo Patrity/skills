@@ -1,7 +1,15 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
-const { data, status } = await useSkillsList()
+const { data, status, error } = await useSkillsList()
+// See index.vue: an upstream failure has to stay a 5xx so ISR keeps the stale page.
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode ?? 500,
+    statusMessage: 'Skills are temporarily unavailable',
+    fatal: true
+  })
+}
 
 const q = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const activeTag = ref<string | null>(typeof route.query.tag === 'string' ? route.query.tag : null)

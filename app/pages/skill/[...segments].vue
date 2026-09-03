@@ -17,8 +17,17 @@ const segments = computed(() => {
 const slug = computed(() => segments.value[0] ?? '')
 const routePath = computed(() => segments.value.slice(1).join('/'))
 
+// An upstream failure must stay a 5xx: Vercel ISR caches 404s and empty 200s, but
+// keeps serving the stale page on a 5xx.
 const { data: detail, error } = await useSkill(slug)
-if (error.value || !detail.value) {
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode ?? 500,
+    statusMessage: error.value.statusCode === 404 ? 'Skill not found' : 'Skills are temporarily unavailable',
+    fatal: true
+  })
+}
+if (!detail.value) {
   throw createError({ statusCode: 404, statusMessage: 'Skill not found', fatal: true })
 }
 const skill = computed(() => detail.value!.skill)
@@ -36,6 +45,14 @@ const isReadme = computed(() => currentPath.value !== '' && currentPath.value ==
 const isMarkdown = computed(() => isMarkdownPath(currentPath.value))
 
 const { data: file, error: fileError, status: fileStatus } = await useSkillFile(slug, currentPath)
+// An unknown file inside a known bundle is a 404 page, not an inline alert (spec §5.2).
+// The page instance is keyed by slug, so file-to-file navigation re-runs the watcher, not setup.
+if (fileError.value?.statusCode === 404) {
+  throw createError({ statusCode: 404, statusMessage: 'File not found', fatal: true })
+}
+watch(fileError, (err) => {
+  if (err?.statusCode === 404) showError(createError({ statusCode: 404, statusMessage: 'File not found', fatal: true }))
+})
 
 const view = ref<'rendered' | 'source'>('rendered')
 const treeOpen = ref(false)
@@ -158,12 +175,12 @@ onMounted(() => trackSkillView(slug.value))
             />
 
             <UAlert
-              v-if="fileError"
+              v-if="fileError && fileError.statusCode !== 404"
               color="error"
               variant="subtle"
               icon="i-lucide-file-x"
               title="Could not load this file"
-              :description="fileError.statusMessage ?? 'Not found'"
+              :description="fileError.statusMessage ?? 'Something went wrong'"
             />
 
             <template v-else-if="file">

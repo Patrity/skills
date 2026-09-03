@@ -1,10 +1,20 @@
 <script setup lang="ts">
-const { data } = await useSkillsList()
+// Never render an empty page over an upstream failure: a cacheable 200 would pin the
+// blank state for the ISR window, whereas a 5xx keeps the stale copy served.
+const { data, error } = await useSkillsList()
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode ?? 500,
+    statusMessage: 'Skills are temporarily unavailable',
+    fatal: true
+  })
+}
 const { repo } = useGithubUrls()
 const featured = computed(() => (data.value?.skills ?? []).slice(0, 6))
 
 useSeoMeta({
-  title: 'Skills',
+  // The app-level titleTemplate appends " · Skills".
+  title: 'Reusable Claude Code setups',
   description: 'Open-source, downloadable Claude Code setups: skills, rules, hooks and settings bundled to drop into any project.',
   ogTitle: 'Skills — reusable Claude Code setups',
   ogDescription: 'Open-source, downloadable Claude Code setups: skills, rules, hooks and settings bundled to drop into any project.'
