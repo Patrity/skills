@@ -1,6 +1,6 @@
 import { buildZip } from '~~/server/lib/skills/zip'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<Buffer> => {
   const slug = getRouterParam(event, 'slug') ?? ''
   const { meta } = await requirePublicSkill(slug)
   const files = await getBundleFilesOr503(slug)

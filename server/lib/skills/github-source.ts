@@ -37,15 +37,15 @@ export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
   return {
     async load() {
       const fetchedAt = new Date().toISOString()
-      const commit = await (await get(`${base}/commits/${opts.branch}`)).json() as CommitResponse
-      const zip = await (await get(`${base}/zipball/${commit.sha}`)).arrayBuffer()
+      const head = await (await get(`${base}/commits/${opts.branch}`)).json() as CommitResponse
+      const zip = await (await get(`${base}/zipball/${head.sha}`)).arrayBuffer()
       const bundles = extractBundles(zip)
       // An empty result means a truncated/unexpected archive, not an empty repo:
       // throwing keeps the previous snapshot in place instead of blanking the site.
-      if (bundles.length === 0) throw new Error(`github: archive ${commit.sha} has no skills/ bundles`)
+      if (bundles.length === 0) throw new Error(`github: archive ${head.sha} has no skills/ bundles`)
       return buildSnapshot(bundles, {
-        sha: commit.sha,
-        committedAt: new Date(commit.commit.committer.date).toISOString(),
+        sha: head.sha,
+        committedAt: new Date(head.commit.committer.date).toISOString(),
         fetchedAt,
         source: 'github'
       })

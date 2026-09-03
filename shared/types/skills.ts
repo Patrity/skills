@@ -50,6 +50,10 @@ export interface SkillDetailResponse extends SnapshotMeta {
   skill: SkillManifest
 }
 
+export interface StatusResponse extends SnapshotMeta {
+  ok: true
+}
+
 export interface SkillFileResponse {
   path: string
   language: Language

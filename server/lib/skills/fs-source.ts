@@ -5,7 +5,12 @@ import type { RawBundle, SkillsSource } from './types'
 import { buildSnapshot } from './parse-bundle'
 import { isExcludedPath } from './exclusions'
 
-async function walk(dir: string, root: string, out: { rel: string, abs: string }[]): Promise<void> {
+interface FoundFile {
+  rel: string
+  abs: string
+}
+
+async function walk(dir: string, root: string, out: FoundFile[]): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true })
   for (const entry of entries) {
     const abs = join(dir, entry.name)
@@ -37,7 +42,7 @@ export function createFsSource(dir: string): SkillsSource {
       const bundles: RawBundle[] = []
       for (const slug of slugs) {
         const bundleRoot = join(root, slug)
-        const found: { rel: string, abs: string }[] = []
+        const found: FoundFile[] = []
         await walk(bundleRoot, bundleRoot, found)
         const files: Record<string, Uint8Array> = {}
         for (const f of found.sort((a, b) => a.rel.localeCompare(b.rel))) {

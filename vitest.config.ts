@@ -13,7 +13,6 @@ export default defineConfig({
   test: {
     include: ['test/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/.nuxt/**', '**/.output/**', '**/.claude/**'],
-    testTimeout: 30_000,
-    passWithNoTests: true
+    testTimeout: 30_000
   }
 })
