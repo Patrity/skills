@@ -7,7 +7,8 @@
 #
 # The base is VERCEL_GIT_PREVIOUS_SHA (the last deployed commit) so a push carrying an app
 # commit followed by a skills-only commit still builds. HEAD^ is the fallback when the
-# variable is absent (first deploy, manual redeploy) or points at a commit we don't have.
+# variable is absent (first deploy) or points at a commit we don't have. A redeploy of the
+# same commit always builds (see below).
 set -uo pipefail
 
 base="${VERCEL_GIT_PREVIOUS_SHA:-}"
@@ -17,6 +18,13 @@ fi
 
 if ! git rev-parse --verify --quiet "${base}^{commit}" >/dev/null; then
   echo "should-build: no usable base commit, building"
+  exit 1
+fi
+
+# A redeploy of the already-deployed commit (env vars changed, "Redeploy" in the dashboard,
+# `vercel redeploy`) has an empty diff by definition. That is a request to build, not to skip.
+if [ "$(git rev-parse "${base}^{commit}")" = "$(git rev-parse HEAD)" ]; then
+  echo "should-build: redeploy of the already-deployed commit, building"
   exit 1
 fi
 

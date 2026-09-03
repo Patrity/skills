@@ -64,5 +64,11 @@ describe('scripts/should-build.sh', () => {
     it('falls back to HEAD^ when the variable points at an unknown commit', () => {
       expect(run(threeCommits(), { VERCEL_GIT_PREVIOUS_SHA: '0'.repeat(40) })).toBe(0)
     })
+
+    it('builds on a redeploy of the already-deployed commit (e.g. after env changes)', () => {
+      const cwd = threeCommits()
+      const head = git(cwd, 'rev-parse', 'HEAD').trim()
+      expect(run(cwd, { VERCEL_GIT_PREVIOUS_SHA: head })).toBe(1)
+    })
   })
 })
