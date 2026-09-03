@@ -1,3 +1,5 @@
+import { docsNav } from '~~/content/docs/nav'
+
 export default defineEventHandler(async (event) => {
   const base = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
   const { meta, skills } = await useSkillsStore().getManifests()
@@ -5,6 +7,7 @@ export default defineEventHandler(async (event) => {
     '/',
     '/skills',
     '/docs',
+    ...docsNav.map(d => `/docs/${d.slug}`),
     ...skills.filter(s => isPublicSkill(s, meta)).map(s => `/skill/${s.slug}`)
   ]
   setHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
