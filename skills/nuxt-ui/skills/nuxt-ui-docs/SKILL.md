@@ -1,5 +1,5 @@
 ---
-name: nuxt-ui
+name: nuxt-ui-docs
 description: Fetches Nuxt UI v4 component documentation from GitHub. Use when building UI with Nuxt UI, needing component APIs, props, slots, or usage examples.
 allowed-tools: Bash, Read, WebFetch
 ---

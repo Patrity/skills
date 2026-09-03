@@ -230,7 +230,7 @@ onMounted(() => trackSkillView(slug.value))
                 <CodeView
                   v-else
                   :code="file.content ?? ''"
-                  :language="isMarkdown ? 'markdown' : file.language"
+                  :language="file.language"
                 />
               </template>
             </template>

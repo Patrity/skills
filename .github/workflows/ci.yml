@@ -31,6 +31,14 @@ jobs:
 
       - run: pnpm typecheck
 
+      # Two separate Nitro builds, and that's intentional: `pnpm test` (@nuxt/test-utils)
+      # builds into its own throwaway .nuxt/test/<id>/output against the fixture bundles
+      # under test/fixtures/skills with a test-only runtimeConfig (revalidateSecret,
+      # skillsDir), then discards it; `pnpm build` below produces the real .output that
+      # would actually ship, against the real skills/ dir. Reusing one for the other
+      # (`setup({ build: false })` pointed at `.output`) would mean the e2e suite no
+      # longer builds anything itself — contradicting the documented, self-contained
+      # `pnpm test` contract (CLAUDE.md) — and would need `pnpm build` to run first.
       - name: Unit + route tests
         run: pnpm test
 

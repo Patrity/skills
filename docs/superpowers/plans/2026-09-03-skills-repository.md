@@ -1,5 +1,8 @@
 # Skills Repository Implementation Plan
 
+> Historical record. Since 2026-09-03 the GitHub source uses the repo zipball + fflate
+> (`server/lib/skills/archive.ts`), not nanotar tarballs; the file endpoint is path-based.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship the public Nuxt 4 site that lists, renders, and zips Claude Code setup bundles stored under `skills/` in this repo, reading them from GitHub at runtime on Vercel.

@@ -1,5 +1,8 @@
 # Skills Repository — Design Spec
 
+> Historical record. Since 2026-09-03 the GitHub source uses the repo zipball + fflate
+> (`server/lib/skills/archive.ts`), not nanotar tarballs; the file endpoint is path-based.
+
 **Date:** 2026-09-03
 **Status:** approved in brainstorm, awaiting implementation plan
 **Repo:** `Patrity/skills` (public, open source) · **Deploy:** Vercel · **Stack:** Nuxt 4, Nuxt UI v4, Nitro
