@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { preloadPayload } from '#app'
 import type { TreeItem } from '@nuxt/ui'
 import type { TreeNode } from '~~/shared/types/skills'
 
@@ -75,6 +76,19 @@ function onSelect(e: Event) {
   const item = (e as CustomEvent<{ value?: SkillTreeItem }>).detail?.value
   if (item?.nodeType === 'dir') e.preventDefault()
 }
+
+// Hovering a file is the earliest signal it is about to be opened, and the click then waits
+// on that route's payload (an uncached one costs a cold ISR render). Fetch it early; once
+// per path, because the browser caches it from then on.
+const nuxtApp = useNuxtApp()
+const preloaded = new Set<string>()
+
+function prefetch(item: SkillTreeItem) {
+  if (item.nodeType !== 'file' || preloaded.has(item.path)) return
+  preloaded.add(item.path)
+  // preloadPayload reads the Nuxt app off the context, which a DOM handler is outside of.
+  void nuxtApp.runWithContext(() => preloadPayload(`/skill/${props.slug}/${item.path}`).catch(() => {}))
+}
 </script>
 
 <template>
@@ -86,5 +100,10 @@ function onSelect(e: Event) {
     size="sm"
     class="p-2"
     @select="onSelect"
-  />
+  >
+    <template #item-label="{ item }">
+      <!-- Plain inline span: a block child here would break the label's truncation. -->
+      <span @mouseenter="prefetch(item)">{{ item.label }}</span>
+    </template>
+  </UTree>
 </template>
