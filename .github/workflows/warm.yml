@@ -42,22 +42,27 @@ jobs:
 
       # deployment_status fires before the alias necessarily points at the new build, and the
       # payload URLs are keyed by build id: warming too early fills entries for the build that
-      # is on its way out. Wait until the site serves the build id this deployment reports.
+      # is on its way out. The per-deployment *.vercel.app URL sits behind Vercel's deployment
+      # protection (302), so it cannot be asked for its build id. Instead compare the live
+      # build's timestamp (written at build time) with this deployment's creation time: once
+      # the site serves a build newer than the deployment was created, it is this one (or a
+      # later one, which is equally fine to warm).
       - name: Wait for the site to serve this deployment
         if: github.event_name == 'deployment_status'
         env:
-          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+          CREATED_AT: ${{ github.event.deployment.created_at }}
         run: |
           set -euo pipefail
-          target=$(curl -fsS --max-time 30 --retry 1 "$DEPLOY_URL/_nuxt/builds/latest.json" | jq -r .id)
-          echo "deployment build id: $target"
-          for i in $(seq 1 20); do
-            live=$(curl -fsS --max-time 30 "$SITE_URL/_nuxt/builds/latest.json" | jq -r .id || true)
-            if [ "$live" = "$target" ]; then echo "site serving $live"; exit 0; fi
-            echo "attempt $i: site serving $live"
+          target=$(date -u -d "$CREATED_AT" +%s)
+          echo "deployment created at $CREATED_AT ($target)"
+          for i in $(seq 1 24); do
+            live_ms=$(curl -fsS --max-time 30 "$SITE_URL/_nuxt/builds/latest.json" | jq -r '.timestamp // 0' || echo 0)
+            live=$(( live_ms / 1000 ))
+            if [ "$live" -ge "$target" ]; then echo "site serving a build from $(date -u -d @$live +%FT%TZ)"; exit 0; fi
+            echo "attempt $i: site still serving a build from $(date -u -d @$live +%FT%TZ)"
             sleep 5
           done
-          echo "site never picked up $target"
+          echo "site never picked up the new build"
           exit 1
 
       - name: Warm caches
