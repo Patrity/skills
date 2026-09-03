@@ -40,3 +40,7 @@ pnpm typecheck && pnpm lint && pnpm build
 Vercel, Git integration on `main`. Environment variables: `NUXT_REVALIDATE_SECRET`, `NUXT_PUBLIC_SITE_URL`, `NUXT_GITHUB_TOKEN`; production-only `NUXT_PUBLIC_UMAMI_ID` and `UMAMI_DOMAINS` (build-time). GitHub Actions needs the `SITE_URL` variable and `REVALIDATE_SECRET` secret.
 
 `NUXT_GITHUB_TOKEN` is strongly recommended in production: serverless functions share egress IPs, so the unauthenticated GitHub limit (60 requests/hour/IP) is easily exhausted by neighbours. A fine-grained read-only token raises it to 5,000/hour.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
