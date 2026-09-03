@@ -71,8 +71,8 @@ function onCardClick(e: MouseEvent) {
     </template>
 
     <template #footer>
-      <div class="flex items-center justify-between gap-2 w-full min-w-0">
-        <span class="text-xs text-muted truncate">
+      <div class="flex flex-wrap items-center justify-between gap-2 w-full min-w-0">
+        <span class="text-xs text-muted min-w-0">
           by
           <ULink
             v-if="skill.authorUrl"
@@ -83,7 +83,10 @@ function onCardClick(e: MouseEvent) {
           <span v-else>{{ skill.author }}</span>
           · {{ skill.fileCount }} files · {{ formatBytes(skill.totalBytes) }}
         </span>
-        <UFieldGroup size="xs">
+        <UFieldGroup
+          size="xs"
+          class="shrink-0"
+        >
           <UButton
             label="Source"
             icon="i-simple-icons-github"
