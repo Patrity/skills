@@ -25,8 +25,10 @@ function repoWith(commits: string[][]): string {
   return cwd
 }
 
-function run(cwd: string) {
-  return spawnSync('bash', [script], { cwd, encoding: 'utf8' }).status
+/** VERCEL_GIT_PREVIOUS_SHA is deliberately cleared unless a case sets it. */
+function run(cwd: string, env: Record<string, string> = {}) {
+  const { VERCEL_GIT_PREVIOUS_SHA: _ignored, ...rest } = process.env
+  return spawnSync('bash', [script], { cwd, encoding: 'utf8', env: { ...rest, ...env } }).status
 }
 
 describe('scripts/should-build.sh', () => {
@@ -44,5 +46,23 @@ describe('scripts/should-build.sh', () => {
   })
   it('builds on the first commit', () => {
     expect(run(repoWith([['skills/nuxt/README.md']]))).toBe(1)
+  })
+
+  describe('with VERCEL_GIT_PREVIOUS_SHA (a push of several commits)', () => {
+    const threeCommits = () => repoWith([['app/a.ts'], ['app/b.ts'], ['skills/nuxt/README.md']])
+
+    it('builds when an app commit sits behind a skills-only tip', () => {
+      const cwd = threeCommits()
+      const base = git(cwd, 'rev-parse', 'HEAD~2').trim()
+      expect(run(cwd, { VERCEL_GIT_PREVIOUS_SHA: base })).toBe(1)
+    })
+
+    it('falls back to HEAD^ when the variable is unset', () => {
+      expect(run(threeCommits())).toBe(0)
+    })
+
+    it('falls back to HEAD^ when the variable points at an unknown commit', () => {
+      expect(run(threeCommits(), { VERCEL_GIT_PREVIOUS_SHA: '0'.repeat(40) })).toBe(0)
+    })
   })
 })
