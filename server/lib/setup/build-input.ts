@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import type { CliManifest } from '../../../shared/types/setup'
 import { resolveBundles, validateAnswers } from '../../../shared/setup/wizard'
+import { PROJECT_NAME_RE } from '../../../shared/setup/build-state'
 
-export const PROJECT_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/
+// One definition, shared with the /build page so the browser rejects exactly what this would.
+export { PROJECT_NAME_RE }
 export const buildInputSchema = z.object({
   projectName: z.string(),
   answers: z.record(z.string(), z.string()),

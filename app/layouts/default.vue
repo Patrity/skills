@@ -6,6 +6,7 @@ const { repo } = useGithubUrls()
 const items: NavigationMenuItem[] = [
   { label: 'Home', icon: 'i-lucide-house', to: '/' },
   { label: 'Skills', icon: 'i-lucide-package', to: '/skills' },
+  { label: 'Build', icon: 'i-lucide-hammer', to: '/build' },
   { label: 'Docs', icon: 'i-lucide-book-open', to: '/docs' },
   { label: 'GitHub', icon: 'i-simple-icons-github', to: repo, target: '_blank' }
 ]

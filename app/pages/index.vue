@@ -67,7 +67,10 @@ useSeoMeta({
         headline="Start a project"
         title="One command, one coherent CLAUDE.md"
         description="Run the wizard in a project directory: it asks about package manager, workflow, docs, git policy and testing, lets you pick bundles, and writes .claude/ plus a CLAUDE.md where every rule lands in its section. Re-run any time; a lockfile keeps it idempotent."
-        :links="[{ label: 'CLI docs', to: '/docs/cli', color: 'neutral', variant: 'subtle', trailingIcon: 'i-lucide-arrow-right' }]"
+        :links="[
+          { label: 'Build your setup', to: '/build', icon: 'i-lucide-hammer' },
+          { label: 'CLI docs', to: '/docs/cli', color: 'neutral', variant: 'subtle', trailingIcon: 'i-lucide-arrow-right' }
+        ]"
       >
         <SkillInstallCommand
           command="pnpx @patrity/skills init"
