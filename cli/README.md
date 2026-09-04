@@ -58,10 +58,21 @@ Everything lands under the project root you point it at:
 ├── hooks/…                # hook scripts, made executable
 ├── settings.json          # committed; deep-merged
 ├── settings.local.json    # gitignored; permission allowlists
+├── .env.example           # committed; the variables the installed bundles read
 └── skills.lock.json       # committed; what is installed and at which sha, plus your answers
 CLAUDE.md
-.gitignore                 # a `.claude/settings.local.json` line is added if missing
+.gitignore                 # a managed block, regenerated in place
 ```
+
+The `.gitignore` entries live in one managed block, between `# >>> skills …` and `# <<< skills`.
+It holds `.claude/settings.local.json`, `.claude/.env` when any installed bundle declares
+variables, and whatever paths the bundles themselves declare (a cache directory, say). Every run
+regenerates the block from the current selection and leaves every line outside it alone; the block
+goes away with the last entry. A bundle that declares variables also gets a group in
+`.claude/.env.example`, one commented line per variable with its description and a sample value.
+Copy it to `.claude/.env` and fill it in — the CLI never creates, reads or deletes that file. When
+the last bundle declaring variables is removed the example is deleted, unless you edited it, in
+which case it is left in place and reported.
 
 `CLAUDE.md` is created with a title line if it does not exist yet. Each contribution is wrapped in
 a marker pair:

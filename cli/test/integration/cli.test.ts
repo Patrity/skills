@@ -7,6 +7,7 @@ import { applyPlan } from '../../src/apply'
 import { emptyLockfile, sha256 } from '../../src/lockfile'
 import { ADVERTISED_REGISTRY, startRegistry } from '../helpers/registry-server'
 import { startMarker } from '../../../shared/setup/markers'
+import { GITIGNORE_END, GITIGNORE_START } from '../../../shared/setup/gitignore'
 
 /**
  * Stand-ins for the four clack prompts, so an interactive run is deterministic and a run that
@@ -71,7 +72,11 @@ describe('@patrity/skills end to end', () => {
     expect(await read(dir, '.claude/rules/demo.md')).toContain('"app/**/*.vue"')
     expect(JSON.parse(await read(dir, '.claude/settings.json')).permissions.deny).toEqual(['Bash(rm -rf:*)'])
     expect(JSON.parse(await read(dir, '.claude/settings.local.json')).permissions.allow).toEqual(['Bash(echo:*)'])
-    expect(await read(dir, '.gitignore')).toContain('.claude/settings.local.json')
+    // One managed block, not a loose line: the bundle's own entries and .claude/.env are in it too.
+    expect(await read(dir, '.gitignore')).toBe(`${GITIGNORE_START}\n.claude/.env\n.claude/settings.local.json\n.claude/skills/demo-skill/cache/\n${GITIGNORE_END}\n`)
+    // The example is written; the real .claude/.env is the user's to create and is never touched.
+    expect(await read(dir, '.claude/.env.example')).toContain('DEMO_TOKEN=<token>')
+    await expect(stat(join(dir, '.claude/.env'))).rejects.toThrow()
     const lock = JSON.parse(await read(dir, '.claude/skills.lock.json'))
     expect(Object.keys(lock.bundles).sort()).toEqual(['demo', 'second'])
     expect(lock.answers).toMatchObject({ pm: 'pnpm', browser: 'none' })
@@ -144,8 +149,14 @@ describe('@patrity/skills end to end', () => {
   it('deletes the files of a removed bundle and the directories they emptied', async () => {
     const dir = await tmpProject()
     await runInit({ ...common(), dir, profile: 'demo' })
-    const { plan } = await runRemove({ ...common(), dir, slugs: ['demo'] })
+    expect(await read(dir, '.claude/.env.example')).toContain('DEMO_TOKEN')
+    const { plan, result } = await runRemove({ ...common(), dir, slugs: ['demo'] })
     expect(plan.removals).toEqual(['.claude/hooks/pre-commit.sh', '.claude/rules/demo.md', '.claude/skills/demo-skill/SKILL.md'])
+    // demo was the only bundle declaring variables: the example goes with it, and so does its line.
+    expect(plan.envExampleRemove).toBe(true)
+    expect(result!.removed).toContain('.claude/.env.example')
+    await expect(stat(join(dir, '.claude/.env.example'))).rejects.toThrow()
+    expect(await read(dir, '.gitignore')).toBe(`${GITIGNORE_START}\n.claude/settings.local.json\n${GITIGNORE_END}\n`)
     await expect(stat(join(dir, '.claude/rules'))).rejects.toThrow()
     await expect(stat(join(dir, '.claude/skills/demo-skill'))).rejects.toThrow()
     // The bundle that stays keeps its block, and `.claude` itself survives.
@@ -310,6 +321,8 @@ describe('@patrity/skills end to end', () => {
       settings: null,
       settingsLocal: null,
       gitignore: null,
+      envExample: null,
+      envExampleRemove: false,
       lock,
       warnings: []
     }

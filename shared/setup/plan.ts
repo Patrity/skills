@@ -1,10 +1,12 @@
-import type { BundleFiles, CliManifest } from '../types/setup'
+import type { BundleFiles, CliManifest, EnvVar } from '../types/setup'
 import { composeClaudeMd, type Contribution } from './render'
 import { findMarkerBlocks, type MarkerBlock } from './markers'
 import { placeholderVars, renderPlaceholders, type PlaceholderVars } from './placeholders'
 import { isSafeBundlePath } from './paths'
 import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
 import { emptyLockfile, sha256, type Lockfile, type LockSettings } from './lock'
+import { gitignoreEntries, renderGitignoreBlock } from './gitignore'
+import { renderEnvExample } from './env-example'
 import { formatJson, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, type Json } from './settings'
 
 export interface FileOp {
@@ -22,7 +24,12 @@ export interface SetupPlan {
   claudeMd: { content: string, changed: boolean, handEdited: string[] }
   settings: { content: string, changed: boolean } | null
   settingsLocal: { content: string, changed: boolean } | null
+  /** The whole `.gitignore`, managed block regenerated in place; `null` when there is none to write. */
   gitignore: { content: string, changed: boolean } | null
+  /** The whole `.claude/.env.example`; `null` when no selected bundle declares variables. */
+  envExample: { content: string, changed: boolean } | null
+  /** The project has an example this tool wrote and nothing declares variables any more. */
+  envExampleRemove: boolean
   lock: Lockfile
   warnings: string[]
 }
@@ -111,7 +118,17 @@ export function renderFresh(input: FreshInput): {
 
   for (const slug of [...bundles].sort()) {
     const bundle = bundleFiles[slug] ?? {}
-    lock.bundles[slug] = { sha: manifest.sha, files: {} }
+    // Declared in the bundle's README frontmatter and carried in the manifest summary: recorded on
+    // the lock so a later run can rebuild the .gitignore block and the env example from it alone.
+    const summary = manifest.skills.find(s => s.slug === slug)
+    const declaredGitignore = summary?.gitignore?.length ? [...summary.gitignore].sort() : undefined
+    const declaredEnv = summary?.env?.length ? summary.env.map(v => v.name).sort() : undefined
+    lock.bundles[slug] = {
+      sha: manifest.sha,
+      files: {},
+      ...(declaredGitignore ? { gitignore: declaredGitignore } : {}),
+      ...(declaredEnv ? { env: declaredEnv } : {})
+    }
     let settingsJson: Json | null = null
     let settingsLocalJson: Json | null = null
     for (const [rel, raw] of Object.entries(bundle).sort(byKey)) {
@@ -182,7 +199,11 @@ export function renderFresh(input: FreshInput): {
     claudeMd: { content: claudeMd, changed: true, handEdited: [] },
     settings: settingsFileFor(null, shared),
     settingsLocal: settingsFileFor(null, local),
+    // Both are regenerated around what the project already has: `planFresh` renders them from
+    // nothing below, `buildPlan` from the files on disk.
     gitignore: null,
+    envExample: null,
+    envExampleRemove: false,
     lock,
     warnings
   }
@@ -197,7 +218,21 @@ export function renderFresh(input: FreshInput): {
  */
 export function planFresh(input: FreshInput): SetupPlan {
   const { plan, contributionWarnings } = renderFresh(input)
-  return { ...plan, warnings: [...plan.warnings, ...contributionWarnings] }
+  const gitignore = renderGitignoreBlock(null, gitignoreEntries({ settingsLocal: plan.settingsLocal, lock: plan.lock }))
+  const envExample = renderEnvExample(envGroups(input.manifest, input.bundles))
+  if (envExample) plan.lock.envExample = sha256(envExample)
+  return {
+    ...plan,
+    gitignore: gitignore === null ? null : { content: gitignore, changed: true },
+    envExample: envExample === null ? null : { content: envExample, changed: true },
+    envExampleRemove: false,
+    warnings: [...plan.warnings, ...contributionWarnings]
+  }
+}
+
+/** What `.claude/.env.example` is rendered from: each selected bundle's declared variables. */
+export function envGroups(manifest: CliManifest, bundles: string[]): { slug: string, env: EnvVar[] }[] {
+  return bundles.map(slug => ({ slug, env: manifest.skills.find(s => s.slug === slug)?.env ?? [] }))
 }
 
 /** A settings file the plan may write: `null` only when there is nothing there and nothing to add. */

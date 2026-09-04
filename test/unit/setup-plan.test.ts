@@ -4,7 +4,8 @@ import { createFsSource } from '../../server/lib/skills/fs-source'
 import { toCliManifest } from '../../server/lib/setup/manifest'
 import { planFresh } from '../../shared/setup/plan'
 import { startMarker } from '../../shared/setup/markers'
-import { parseLockfile, serializeLockfile } from '../../shared/setup/lock'
+import { GITIGNORE_END, GITIGNORE_START } from '../../shared/setup/gitignore'
+import { parseLockfile, serializeLockfile, sha256 } from '../../shared/setup/lock'
 
 const dir = fileURLToPath(new URL('../fixtures/skills', import.meta.url))
 const dec = new TextDecoder()
@@ -45,6 +46,18 @@ describe('planFresh', () => {
     const rule = a.files.find(f => f.path.endsWith('.md') && dec.decode(f.bytes).includes('apps/web/app'))
     expect(rule, 'a text file rendered {{appDir}}').toBeDefined()
     expect(a.files.find(f => f.path.endsWith('bin.dat'))!.bytes).toEqual(new Uint8Array([0, 1, 2, 0]))
+  })
+
+  it('fills the managed gitignore block and the env example from the bundles', async () => {
+    const { manifest, files } = await load()
+    const plan = planFresh({ manifest, projectName: 'p', answers: { pm: 'pnpm', layout: 'single' }, bundles: ['demo'], bundleFiles: { demo: files.demo! }, registry: 'r' })
+    expect(plan.gitignore!.content).toBe(`${GITIGNORE_START}\n.claude/.env\n.claude/settings.local.json\n.claude/skills/demo-skill/cache/\n${GITIGNORE_END}\n`)
+    expect(plan.envExample!.content).toContain('# skills: demo\n# Token the demo skill sends.\nDEMO_TOKEN=<token>\n')
+    expect(plan.envExampleRemove).toBe(false)
+    expect(plan.lock.bundles.demo).toMatchObject({ gitignore: ['.claude/skills/demo-skill/cache/'], env: ['DEMO_TOKEN'] })
+    expect(plan.lock.envExample).toBe(sha256(plan.envExample!.content))
+    // The new lock fields survive the codec.
+    expect(serializeLockfile(parseLockfile(serializeLockfile(plan.lock)))).toBe(serializeLockfile(plan.lock))
   })
 
   it('warns instead of throwing on a malformed settings.json and an unsafe path', async () => {

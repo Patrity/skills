@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
+import { ENV_EXAMPLE_PATH } from '../../shared/setup/env-example'
 import { LOCKFILE_PATH, parseLockfile, type Lockfile } from './lockfile'
 import type { Json } from './settings'
 
@@ -12,6 +13,8 @@ export interface ProjectState {
   settings: Json | null
   settingsLocal: Json | null
   gitignore: string | null
+  /** `.claude/.env.example`. The real `.claude/.env` beside it is the user's and is never read. */
+  envExample: string | null
   lock: Lockfile | null
 }
 
@@ -51,6 +54,7 @@ export async function readProject(dir: string): Promise<ProjectState> {
     settings: await readJson(abs, '.claude/settings.json'),
     settingsLocal: await readJson(abs, '.claude/settings.local.json'),
     gitignore: await readText(abs, '.gitignore'),
+    envExample: await readText(abs, ENV_EXAMPLE_PATH),
     lock
   }
 }

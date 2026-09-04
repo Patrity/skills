@@ -2,11 +2,13 @@ import type { CliManifest, SectionDef } from '../../shared/types/setup'
 import { composeClaudeMd, type Contribution } from '../../shared/setup/render'
 import { findMarkerBlocks } from '../../shared/setup/markers'
 import { sectionIdForHeading } from '../../shared/setup/sections'
-import { byKey, hashForSource, renderFresh, settingsFileFor, sourceIds, varsFor, type FileOp, type SetupPlan } from '../../shared/setup/plan'
+import { byKey, envGroups, hashForSource, renderFresh, settingsFileFor, sourceIds, varsFor, type FileOp, type SetupPlan } from '../../shared/setup/plan'
+import { gitignoreEntries, renderGitignoreBlock } from '../../shared/setup/gitignore'
+import { ENV_EXAMPLE_PATH, renderEnvExample } from '../../shared/setup/env-example'
 import { sha256, type LockSettings } from './lockfile'
 import type { BundleFiles } from './registry'
 import type { ProjectState } from './project'
-import { ensureGitignoreLine, mergeSettings, subtractSettings, type Json, type SettingsContribution } from './settings'
+import { mergeSettings, subtractSettings, type Json, type SettingsContribution } from './settings'
 
 export { hashForSource, varsFor }
 export type { FileOp, SetupPlan }
@@ -15,7 +17,8 @@ export type { FileOp, SetupPlan }
  * A setup for a project that may already have one. Everything a fresh project gets is rendered once
  * by `renderFresh` (shared with the web builder); this adds what only a real project on disk has: the
  * classification of each file against disk and the previous lock, removals, hand-edited marker
- * blocks and settings entries, and the .gitignore line.
+ * blocks and settings entries, and the two files regenerated around what is already there — the
+ * managed `.gitignore` block and `.claude/.env.example`.
  */
 export async function buildPlan(input: {
   manifest: CliManifest
@@ -127,16 +130,34 @@ export async function buildPlan(input: {
     (existing === null ? null : previous.reduce((acc, c) => subtractSettings(acc, half(c)), existing))
   const settings = settingsFileFor(project.settings, mergeSettings(strip(project.settings, c => c.shared), shared))
   const settingsLocal = settingsFileFor(project.settingsLocal, mergeSettings(strip(project.settingsLocal, c => c.local), local))
-  const gitignoreContent = settingsLocal ? ensureGitignoreLine(project.gitignore, '.claude/settings.local.json') : null
 
+  // The managed .gitignore block, regenerated in place: what is outside it is the user's.
+  const gitignoreContent = renderGitignoreBlock(project.gitignore, gitignoreEntries({ settingsLocal, lock }))
+
+  // .claude/.env.example is entirely ours, so it is only ever deleted when it is byte-identical to
+  // the one we wrote. `.claude/.env` itself is never read, written or removed.
+  const envContent = renderEnvExample(envGroups(manifest, bundles))
+  let envExample: SetupPlan['envExample'] = null
+  let envExampleRemove = false
+  if (envContent !== null) {
+    envExample = { content: envContent, changed: envContent !== (project.envExample ?? '') }
+    lock.envExample = sha256(envContent)
+  } else if (project.envExample !== null) {
+    if (prev?.envExample !== undefined && sha256(project.envExample) === prev.envExample) envExampleRemove = true
+    else warnings.push(`${ENV_EXAMPLE_PATH} was modified after install; left in place`)
+  }
+
+  // Spelled out rather than spread over `fresh`: a field added to `SetupPlan` must be considered
+  // here too, not silently inherit the value a fresh project would have got.
   return {
-    ...fresh,
     files,
     removals,
     claudeMd: { content: claudeMd, changed: claudeMd !== (project.claudeMd ?? ''), handEdited },
     settings,
     settingsLocal,
-    gitignore: gitignoreContent ? { content: gitignoreContent, changed: gitignoreContent !== (project.gitignore ?? '') } : null,
+    gitignore: gitignoreContent === null ? null : { content: gitignoreContent, changed: gitignoreContent !== (project.gitignore ?? '') },
+    envExample,
+    envExampleRemove,
     lock,
     warnings
   }

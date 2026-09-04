@@ -1,5 +1,6 @@
 import { chmod, mkdir, rm, rmdir, writeFile } from 'node:fs/promises'
 import path, { dirname } from 'node:path'
+import { ENV_EXAMPLE_PATH } from '../../shared/setup/env-example'
 import { LOCKFILE_PATH, serializeLockfile } from './lockfile'
 import type { SetupPlan } from './plan'
 
@@ -58,6 +59,7 @@ async function pruneEmptyDirs(root: string, from: string): Promise<void> {
 export async function applyPlan(plan: SetupPlan, dir: string, opts: { overwrite?: Set<string> } = {}): Promise<ApplyResult> {
   const written: string[] = []
   const skipped: string[] = []
+  const removed = [...plan.removals]
 
   for (const op of plan.files) {
     const go = op.action === 'create' || op.action === 'update' || (op.action === 'conflict' && opts.overwrite?.has(op.path) === true)
@@ -88,11 +90,21 @@ export async function applyPlan(plan: SetupPlan, dir: string, opts: { overwrite?
     await write(dir, '.claude/settings.local.json', plan.settingsLocal.content)
     written.push('.claude/settings.local.json')
   }
+  // `.claude/.env.example` is written and deleted; `.claude/.env` beside it is the user's secret
+  // file and is never created, read or removed.
+  if (plan.envExample?.changed) {
+    await write(dir, ENV_EXAMPLE_PATH, plan.envExample.content)
+    written.push(ENV_EXAMPLE_PATH)
+  }
+  if (plan.envExampleRemove) {
+    await rm(inside(root, ENV_EXAMPLE_PATH), { force: true })
+    removed.push(ENV_EXAMPLE_PATH)
+  }
   if (plan.gitignore?.changed) {
     await write(dir, '.gitignore', plan.gitignore.content)
     written.push('.gitignore')
   }
 
   await write(dir, LOCKFILE_PATH, serializeLockfile(plan.lock))
-  return { written, removed: plan.removals, skipped }
+  return { written, removed, skipped }
 }

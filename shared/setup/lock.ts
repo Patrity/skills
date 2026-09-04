@@ -17,6 +17,10 @@ export interface LockSettings {
 export interface LockBundle {
   sha: string
   files: Record<string, string>
+  /** Paths this bundle contributed to the managed block in `.gitignore`. */
+  gitignore?: string[]
+  /** Names of the variables this bundle declared, so `.claude/.env.example` can be rebuilt. */
+  env?: string[]
   /** What this bundle merged into settings.json / settings.local.json, so removing it can undo it. */
   settings?: LockSettings
 }
@@ -30,6 +34,8 @@ export interface Lockfile {
   bundles: Record<string, LockBundle>
   scaffolds: Record<string, string>
   blocks: Record<string, string>
+  /** sha256 of the last `.claude/.env.example` the tool wrote; absent when it wrote none. */
+  envExample?: string
 }
 
 export { sha256 } from './hash'
@@ -72,7 +78,8 @@ export function parseLockfile(text: string): Lockfile {
     answers: { ...lock.answers },
     bundles: Object.fromEntries(Object.entries(lock.bundles).map(([slug, b]) => [slug, parseBundle(b)])),
     scaffolds: { ...lock.scaffolds },
-    blocks: { ...lock.blocks }
+    blocks: { ...lock.blocks },
+    ...(typeof lock.envExample === 'string' ? { envExample: lock.envExample } : {})
   }
 }
 
@@ -104,8 +111,14 @@ function migrateContribution(c: SettingsContribution): LockSettings {
 
 /** A lockfile written before `settings` existed simply has none: it parses, and nothing is undone. */
 function parseBundle(bundle: LockBundle): LockBundle {
-  const raw = bundle as LockBundle & { settings?: unknown }
+  const raw = bundle as LockBundle & { settings?: unknown, gitignore?: unknown, env?: unknown }
   const out: LockBundle = { sha: bundle.sha, files: { ...bundle.files } }
+  // Written since the managed .gitignore block and .claude/.env.example landed; an older lock has
+  // neither, and simply contributes nothing to either file until the next run re-records it.
+  const gitignore = strings(raw.gitignore)
+  if (gitignore.length) out.gitignore = gitignore
+  const env = strings(raw.env)
+  if (env.length) out.env = env
   const s: unknown = raw.settings
   if (!isRecord(s)) return out
   out.settings = 'shared' in s || 'local' in s
@@ -140,12 +153,15 @@ export function serializeLockfile(lock: Lockfile): string {
         Object.entries(lock.bundles).map(([slug, b]) => [slug, {
           sha: b.sha,
           files: sortedEntries(b.files),
+          ...(b.env?.length ? { env: [...b.env].sort() } : {}),
+          ...(b.gitignore?.length ? { gitignore: [...b.gitignore].sort() } : {}),
           ...(b.settings ? { settings: { local: serializeContribution(b.settings.local), shared: serializeContribution(b.settings.shared) } } : {})
         }])
       )
     ),
     scaffolds: sortedEntries(lock.scaffolds),
-    blocks: sortedEntries(lock.blocks)
+    blocks: sortedEntries(lock.blocks),
+    ...(lock.envExample ? { envExample: lock.envExample } : {})
   }
   return `${JSON.stringify(out, null, 2)}\n`
 }

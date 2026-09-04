@@ -12,6 +12,8 @@ const plan = (files: FileOp[], over: Partial<SetupPlan> = {}): SetupPlan => ({
   settings: null,
   settingsLocal: null,
   gitignore: null,
+  envExample: null,
+  envExampleRemove: false,
   lock: emptyLockfile({ registry: 'http://registry.test', schemaVersion: 1, projectName: 'p', answers: {} }),
   warnings: [],
   ...over

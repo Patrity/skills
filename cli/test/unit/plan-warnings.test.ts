@@ -25,6 +25,7 @@ describe('buildPlan (warning order)', () => {
       settings: null,
       settingsLocal: null,
       gitignore: null,
+      envExample: null,
       lock,
       files: async rel => (rel in disk ? enc(disk[rel]!) : null)
     }

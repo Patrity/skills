@@ -5,6 +5,7 @@ import { mergeSettings } from '../../src/settings'
 import type { ProjectState } from '../../src/project'
 import { fixtureManifest, loadFixtureBundle } from '../helpers/fixtures'
 import { startMarker } from '../../../shared/setup/markers'
+import { GITIGNORE_END, GITIGNORE_START } from '../../../shared/setup/gitignore'
 
 const manifest = fixtureManifest()
 const enc = (s: string) => new TextEncoder().encode(s)
@@ -18,7 +19,10 @@ function project(over: Partial<ProjectState> & { disk?: Record<string, string> }
     claudeMd: null,
     settings: null,
     settingsLocal: null,
-    gitignore: null,
+    // The two managed text files are read off `disk` like everything else, so a test can hand a
+    // project the exact bytes a previous plan wrote.
+    gitignore: disk['.gitignore'] ?? null,
+    envExample: disk['.claude/.env.example'] ?? null,
     lock: null,
     files: async rel => (rel in disk ? enc(disk[rel]!) : null),
     ...over
@@ -36,7 +40,8 @@ function projectAfter(plan: SetupPlan): ProjectState {
     claudeMd: plan.claudeMd.content,
     settings: plan.settings ? JSON.parse(plan.settings.content) as Record<string, unknown> : null,
     settingsLocal: plan.settingsLocal ? JSON.parse(plan.settingsLocal.content) as Record<string, unknown> : null,
-    gitignore: plan.gitignore?.content ?? null
+    gitignore: plan.gitignore?.content ?? null,
+    envExample: plan.envExample?.content ?? null
   })
 }
 
@@ -238,6 +243,37 @@ describe('buildPlan (removals)', () => {
   })
 })
 
+describe('buildPlan (managed gitignore block and env example)', () => {
+  it('regenerates the managed gitignore block around user lines and removes it with the last bundle', async () => {
+    const first = await buildPlan({ manifest, registry: 'r', project: project({ disk: { '.gitignore': 'node_modules\n' } }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect(first.gitignore!.content).toBe(`node_modules\n\n${GITIGNORE_START}\n.claude/.env\n.claude/settings.local.json\n.claude/skills/demo-skill/cache/\n${GITIGNORE_END}\n`)
+    expect(first.envExample!.content).toContain('DEMO_TOKEN=<token>')
+    expect(first.envExample!.changed).toBe(true)
+    expect(first.lock.envExample).toBe(sha256(first.envExample!.content))
+    const lock = first.lock
+    const after = await buildPlan({ manifest, registry: 'r', project: project({ disk: { '.gitignore': first.gitignore!.content, '.claude/.env.example': first.envExample!.content }, lock }), answers, bundles: [], bundleFiles: {} })
+    expect(after.gitignore!.content).toBe('node_modules\n')
+    expect(after.envExample).toBeNull()
+    expect(after.envExampleRemove).toBe(true)
+    expect(after.lock.envExample).toBeUndefined()
+  })
+
+  it('leaves an edited example in place and says so instead of deleting it', async () => {
+    const first = await buildPlan({ manifest, registry: 'r', project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const after = await buildPlan({ manifest, registry: 'r', project: project({ disk: { '.claude/.env.example': `${first.envExample!.content}# mine\n` }, lock: first.lock }), answers, bundles: [], bundleFiles: {} })
+    expect(after.envExampleRemove).toBe(false)
+    expect(after.warnings).toContain('.claude/.env.example was modified after install; left in place')
+  })
+
+  it('is idempotent over its own output', async () => {
+    const first = await buildPlan({ manifest, registry: 'r', project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const second = await buildPlan({ manifest, registry: 'r', project: projectAfter(first), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect(second.gitignore!.changed).toBe(false)
+    expect(second.envExample!.changed).toBe(false)
+    expect(second.envExampleRemove).toBe(false)
+  })
+})
+
 describe('buildPlan (bundle settings)', () => {
   it('warns and keeps going when a bundle ships malformed settings', async () => {
     const files = loadFixtureBundle()
@@ -246,7 +282,9 @@ describe('buildPlan (bundle settings)', () => {
     expect(plan.warnings).toContain('demo/settings.json: not valid JSON, skipped')
     expect(plan.settings).toBeNull()
     expect(plan.settingsLocal).toBeNull()
-    expect(plan.gitignore).toBeNull()
+    // No settings.local.json to ignore; what the bundle itself declares is still in the block.
+    expect(plan.gitignore!.content).not.toContain('.claude/settings.local.json')
+    expect(plan.gitignore!.content).toContain('.claude/skills/demo-skill/cache/')
     expect(plan.files.some(f => f.path === '.claude/rules/demo.md')).toBe(true)
   })
 

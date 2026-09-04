@@ -46,8 +46,10 @@ Everything lands under the project root you point it at:
 ├── hooks/…                # hook scripts, made executable
 ├── settings.json          # committed; deep-merged
 ├── settings.local.json    # gitignored; permission allowlists
+├── .env.example           # committed; the variables the installed bundles read
 └── skills.lock.json       # committed; what is installed, at which sha, and your answers
 CLAUDE.md
+.gitignore                 # a managed block, regenerated in place
 ```
 
 `CLAUDE.md` is created with a title line if it does not exist yet. Each contribution is wrapped in a marker pair:
@@ -61,6 +63,8 @@ CLAUDE.md
 Everything outside those markers is yours and is never touched. See [Base and profiles](/docs/base-and-profiles) for how the sections are ordered.
 
 The two settings files are treated differently. `settings.json` is meant to be committed, so bundle hooks are unioned into it by matcher and command string and `permissions.deny` entries are merged. `settings.local.json` is per-machine: bundle `permissions.allow` entries go there, and the CLI makes sure it is gitignored. What each bundle merged into each file is recorded in the lockfile, so removing the bundle takes its hooks and permissions back out of the file it put them in. Anything you added by hand survives `remove` and `update` unless it is byte-identical to an entry the bundle contributed to that same file — so an `allow` you keep in `settings.json` stays put when the bundle's copy leaves `settings.local.json`.
+
+Your `.gitignore` gets one managed block, between `# >>> skills …` and `# <<< skills`. It lists `.claude/settings.local.json`, `.claude/.env` when any installed bundle declares variables, and whatever paths the bundles themselves declare — a cache directory a skill writes into, say. Every run regenerates the block from the current selection; lines outside it are yours and are never touched, and the block is removed once nothing needs it. A bundle that declares variables also contributes a group to `.claude/.env.example`: one commented line per variable with its description and a sample value. Copy that file to `.claude/.env` and fill it in — the CLI never creates, reads or deletes `.claude/.env` itself. Removing the last bundle that declares variables deletes the example, unless you edited it, in which case it stays and the run says so.
 
 ## Updating
 
