@@ -265,6 +265,14 @@ describe('buildPlan (managed gitignore block and env example)', () => {
     expect(after.warnings).toContain('.claude/.env.example was modified after install; left in place')
   })
 
+  it('refuses to touch a .gitignore whose managed block was never closed', async () => {
+    const orphan = `mine1\n${GITIGNORE_START}\nmine2\n`
+    const plan = await buildPlan({ manifest, registry: 'r', project: project({ disk: { '.gitignore': orphan } }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect(plan.gitignore!.content).toBe(orphan)
+    expect(plan.gitignore!.changed).toBe(false)
+    expect(plan.warnings).toContain('.gitignore has an unterminated skills block; left in place (close it with "# <<< skills")')
+  })
+
   it('is idempotent over its own output', async () => {
     const first = await buildPlan({ manifest, registry: 'r', project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     const second = await buildPlan({ manifest, registry: 'r', project: projectAfter(first), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })

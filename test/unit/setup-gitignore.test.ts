@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GITIGNORE_END, GITIGNORE_START, gitignoreEntries, renderGitignoreBlock } from '../../shared/setup/gitignore'
+import { GITIGNORE_END, GITIGNORE_START, GITIGNORE_UNTERMINATED, gitignoreEntries, gitignoreFileFor, hasUnterminatedBlock, renderGitignoreBlock } from '../../shared/setup/gitignore'
 import { emptyLockfile, type Lockfile } from '../../shared/setup/lock'
 
 const block = (entries: string[]) => [GITIGNORE_START, ...entries, GITIGNORE_END].join('\n')
@@ -28,6 +28,43 @@ describe('renderGitignoreBlock', () => {
   it('is idempotent', () => {
     const once = renderGitignoreBlock('a\n', ['x', 'y'])!
     expect(renderGitignoreBlock(once, ['x', 'y'])).toBe(once)
+  })
+  it('returns the file untouched when it holds no block and there is nothing to add', () => {
+    // Not even normalised: re-emitting it would report `changed` on a file the tool never touched.
+    expect(renderGitignoreBlock('a\nb\r\nc', [])).toBe('a\nb\r\nc')
+    expect(renderGitignoreBlock('node_modules', [])).toBe('node_modules')
+  })
+  it('leaves a file with an unterminated block alone, however often it runs', () => {
+    // The end marker lost in a merge. Appending a second block would let the NEXT run read the
+    // orphan as the start and the new end marker as the end, and delete mine1/mine2 with it.
+    const orphan = `mine1\n${GITIGNORE_START}\nmine2\n`
+    const once = renderGitignoreBlock(orphan, ['x'])!
+    expect(once).toBe(orphan)
+    expect(renderGitignoreBlock(once, ['x'])).toBe(orphan)
+    expect(renderGitignoreBlock(orphan, [])).toBe(orphan)
+  })
+})
+
+describe('hasUnterminatedBlock', () => {
+  it('is true only for a start marker with no end marker after it', () => {
+    expect(hasUnterminatedBlock(`mine1\n${GITIGNORE_START}\nmine2\n`)).toBe(true)
+    expect(hasUnterminatedBlock(`${GITIGNORE_END}\n${GITIGNORE_START}\nx\n`)).toBe(true)
+    expect(hasUnterminatedBlock(`a\n${GITIGNORE_START}\nx\n${GITIGNORE_END}\n`)).toBe(false)
+    expect(hasUnterminatedBlock('node_modules\n')).toBe(false)
+    expect(hasUnterminatedBlock(null)).toBe(false)
+  })
+})
+
+describe('gitignoreFileFor', () => {
+  it('reports the unterminated block and writes nothing', () => {
+    const orphan = `mine1\n${GITIGNORE_START}\nmine2\n`
+    expect(gitignoreFileFor(orphan, ['x'])).toEqual({ file: { content: orphan, changed: false }, warnings: [GITIGNORE_UNTERMINATED] })
+    expect(GITIGNORE_UNTERMINATED).toBe('.gitignore has an unterminated skills block; left in place (close it with "# <<< skills")')
+  })
+  it('marks a fresh file changed and an untouched one unchanged, with no warnings', () => {
+    expect(gitignoreFileFor(null, ['x'])).toEqual({ file: { content: `${block(['x'])}\n`, changed: true }, warnings: [] })
+    expect(gitignoreFileFor('a\n', [])).toEqual({ file: { content: 'a\n', changed: false }, warnings: [] })
+    expect(gitignoreFileFor(null, [])).toEqual({ file: null, warnings: [] })
   })
 })
 

@@ -3,7 +3,7 @@ import { composeClaudeMd, type Contribution } from '../../shared/setup/render'
 import { findMarkerBlocks } from '../../shared/setup/markers'
 import { sectionIdForHeading } from '../../shared/setup/sections'
 import { byKey, envGroups, hashForSource, renderFresh, settingsFileFor, sourceIds, varsFor, type FileOp, type SetupPlan } from '../../shared/setup/plan'
-import { gitignoreEntries, renderGitignoreBlock } from '../../shared/setup/gitignore'
+import { gitignoreEntries, gitignoreFileFor } from '../../shared/setup/gitignore'
 import { ENV_EXAMPLE_PATH, renderEnvExample } from '../../shared/setup/env-example'
 import { sha256, type LockSettings } from './lockfile'
 import type { BundleFiles } from './registry'
@@ -131,8 +131,10 @@ export async function buildPlan(input: {
   const settings = settingsFileFor(project.settings, mergeSettings(strip(project.settings, c => c.shared), shared))
   const settingsLocal = settingsFileFor(project.settingsLocal, mergeSettings(strip(project.settingsLocal, c => c.local), local))
 
-  // The managed .gitignore block, regenerated in place: what is outside it is the user's.
-  const gitignoreContent = renderGitignoreBlock(project.gitignore, gitignoreEntries({ settingsLocal, lock }))
+  // The managed .gitignore block, regenerated in place: what is outside it is the user's, and an
+  // unterminated block leaves the whole file alone with a warning rather than risk eating lines.
+  const gitignore = gitignoreFileFor(project.gitignore, gitignoreEntries({ settingsLocal, lock }))
+  warnings.push(...gitignore.warnings)
 
   // .claude/.env.example is entirely ours, so it is only ever deleted when it is byte-identical to
   // the one we wrote. `.claude/.env` itself is never read, written or removed.
@@ -155,7 +157,7 @@ export async function buildPlan(input: {
     claudeMd: { content: claudeMd, changed: claudeMd !== (project.claudeMd ?? ''), handEdited },
     settings,
     settingsLocal,
-    gitignore: gitignoreContent === null ? null : { content: gitignoreContent, changed: gitignoreContent !== (project.gitignore ?? '') },
+    gitignore: gitignore.file,
     envExample,
     envExampleRemove,
     lock,

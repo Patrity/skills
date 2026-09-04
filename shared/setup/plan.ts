@@ -5,7 +5,7 @@ import { placeholderVars, renderPlaceholders, type PlaceholderVars } from './pla
 import { isSafeBundlePath } from './paths'
 import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
 import { emptyLockfile, sha256, type Lockfile, type LockSettings } from './lock'
-import { gitignoreEntries, renderGitignoreBlock } from './gitignore'
+import { gitignoreEntries, gitignoreFileFor } from './gitignore'
 import { renderEnvExample } from './env-example'
 import { formatJson, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, type Json } from './settings'
 
@@ -218,15 +218,15 @@ export function renderFresh(input: FreshInput): {
  */
 export function planFresh(input: FreshInput): SetupPlan {
   const { plan, contributionWarnings } = renderFresh(input)
-  const gitignore = renderGitignoreBlock(null, gitignoreEntries({ settingsLocal: plan.settingsLocal, lock: plan.lock }))
+  const gitignore = gitignoreFileFor(null, gitignoreEntries({ settingsLocal: plan.settingsLocal, lock: plan.lock }))
   const envExample = renderEnvExample(envGroups(input.manifest, input.bundles))
   if (envExample) plan.lock.envExample = sha256(envExample)
   return {
     ...plan,
-    gitignore: gitignore === null ? null : { content: gitignore, changed: true },
+    gitignore: gitignore.file,
     envExample: envExample === null ? null : { content: envExample, changed: true },
     envExampleRemove: false,
-    warnings: [...plan.warnings, ...contributionWarnings]
+    warnings: [...plan.warnings, ...contributionWarnings, ...gitignore.warnings]
   }
 }
 
