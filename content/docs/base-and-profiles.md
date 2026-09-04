@@ -28,8 +28,23 @@ Rendering rules:
 - Within a section: base fragments first (schema order), then bundles alphabetically by slug.
 - Each contribution is wrapped in `<!-- skills:<source-id> -->` … `<!-- /skills:<source-id> -->` where `source-id` is `base:<axis>=<option>`, `base:always/<name>`, or `bundle:<slug>`.
 - Text outside markers is the user's and is never modified. If the user already has a heading matching a canonical title, contributions are inserted under it instead of duplicating it.
-- Placeholders `{{pm}}`, `{{pmx}}`, `{{appDir}}`, `{{projectName}}` are rendered in snippets and in rule `paths:` frontmatter.
+- Placeholders (below) are rendered in snippets and in rule `paths:` frontmatter.
 - `validate:skills` rejects a snippet whose headings are not canonical.
+
+## Placeholders
+
+| Placeholder | Renders to | Use it for |
+| --- | --- | --- |
+| `{{pm}}` | `pnpm`, `npm`, `yarn`, `bun` | commands — `{{pm}} test` |
+| `{{pmx}}` | `pnpx`, `npx`, `yarn dlx`, `bunx` | one-off runners — `{{pmx}} tsx scripts/x.ts` |
+| `{{appDir}}` | `app`, or the `appDir` answer (`apps/web/app`) | app-code globs — `{{appDir}}/**/*.vue` |
+| `{{pkgDir}}` | nothing in a single-app repo; the package root with a trailing slash (`apps/web/`) in a monorepo | every other path inside the package — `{{pkgDir}}server/**`, `{{pkgDir}}nuxt.config.ts` |
+| `{{projectName}}` | the project name | scaffold destinations and titles |
+
+`{{pkgDir}}` is written *immediately* before the path, with no slash of your own: it disappears in
+a single-app repo and becomes `apps/web/` when the app lives in `apps/web/app`. Leave a path at the
+repo root (`.claude/**`, CI config) unprefixed — those do not move. A text-input axis contributes a
+placeholder of its own id as well, so `appDir` is both an answer and `{{appDir}}`.
 
 ## Writing a fragment
 
@@ -45,7 +60,7 @@ Rules for the file:
 
 - Use only `##` headings, and only canonical titles (or `## @<id>`). Anything else fails validation.
 - Go straight to the rules. There is no `#` title: the heading structure of the finished `CLAUDE.md` comes from the section convention, not from the fragment.
-- Reach for the placeholders instead of hardcoding: `{{pm}}` and `{{pmx}}` for the package manager, `{{appDir}}` for the app's source directory, `{{projectName}}` for the project.
+- Reach for the placeholders instead of hardcoding: `{{pm}}` and `{{pmx}}` for the package manager, `{{appDir}}` for the app's source directory, `{{pkgDir}}` before any other path inside the package, `{{projectName}}` for the project.
 - Files under `base/always/` follow the same rules but skip the questions — every generated `CLAUDE.md` gets them.
 
 ## Axes
@@ -109,6 +124,8 @@ The wizard offers profiles first and pre-fills every answer from the one you pic
 - Every `##` heading in every fragment, `always/` file and bundle `CLAUDE.md` resolves to a canonical section.
 - `sections.yaml` lists exactly the canonical section ids, in order.
 - Every axis has either options or an input, its default is one of its options, ids are unique, and each `when.axis` refers to an earlier axis and a real option of it.
+- Every `rules/*.md` in a bundle has a non-empty `paths:` list — a rule with no globs never loads.
+- Every `{{…}}` token in a snippet, rule, skill, fragment, template or scaffold destination is a known placeholder or the id of a text-input axis.
 - Every `fragment` and every `scaffolds.template` path exists, and every `selects` entry names a real bundle.
 - Every profile's `name` matches its file name, every answer names a real axis and a real option, and every bundle in `bundles` exists.
 - `base/` and `profiles/` are scanned for secrets and private infrastructure along with `skills/`.

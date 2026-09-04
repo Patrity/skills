@@ -3,7 +3,7 @@ paths:
   - "{{appDir}}/pages/**/*.vue"
   - "{{appDir}}/components/**/*.vue"
   - "{{appDir}}/composables/**/*.ts"
-  - "nuxt.config.ts"
+  - "{{pkgDir}}nuxt.config.ts"
 ---
 
 # SSR and hydration

@@ -17,8 +17,8 @@
 - Canonical sections (id → title), exact strings: `intro` (title line), `read-first` → "Read first", `stack` → "Stack", `commands` → "Commands", `workflow` → "Workflow", `testing` → "Testing", `docs` → "Docs", `git` → "Git", `deploy` → "Deploy", `constraints` → "Constraints that bit before", `memory` → "Memory", `skills-and-rules` → "Skills and rules", `self-improvement` → "Self-improvement".
 - Snippet rule: `##` headings must be canonical titles or `## @<id>`; content before any heading → `skills-and-rules`; anything else is a validation error.
 - Marker format, exact: `<!-- skills:<source-id> -->` … `<!-- /skills:<source-id> -->`. Source ids: `base:<axis>=<option>`, `base:always/<name>`, `bundle:<slug>`.
-- Placeholders: `{{pm}}`, `{{pmx}}`, `{{appDir}}`, `{{projectName}}` only.
-- `paths:` frontmatter in every rule file is a YAML list; app-relative globs use `{{appDir}}/**` where the layout can change them.
+- Placeholders: `{{pm}}`, `{{pmx}}`, `{{appDir}}`, `{{pkgDir}}`, `{{projectName}}` only (`{{pkgDir}}` is the package-root prefix — empty for a single-app layout, `apps/web/` when `appDir` is `apps/web/app` — and is written immediately before a path).
+- `paths:` frontmatter in every rule file is a non-empty YAML list (the validator enforces it); app-code globs use `{{appDir}}/**` and every other package-relative path uses `{{pkgDir}}…` where the layout can move it.
 - Frontmatter: `requires` keeps meaning external tooling; `dependsOn` and `suggests` are bundle slugs.
 - Every published file (bundles, base, profiles) must be free of secrets, private IPs and internal hostnames; the validator enforces the patterns in Task 5.
 - ISR routes carry `Vercel-Cache-Tag: skills`; new content types ride the existing purge + warm.

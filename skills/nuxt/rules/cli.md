@@ -1,12 +1,12 @@
 ---
 paths:
-  - "scripts/**/*.ts"
-  - "cli/**/*.ts"
+  - "{{pkgDir}}scripts/**/*.ts"
+  - "{{pkgDir}}cli/**/*.ts"
 ---
 
 # Scripts and CLI entry points
 
-One-off and maintenance scripts live under `scripts/` and run through the TypeScript runner rather than a build step:
+One-off and maintenance scripts live under `{{pkgDir}}scripts/` and run through the TypeScript runner rather than a build step:
 
 ```bash
 {{pmx}} tsx scripts/<name>.ts [args]

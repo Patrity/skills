@@ -19,10 +19,30 @@ describe('scanForSecrets', () => {
     ]))
   })
 
-  it('warns on private IPs and internal hostnames', () => {
+  it('fails on a punctuated password an alphanumeric value class missed', () => {
+    const findings = scanForSecrets({ 'README.md': enc('password: P@ssw0rd!2024\n') })
+    expect(findings.map(f => [f.severity, f.rule])).toEqual([['fail', 'credential-assignment']])
+  })
+
+  it('fails on cloud provider keys and private key blocks', () => {
+    const findings = scanForSecrets({
+      'a.md': enc('AWS_ACCESS_KEY_ID AKIAIOSFODNN7EXAMPLE\n'),
+      'b.md': enc('slack bot: xoxb-1234567890-ABCdefGHIjkl\n'),
+      'c.pem': enc('-----BEGIN OPENSSH PRIVATE KEY-----\nbase64\n'),
+      'd.pem': enc('-----BEGIN PRIVATE KEY-----\n')
+    })
+    expect(findings.map(f => [f.path, f.severity, f.rule])).toEqual([
+      ['a.md', 'fail', 'aws-access-key'],
+      ['b.md', 'fail', 'slack-token'],
+      ['c.pem', 'fail', 'private-key'],
+      ['d.pem', 'fail', 'private-key']
+    ])
+  })
+
+  it('fails on private IPs and warns on internal hostnames', () => {
     const findings = scanForSecrets({ 'SKILL.md': enc('ssh root@192.168.2.50 and http://nas.local:8080 and 10.0.0.7\n') }, 'skills/x/')
     expect(findings.map(f => [f.path, f.severity, f.rule])).toEqual(expect.arrayContaining([
-      ['skills/x/SKILL.md', 'warn', 'private-ip'],
+      ['skills/x/SKILL.md', 'fail', 'private-ip'],
       ['skills/x/SKILL.md', 'warn', 'internal-hostname']
     ]))
     expect(findings[0]!.line).toBe(1)
@@ -59,6 +79,17 @@ describe('scanForSecrets', () => {
     expect(scanForSecrets({
       'README.md': enc('Store the password in the project skill, never here. Use {{pm}}.\nTOKEN=<your-token>\n'),
       'blob.bin': new Uint8Array([0x89, 0x50, 0x00, 0x41])
+    })).toEqual([])
+  })
+
+  it('lets templated credential values through, however punctuated', () => {
+    expect(scanForSecrets({
+      'SKILL.md': enc([
+        'ALTER ROLE app_claude_ro PASSWORD \'<value>\';',
+        'password: <the-one-in-your-secret-manager>',
+        'api_key = {{apiKey}}',
+        'token: <token-from-the-provider-console>'
+      ].join('\n'))
     })).toEqual([])
   })
 })

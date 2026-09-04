@@ -27,15 +27,30 @@ describe('markers', () => {
 
 describe('placeholders', () => {
   it('derives vars from answers', () => {
-    expect(placeholderVars({ pm: 'pnpm', layout: 'single' }, 'my-app')).toEqual({ pm: 'pnpm', pmx: 'pnpx', appDir: 'app', projectName: 'my-app' })
+    expect(placeholderVars({ pm: 'pnpm', layout: 'single' }, 'my-app')).toEqual({ pm: 'pnpm', pmx: 'pnpx', appDir: 'app', pkgDir: '', projectName: 'my-app' })
     expect(placeholderVars({ pm: 'npm', layout: 'monorepo', appDir: 'apps/web/app' }, 'x').appDir).toBe('apps/web/app')
     expect(placeholderVars({ pm: 'bun' }, 'x').pmx).toBe('bunx')
     expect(placeholderVars({ pm: 'yarn' }, 'x').pmx).toBe('yarn dlx')
+  })
+  it('derives pkgDir as the package root that holds appDir', () => {
+    const pkgDir = (answers: Record<string, string>) => placeholderVars(answers, 'x').pkgDir
+    expect(pkgDir({ layout: 'monorepo', appDir: 'apps/web/app' })).toBe('apps/web/')
+    expect(pkgDir({ layout: 'monorepo', appDir: 'packages/site/src/app/' })).toBe('packages/site/src/')
+    expect(pkgDir({ layout: 'monorepo' })).toBe('apps/web/')
+    // A monorepo answer whose appDir has no parent, and every single-app layout, prefix nothing.
+    expect(pkgDir({ layout: 'monorepo', appDir: 'app' })).toBe('')
+    expect(pkgDir({ layout: 'single', appDir: 'apps/web/app' })).toBe('')
+    expect(pkgDir({})).toBe('')
   })
   it('renders known placeholders and reports unknown ones', () => {
     const r = renderPlaceholders('run {{pm}} dev in {{appDir}}; {{nope}}', placeholderVars({ pm: 'pnpm' }, 'p'))
     expect(r.text).toBe('run pnpm dev in app; {{nope}}')
     expect(r.unknown).toEqual(['nope'])
+  })
+  it('renders a root-relative glob under either layout', () => {
+    const glob = '{{pkgDir}}server/**/*.ts'
+    expect(renderPlaceholders(glob, placeholderVars({ layout: 'single' }, 'p')).text).toBe('server/**/*.ts')
+    expect(renderPlaceholders(glob, placeholderVars({ layout: 'monorepo', appDir: 'apps/web/app' }, 'p')).text).toBe('apps/web/server/**/*.ts')
   })
 })
 

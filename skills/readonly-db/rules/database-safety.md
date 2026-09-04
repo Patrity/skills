@@ -1,9 +1,9 @@
 ---
 paths:
-  - "server/**"
-  - "db/**"
-  - "drizzle/**"
-  - "prisma/**"
+  - "{{pkgDir}}server/**"
+  - "{{pkgDir}}db/**"
+  - "{{pkgDir}}drizzle/**"
+  - "{{pkgDir}}prisma/**"
 ---
 
 # Database safety

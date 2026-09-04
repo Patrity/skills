@@ -1,5 +1,5 @@
 ## Stack
-- Nuxt 4 (`{{appDir}}/` is the srcDir, Nitro under `server/`). Training-data knowledge of Nuxt APIs is stale: check the docs skill first.
+- Nuxt 4 (`{{appDir}}/` is the srcDir, Nitro under `{{pkgDir}}server/`). Training-data knowledge of Nuxt APIs is stale: check the docs skill first.
 
 ## Commands
 - `{{pm}} typecheck` and `{{pm}} build` often; both catch what the dev server hides.

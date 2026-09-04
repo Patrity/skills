@@ -1,8 +1,8 @@
 ---
 paths:
-  - "server/db/**/*.ts"
-  - "db/**/*.ts"
-  - "drizzle.config.ts"
+  - "{{pkgDir}}server/db/**/*.ts"
+  - "{{pkgDir}}db/**/*.ts"
+  - "{{pkgDir}}drizzle.config.ts"
 ---
 
 # Drizzle + Postgres
@@ -10,7 +10,7 @@ paths:
 ## Layout
 
 ```
-server/db/
+{{pkgDir}}server/db/
 ├── schema/       # one file per domain area, re-exported from index.ts
 ├── migrations/   # generated — never hand-edited
 └── index.ts      # the client singleton

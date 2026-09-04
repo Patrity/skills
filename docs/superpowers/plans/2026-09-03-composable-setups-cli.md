@@ -17,7 +17,7 @@
 - Registry default `https://skills.patrity.com`; every request sends `User-Agent: @patrity/skills/<version>`.
 - File mapping: bundle `skills/**`, `rules/**`, `hooks/**` and any other bundle file → `.claude/<same path>`; bundle `CLAUDE.md` → snippet (never copied); bundle `README.md` → not installed; bundle `settings.json` → merged into `.claude/settings.json` except `permissions.allow` → `.claude/settings.local.json`; bundle `settings.local.json` → merged into `.claude/settings.local.json`. Hook scripts get mode `0o755`.
 - Marker format and section rules are those of `shared/setup/*` (Plan A); contributions order: `base:always/*` (sorted by file name), then axis fragments in schema order, then bundles alphabetically.
-- Placeholders `{{pm}}`, `{{pmx}}`, `{{appDir}}`, `{{projectName}}`, plus `{{<axisId>}}` for text-input axes, rendered in every text file installed and in snippets; unknown placeholders are warnings.
+- Placeholders `{{pm}}`, `{{pmx}}`, `{{appDir}}`, `{{pkgDir}}` (package-root prefix: empty for a single-app layout, `apps/web/` when `appDir` is `apps/web/app`), `{{projectName}}`, plus `{{<axisId>}}` for text-input axes, rendered in every text file installed and in snippets; unknown placeholders are warnings.
 - Lockfile `.claude/skills.lock.json` (committed); `update` refuses to overwrite a hand-edited marker block or owned file without `--force`.
 - `.claude/settings.local.json` must be gitignored; the CLI adds the line if missing.
 - Never print secrets; never write outside `--dir`.

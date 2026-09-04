@@ -1,6 +1,8 @@
 import { join } from 'node:path'
+import { PLACEHOLDERS } from '../shared/setup/placeholders'
 import { createFsSource, readDirFiles } from '../server/lib/skills/fs-source'
 import { splitFrontmatter } from '../server/lib/skills/frontmatter'
+import { checkPlaceholders, checkRulePaths, placeholderTexts } from '../server/lib/setup/constraints'
 import { scanForSecrets } from '../server/lib/setup/secrets'
 
 const dir = process.argv[2] ?? 'skills'
@@ -55,9 +57,38 @@ if (snapshot.profileErrors.length) {
   for (const err of snapshot.profileErrors) console.error(`    - ${err}`)
 }
 
-// Secrets and private infrastructure must never be published.
 const baseFiles = await readDirFiles(join(dir, '..', 'base'))
 const profileFiles = await readDirFiles(join(dir, '..', 'profiles'))
+
+// Global constraint: every rule carries a non-empty `paths:` list.
+const ruleErrors = Object.entries(snapshot.files).flatMap(([slug, files]) => checkRulePaths(files, `skills/${slug}/`))
+
+// Global constraint: every `{{token}}` is one the renderer knows — a placeholder, or a
+// text-input axis whose answer becomes a variable of the same name.
+const inputAxes = (snapshot.base?.axes ?? []).filter(a => a.input).map(a => a.id)
+const texts: Record<string, string> = {}
+for (const [slug, files] of Object.entries(snapshot.files)) {
+  Object.assign(texts, placeholderTexts(files, `skills/${slug}/`))
+}
+for (const [path, bytes] of Object.entries(baseFiles)) {
+  const scanned = path.startsWith('fragments/') || path.startsWith('always/') || path.startsWith('templates/')
+  if (scanned && path.endsWith('.md')) texts[`base/${path}`] = decoder.decode(bytes)
+}
+for (const axis of snapshot.base?.axes ?? []) {
+  for (const option of axis.options ?? []) {
+    for (const scaffold of option.scaffolds ?? []) {
+      texts[`base/questions.yaml (axis "${axis.id}", option "${option.id}", to)`] = scaffold.to
+    }
+  }
+}
+const placeholderErrors = checkPlaceholders(texts, [...PLACEHOLDERS, ...inputAxes])
+
+for (const err of [...ruleErrors, ...placeholderErrors]) {
+  failed++
+  console.error(`✗ ${err}`)
+}
+
+// Secrets and private infrastructure must never be published.
 const findings = [
   ...Object.entries(snapshot.files).flatMap(([slug, files]) => scanForSecrets(files, `skills/${slug}/`)),
   ...scanForSecrets(baseFiles, 'base/'),
@@ -74,6 +105,6 @@ for (const f of findings) {
 }
 
 if (failed) {
-  console.error(`\nvalidate-skills: ${failed} bundle(s) failed`)
+  console.error(`\nvalidate-skills: ${failed} problem(s) found`)
   process.exit(1)
 }
