@@ -44,6 +44,9 @@ export default defineNuxtConfig({
     '/api/docs/**': { isr: true },
     '/api/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/api/skills/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    '/api/base': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    '/api/profiles': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    '/api/cli/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/sitemap.xml': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } }
   },
 

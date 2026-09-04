@@ -4,6 +4,7 @@ import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
 import { unzipSync } from 'fflate'
 import type { SkillDetailResponse, SkillFileResponse, SkillsListResponse } from '../../shared/types/skills'
 import type { DocResponse } from '../../shared/types/docs'
+import type { BaseResponse, CliManifest, ProfilesResponse } from '../../shared/types/setup'
 
 await setup({
   rootDir: fileURLToPath(new URL('../..', import.meta.url)),
@@ -166,5 +167,32 @@ describe('skill pages', () => {
   })
   it('renders a known bundle', async () => {
     expect((await fetch('/skill/demo')).status).toBe(200)
+  })
+})
+
+describe('setup endpoints', () => {
+  it('GET /api/base returns the fixture schema', async () => {
+    const res = await $fetch<BaseResponse>('/api/base')
+    expect(res.errors).toEqual([])
+    expect(res.base!.axes.map(a => a.id)).toEqual(['pm', 'layout', 'appDir'])
+    expect(res.base!.sections.map(s => s.id)).toContain('skills-and-rules')
+    expect(res.base!.fragments['pm/pnpm.md']).toContain('{{pm}}')
+  })
+  it('GET /api/profiles returns the fixture profiles', async () => {
+    const res = await $fetch<ProfilesResponse>('/api/profiles')
+    expect(res.profiles.map(p => p.name)).toEqual(['demo'])
+  })
+  it('GET /api/cli/manifest bundles everything the CLI needs in one call', async () => {
+    const res = await $fetch<CliManifest>('/api/cli/manifest')
+    expect(res.registry).toBe('http://localhost:3000')
+    expect(res.base!.version).toBe(1)
+    expect(res.profiles).toHaveLength(1)
+    expect(res.skills.map(s => s.slug)).toEqual(['broken', 'demo', 'no-readme'])
+    expect('tree' in res.skills[0]!).toBe(false)
+    expect(res.errors).toEqual([])
+  })
+  it('caches the manifest with the skills tag', async () => {
+    const res = await fetch('/api/cli/manifest')
+    expect(res.headers.get('vercel-cache-tag')).toBe('skills')
   })
 })

@@ -70,6 +70,12 @@ describe('buildWarmUrls', () => {
     expect(new Set(urls).size).toBe(urls.length)
   })
 
+  it('always warms the setup endpoints, even though nothing in the sitemap links to them', () => {
+    expect(urls).toContain('/api/base')
+    expect(urls).toContain('/api/profiles')
+    expect(urls).toContain('/api/cli/manifest')
+  })
+
   it('warms the payload behind every sitemap page too, not just the bundle files', () => {
     expect(urls).toContain('/docs/getting-started/_payload.json')
     expect(urls).toContain('/docs/frontmatter/_payload.json')
