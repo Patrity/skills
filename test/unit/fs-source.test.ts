@@ -38,4 +38,11 @@ describe('createFsSource', () => {
     const b = await createFsSource(fixtures).load()
     expect(a.sha).toBe(b.sha)
   })
+
+  it('reads sibling base/ and profiles/ directories', async () => {
+    const snap = await createFsSource(fixtures).load()
+    expect(snap.base?.axes.map(a => a.id)).toEqual(['pm', 'layout', 'appDir'])
+    expect(snap.profiles.map(p => p.name)).toEqual(['demo'])
+    expect(snap.baseErrors).toEqual([])
+  })
 })

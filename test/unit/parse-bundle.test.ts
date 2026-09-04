@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { buildSnapshot, parseBundle } from '../../server/lib/skills/parse-bundle'
 import { MAX_FILE_BYTES } from '../../server/lib/skills/exclusions'
 
@@ -74,5 +75,41 @@ describe('buildSnapshot', () => {
     expect(snap.sha).toBe('abc')
     expect(snap.skills.map(s => s.slug)).toEqual(['alpha', 'zeta'])
     expect(Object.keys(snap.files['alpha']!)).toEqual(['README.md'])
+  })
+
+  it('parses base and profiles from extras and cross-validates slugs', () => {
+    const meta = { sha: 'x', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'fs' as const }
+    const extras = {
+      base: {
+        'sections.yaml': enc(readFileSync(new URL('../fixtures/base/sections.yaml', import.meta.url), 'utf8')),
+        'questions.yaml': enc(readFileSync(new URL('../fixtures/base/questions.yaml', import.meta.url), 'utf8')),
+        'fragments/pm/pnpm.md': enc('## Commands\n- pnpm\n'),
+        'fragments/pm/npm.md': enc('## Commands\n- npm\n'),
+        'fragments/layout/monorepo.md': enc('## Constraints that bit before\n- x\n')
+      },
+      profiles: { 'demo.yaml': enc('name: demo\ndescription: d\nanswers: { pm: pnpm }\nbundles: [demo]\n') }
+    }
+    const snap = buildSnapshot([{ slug: 'demo', files: { 'README.md': enc(readme) } }], meta, extras)
+    expect(snap.baseErrors).toEqual([])
+    expect(snap.base!.axes.map(a => a.id)).toEqual(['pm', 'layout', 'appDir'])
+    expect(snap.profiles.map(p => p.name)).toEqual(['demo'])
+    expect(snap.profileErrors).toEqual([])
+  })
+
+  it('defaults to no base and no profiles', () => {
+    const meta = { sha: 'x', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'fs' as const }
+    const snap = buildSnapshot([], meta)
+    expect(snap.base).toBeNull()
+    expect(snap.baseErrors).toEqual([]) // no base dir at all is not an error
+    expect(snap.profiles).toEqual([])
+  })
+
+  it.todo('flags dependsOn/suggests that reference unknown bundles', () => {
+    const meta = { sha: 'x', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'fs' as const }
+    const withDeps = readme.replace('author: Tester', 'author: Tester\ndependsOn: [nuxt]\nsuggests: [ghost]')
+    const snap = buildSnapshot([{ slug: 'demo', files: { 'README.md': enc(withDeps) } }, { slug: 'nuxt', files: { 'README.md': enc(readme) } }], meta)
+    const demo = snap.skills.find(s => s.slug === 'demo')!
+    expect(demo.dependsOn).toEqual(['nuxt'])
+    expect(demo.errors).toEqual(['suggests references unknown bundle "ghost"'])
   })
 })

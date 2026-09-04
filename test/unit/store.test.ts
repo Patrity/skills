@@ -16,7 +16,11 @@ function snapshot(sha: string, extraFiles: Record<string, Uint8Array> = {}): Sna
       badges: [], fileCount: 1, totalBytes: 5, errors: [],
       tree: [{ name: 'README.md', path: 'README.md', type: 'file', size: 5, kind: 'text' }]
     }],
-    files: { demo: { 'README.md': enc('hello'), ...extraFiles } }
+    files: { demo: { 'README.md': enc('hello'), ...extraFiles } },
+    base: null,
+    baseErrors: [],
+    profiles: [],
+    profileErrors: []
   }
 }
 
@@ -90,9 +94,11 @@ describe('createSnapshotStore with a cache (Vercel)', () => {
     const store = createSnapshotStore({ source, cache, cacheTtl: 123 })
     const first = await store.getManifests()
     expect(first.meta.sha).toBe('a')
+    expect(first.profiles).toEqual([])
     expect(source.calls).toBe(1)
     expect(cache.store.get(MANIFEST_KEY)).toMatchObject({ tags: [CACHE_TAG], ttl: 123 })
     expect(cache.store.get(bundleKey('demo'))).toMatchObject({ tags: [CACHE_TAG], ttl: 123 })
+    expect(cache.store.get(MANIFEST_KEY)!.value).toMatchObject({ base: null, baseErrors: [], profiles: [], profileErrors: [] })
 
     cache.gets = 0
     await store.getManifests()
@@ -289,7 +295,11 @@ describe('runtime cache warnings are throttled to once per outage', () => {
         if (getCalls === 3) {
           return {
             meta: { sha: 'cached', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'github' },
-            skills: []
+            skills: [],
+            base: null,
+            baseErrors: [],
+            profiles: [],
+            profileErrors: []
           }
         }
         throw new Error('cache get boom')

@@ -22,8 +22,10 @@ async function walk(dir: string, root: string, out: FoundFile[]): Promise<void> 
 }
 
 /** Reads `<dir>/<slug>/**` from disk. Dev/CI source; zero network. */
-export function createFsSource(dir: string): SkillsSource {
+export function createFsSource(dir: string, opts: { baseDir?: string, profilesDir?: string } = {}): SkillsSource {
   const root = resolve(dir)
+  const baseRoot = resolve(opts.baseDir ?? join(root, '..', 'base'))
+  const profilesRoot = resolve(opts.profilesDir ?? join(root, '..', 'profiles'))
   return {
     async load() {
       const fetchedAt = new Date().toISOString()
@@ -54,12 +56,37 @@ export function createFsSource(dir: string): SkillsSource {
         bundles.push({ slug, files })
       }
 
+      /**
+       * Reads an optional sibling directory (base/, profiles/) as relative-path → bytes,
+       * folding it into the same hash/mtime tracking as the bundles above. A missing
+       * directory is not an error: it just yields no extras.
+       */
+      async function readDir(r: string, label: string): Promise<Record<string, Uint8Array>> {
+        const found: FoundFile[] = []
+        try {
+          await walk(r, r, found)
+        } catch {
+          return {}
+        }
+        const out: Record<string, Uint8Array> = {}
+        for (const f of found.sort((a, b) => a.rel.localeCompare(b.rel))) {
+          const [bytes, info] = await Promise.all([readFile(f.abs), stat(f.abs)])
+          out[f.rel] = new Uint8Array(bytes)
+          hash.update(`${label}/${f.rel}:${info.size}:${info.mtimeMs}\n`)
+          if (info.mtimeMs > newest) newest = info.mtimeMs
+        }
+        return out
+      }
+
+      const base = await readDir(baseRoot, 'base')
+      const profiles = await readDir(profilesRoot, 'profiles')
+
       return buildSnapshot(bundles, {
         sha: `fs-${hash.digest('hex').slice(0, 12)}`,
         committedAt: new Date(newest || Date.now()).toISOString(),
         fetchedAt,
         source: 'fs'
-      })
+      }, { base, profiles })
     }
   }
 }

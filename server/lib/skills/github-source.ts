@@ -1,6 +1,6 @@
 import type { SkillsSource } from './types'
 import { buildSnapshot } from './parse-bundle'
-import { extractBundles } from './archive'
+import { extractArchive } from './archive'
 
 export interface GithubSourceOptions {
   owner: string
@@ -39,7 +39,7 @@ export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
       const fetchedAt = new Date().toISOString()
       const head = await (await get(`${base}/commits/${opts.branch}`)).json() as CommitResponse
       const zip = await (await get(`${base}/zipball/${head.sha}`)).arrayBuffer()
-      const bundles = extractBundles(zip)
+      const { bundles, extras } = extractArchive(zip)
       // An empty result means a truncated/unexpected archive, not an empty repo:
       // throwing keeps the previous snapshot in place instead of blanking the site.
       if (bundles.length === 0) throw new Error(`github: archive ${head.sha} has no skills/ bundles`)
@@ -48,7 +48,7 @@ export function createGithubSource(opts: GithubSourceOptions): SkillsSource {
         committedAt: new Date(head.commit.committer.date).toISOString(),
         fetchedAt,
         source: 'github'
-      })
+      }, extras)
     }
   }
 }

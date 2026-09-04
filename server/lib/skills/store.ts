@@ -1,4 +1,5 @@
 import type { SkillManifest, SnapshotMeta } from '../../../shared/types/skills'
+import type { BaseSchema, Profile } from '../../../shared/types/setup'
 import type { BundleFiles, SkillsSource, Snapshot } from './types'
 
 /** Structurally matches `RuntimeCache` from @vercel/functions. */
@@ -10,6 +11,10 @@ export interface StoreCache {
 export interface ManifestRecord {
   meta: SnapshotMeta
   skills: SkillManifest[]
+  base: BaseSchema | null
+  baseErrors: string[]
+  profiles: Profile[]
+  profileErrors: string[]
 }
 
 export interface SnapshotStore {
@@ -66,12 +71,14 @@ function decodeBundle(record: BundleRecord): BundleFiles {
 /** Guards against a cache entry written by an older/incompatible build of this store. */
 function isValidManifestRecord(hit: unknown): hit is ManifestRecord {
   if (!hit || typeof hit !== 'object') return false
-  const { meta, skills } = hit as { meta?: unknown, skills?: unknown }
+  const { meta, skills, profiles, baseErrors } = hit as { meta?: unknown, skills?: unknown, profiles?: unknown, baseErrors?: unknown }
   if (!meta || typeof meta !== 'object') return false
   const m = meta as Record<string, unknown>
   if (typeof m.sha !== 'string' || typeof m.committedAt !== 'string' || typeof m.fetchedAt !== 'string') return false
   if (m.source !== 'fs' && m.source !== 'github') return false
   if (!Array.isArray(skills)) return false
+  if (!Array.isArray(profiles)) return false
+  if (!Array.isArray(baseErrors)) return false
   return skills.every((s) => {
     if (!s || typeof s !== 'object') return false
     const skill = s as Record<string, unknown>
@@ -138,7 +145,14 @@ export function createSnapshotStore(opts: StoreOptions): SnapshotStore {
     if (!inflight) {
       inflight = source.load()
         .then(async (snap) => {
-          const record: ManifestRecord = { meta: pickMeta(snap), skills: snap.skills }
+          const record: ManifestRecord = {
+            meta: pickMeta(snap),
+            skills: snap.skills,
+            base: snap.base,
+            baseErrors: snap.baseErrors,
+            profiles: snap.profiles,
+            profileErrors: snap.profileErrors
+          }
           manifests = record
           manifestsAt = now()
           files = snap.files
