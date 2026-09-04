@@ -13,6 +13,9 @@ export default defineCommand({
     const slugs = positionals(args)
     startInteractive(opts)
     const result = await runUpdate({ ...opts, slugs })
-    reportPlan(opts, result, slugs.length ? `Updated ${slugs.join(', ')}.` : 'Up to date.')
+    // "Up to date." only when the re-render actually touched nothing: the lockfile is rewritten
+    // every run, so it is the written/removed files that say whether anything changed.
+    const wrote = Boolean(result.result && (result.result.written.length || result.result.removed.length))
+    reportPlan(opts, result, wrote ? (slugs.length ? `Updated ${slugs.join(', ')}.` : 'Updated.') : 'Up to date.')
   })
 })

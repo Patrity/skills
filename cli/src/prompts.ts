@@ -41,10 +41,17 @@ export async function askBundles(skills: SkillSummary[], preselected: string[], 
   return { bundles: chosen, profile }
 }
 
-export function summarize(plan: SetupPlan): string {
+/**
+ * The plan in a dozen lines: counts, then every path the run will not write and why — a skipped
+ * conflict or a protected edit is the whole reason to read this, so it is named, not just counted.
+ */
+export function summarize(plan: SetupPlan, overwrite: ReadonlySet<string> = new Set()): string {
   const count = (a: string) => plan.files.filter(f => f.action === a).length
+  const paths = (a: string) => plan.files.filter(f => f.action === a).map(f => f.path)
   const lines = [
     `create ${count('create')} · update ${count('update')} · unchanged ${count('unchanged')} · conflicts ${count('conflict')} · protected ${count('protected')}`,
+    ...paths('conflict').map(p => `conflict: ${p} (${overwrite.has(p) ? 'overwriting' : 'kept yours'})`),
+    ...paths('protected').map(p => `protected: ${p} (kept your edit)`),
     ...(plan.removals.length ? [`remove ${plan.removals.length}: ${plan.removals.join(', ')}`] : []),
     `CLAUDE.md: ${plan.claudeMd.changed ? 'updated' : 'unchanged'}${plan.claudeMd.handEdited.length ? ` (hand-edited kept: ${plan.claudeMd.handEdited.join(', ')})` : ''}`,
     `settings.json: ${plan.settings ? (plan.settings.changed ? 'merged' : 'unchanged') : '—'} · settings.local.json: ${plan.settingsLocal ? (plan.settingsLocal.changed ? 'merged' : 'unchanged') : '—'}`,
@@ -53,8 +60,8 @@ export function summarize(plan: SetupPlan): string {
   return lines.join('\n')
 }
 
-export async function confirmPlan(plan: SetupPlan): Promise<boolean> {
-  note(summarize(plan), 'Plan')
+export async function confirmPlan(plan: SetupPlan, overwrite: ReadonlySet<string> = new Set()): Promise<boolean> {
+  note(summarize(plan, overwrite), 'Plan')
   return bail(await confirm({ message: 'Apply?', initialValue: true }))
 }
 

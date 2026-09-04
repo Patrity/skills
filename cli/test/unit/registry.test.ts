@@ -60,6 +60,14 @@ describe('createRegistryClient', () => {
     await expect(client.manifest()).rejects.toThrow(/http:\/\/registry\.test\/api\/cli\/manifest/)
   })
 
+  it('rejects a body that parses but is not a manifest', async () => {
+    const bodies: unknown[] = [{ hello: 'world' }, [], null, { ...fixtureManifest(), skills: 'nope' }, { ...fixtureManifest(), errors: undefined }]
+    for (const body of bodies) {
+      const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => Response.json(body)) })
+      await expect(client.manifest({ allowErrors: true })).rejects.toThrow(/unexpected manifest shape from http:\/\/registry\.test\/api\/cli\/manifest/)
+    }
+  })
+
   it('turns a corrupt bundle zip into a RegistryError naming the slug and url', async () => {
     const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response(new Uint8Array([1, 2, 3, 4]))) })
     await expect(client.download('demo')).rejects.toMatchObject({ name: 'RegistryError', url: 'http://registry.test/api/skills/demo/download' })

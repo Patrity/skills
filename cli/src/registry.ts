@@ -16,6 +16,17 @@ export function isSafeBundlePath(rel: string): boolean {
   return !pathPosix.normalize(`x/${rel}`).startsWith('..')
 }
 
+/**
+ * The two fields every caller walks unconditionally. A host that answers `/api/cli/manifest` with
+ * something else (an HTML error page served as JSON, another API) must fail here, not with a
+ * `TypeError` three frames deeper.
+ */
+function isManifest(value: unknown): value is CliManifest {
+  if (typeof value !== 'object' || value === null) return false
+  const m = value as { skills?: unknown, errors?: unknown }
+  return Array.isArray(m.skills) && Array.isArray(m.errors)
+}
+
 export class RegistryError extends Error {
   name = 'RegistryError'
   constructor(message: string, public url: string, public status?: number) {
@@ -51,12 +62,14 @@ export function createRegistryClient(registry: string, opts: { fetchImpl?: typeo
     async manifest({ allowErrors = false } = {}) {
       const url = `${base}/api/cli/manifest`
       const res = await get('/api/cli/manifest')
-      let manifest: CliManifest
+      let body: unknown
       try {
-        manifest = await res.json() as CliManifest
+        body = await res.json()
       } catch (err) {
         throw new RegistryError(`registry returned an unreadable manifest from ${url}: ${(err as Error).message}`, url)
       }
+      if (!isManifest(body)) throw new RegistryError(`registry returned an unexpected manifest shape from ${url}`, url)
+      const manifest = body
       if (!allowErrors && manifest.errors.length) {
         throw new RegistryError(`registry base schema has errors: ${manifest.errors.join('; ')}`, url)
       }

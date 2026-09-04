@@ -1,5 +1,5 @@
 import { chmod, mkdir, rm, rmdir, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import path, { dirname } from 'node:path'
 import { LOCKFILE_PATH, serializeLockfile } from './lockfile'
 import type { SetupPlan } from './plan'
 
@@ -9,11 +9,23 @@ export interface ApplyResult {
   skipped: string[]
 }
 
+/** The slice of `node:path` the containment check needs, so the tests can drive win32 and posix. */
+export type PathApi = Pick<typeof path, 'resolve' | 'relative' | 'isAbsolute'>
+
+/**
+ * Is `abs` strictly under `root`? Compared through `relative()`, never a string prefix: on Windows
+ * `C:\proj\a` does not start with `C:\proj/`, which would refuse every path there.
+ */
+export function isUnder(root: string, abs: string, p: PathApi = path): boolean {
+  const rel = p.relative(root, abs)
+  return rel !== '' && !p.isAbsolute(rel) && rel.split(/[\\/]/)[0] !== '..'
+}
+
 /** Every path the CLI touches is resolved against the project and must sit strictly under it. */
-function inside(dir: string, rel: string): string {
-  const root = resolve(dir)
-  const abs = resolve(root, rel)
-  if (!abs.startsWith(`${root}/`)) throw new Error(`refusing to write outside the project: ${rel}`)
+export function inside(dir: string, rel: string, p: PathApi = path): string {
+  const root = p.resolve(dir)
+  const abs = p.resolve(root, rel)
+  if (!isUnder(root, abs, p)) throw new Error(`refusing to write outside the project: ${rel}`)
   return abs
 }
 
@@ -27,7 +39,7 @@ async function write(dir: string, rel: string, data: Uint8Array | string, mode?:
 /** Drop the directories a removal emptied (a bundle's skill folder), never the project root. */
 async function pruneEmptyDirs(root: string, from: string): Promise<void> {
   let current = dirname(from)
-  while (current.startsWith(`${root}/`)) {
+  while (isUnder(root, current)) {
     try {
       await rmdir(current)
     } catch {
@@ -57,7 +69,7 @@ export async function applyPlan(plan: SetupPlan, dir: string, opts: { overwrite?
     written.push(op.path)
   }
 
-  const root = resolve(dir)
+  const root = path.resolve(dir)
   for (const rel of plan.removals) {
     const abs = inside(root, rel)
     await rm(abs, { force: true })

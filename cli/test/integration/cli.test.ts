@@ -1,10 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { runAdd, runDiff, runInit, runList, runRemove, runUpdate } from '../../src/run'
 import { applyPlan } from '../../src/apply'
-import { emptyLockfile } from '../../src/lockfile'
+import { emptyLockfile, sha256 } from '../../src/lockfile'
 import { ADVERTISED_REGISTRY, startRegistry } from '../helpers/registry-server'
 import { startMarker } from '../../../shared/setup/markers'
 
@@ -151,6 +151,75 @@ describe('@patrity/skills end to end', () => {
     // The bundle that stays keeps its block, and `.claude` itself survives.
     expect(await read(dir, 'CLAUDE.md')).toContain(startMarker('bundle:second'))
     expect((await stat(join(dir, '.claude/settings.json'))).isFile()).toBe(true)
+  })
+
+  it('re-running init keeps what add installed', async () => {
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, profile: 'demo' })
+    await runAdd({ ...common(), dir, slugs: ['third'] })
+    expect((await runList({ ...common(), dir })).bundles).toEqual(['demo', 'second', 'third'])
+
+    const { plan } = await runInit({ ...common(), dir, profile: 'demo' })
+    expect(plan.removals).toEqual([])
+    expect((await runList({ ...common(), dir })).bundles).toEqual(['demo', 'second', 'third'])
+    expect(await read(dir, 'CLAUDE.md')).toContain(startMarker('bundle:third'))
+  })
+
+  it('re-running init keeps the answers on record; a profile and --answer still override them', async () => {
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, answers: ['pm=npm', 'browser=none'], with: ['demo'] })
+    expect((await runList({ ...common(), dir })).answers).toMatchObject({ pm: 'npm', browser: 'none' })
+
+    // No profile, no flags: a bare re-init edits the project, it does not reset it to the defaults.
+    await runInit({ ...common(), dir })
+    expect((await runList({ ...common(), dir })).answers).toMatchObject({ pm: 'npm', browser: 'none' })
+    expect(await read(dir, '.claude/hooks/pre-commit.sh')).toContain('npm lint')
+
+    await runInit({ ...common(), dir, answers: ['pm=pnpm'] })
+    expect((await runList({ ...common(), dir })).answers).toMatchObject({ pm: 'pnpm', browser: 'none' })
+  })
+
+  it('reconciles a stale lockfile: unknown axes dropped, invalid answers defaulted', async () => {
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, profile: 'demo' })
+    const lockPath = join(dir, '.claude/skills.lock.json')
+    const lock = JSON.parse(await read(dir, '.claude/skills.lock.json')) as { answers: Record<string, string> }
+    lock.answers = { ...lock.answers, pm: 'cargo', deploy: 'netlify' }
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+
+    const { plan } = await runUpdate({ ...common(), dir })
+    expect(plan.warnings).toContain('lock answer pm=cargo is not an option; using default pnpm')
+    expect(plan.warnings).toContain('lock answer deploy=netlify is not an axis any more; dropped')
+    // The corrected answers are what the new lockfile records — and what the files were rendered from.
+    const fixed = JSON.parse(await read(dir, '.claude/skills.lock.json')) as { answers: Record<string, string> }
+    expect(fixed.answers.pm).toBe('pnpm')
+    expect(fixed.answers.deploy).toBeUndefined()
+    expect(await read(dir, '.claude/hooks/pre-commit.sh')).toContain('pnpm lint')
+  })
+
+  it('drops a bundle that vanished upstream instead of bricking update and add', async () => {
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, profile: 'demo' })
+    const lockPath = join(dir, '.claude/skills.lock.json')
+    const lock = JSON.parse(await read(dir, '.claude/skills.lock.json')) as { bundles: Record<string, unknown> }
+    lock.bundles.ghost = { sha: 'old', files: { '.claude/rules/ghost.md': sha256('ghost rule\n') } }
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+    await mkdir(join(dir, '.claude/rules'), { recursive: true })
+    await writeFile(join(dir, '.claude/rules/ghost.md'), 'ghost rule\n')
+
+    const { plan } = await runUpdate({ ...common(), dir })
+    expect(plan.warnings).toContain('ghost is installed but no longer in the registry; removing its files')
+    expect(plan.removals).toEqual(['.claude/rules/ghost.md'])
+    await expect(stat(join(dir, '.claude/rules/ghost.md'))).rejects.toThrow()
+    expect((await runList({ ...common(), dir })).bundles).toEqual(['demo', 'second'])
+
+    // add of another slug proceeds; naming the ghost itself still fails.
+    lock.bundles.ghost = { sha: 'old', files: {} }
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+    await expect(runAdd({ ...common(), dir, slugs: ['ghost'] })).rejects.toThrow(/unknown bundle: ghost/)
+    const added = await runAdd({ ...common(), dir, slugs: ['third'] })
+    expect(added.plan.warnings).toContain('ghost is installed but no longer in the registry; removing its files')
+    expect((await runList({ ...common(), dir })).bundles).toEqual(['demo', 'second', 'third'])
   })
 
   it('refuses add/remove/update without a lockfile and reports unknown slugs', async () => {

@@ -214,6 +214,27 @@ describe('buildPlan (removals)', () => {
     const dropped = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: [], bundleFiles: {} })
     expect(dropped.removals).toEqual(['.claude/rules/demo.md'])
   })
+
+  it('removes a file a still-selected bundle stopped shipping (upstream rename)', async () => {
+    const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
+    lock.bundles.demo = { sha: 'x', files: { '.claude/rules/old.md': sha256('old') } }
+    const args = {
+      manifest,
+      registry: manifest.registry,
+      answers,
+      bundles: ['demo'],
+      bundleFiles: { demo: loadFixtureBundle() } // ships rules/demo.md, never rules/old.md
+    }
+    const plan = await buildPlan({ ...args, project: project({ disk: { '.claude/rules/old.md': 'old' }, lock }) })
+    expect(plan.removals).toEqual(['.claude/rules/old.md'])
+    expect(plan.lock.bundles.demo!.files['.claude/rules/old.md']).toBeUndefined()
+    expect(plan.lock.bundles.demo!.files['.claude/rules/demo.md']).toBeDefined()
+
+    // Edited since install, so it is kept and reported instead of deleted behind the user's back.
+    const edited = await buildPlan({ ...args, project: project({ disk: { '.claude/rules/old.md': 'mine now' }, lock }) })
+    expect(edited.removals).toEqual([])
+    expect(edited.warnings).toContain('.claude/rules/old.md was modified after install; left in place (remove it by hand)')
+  })
 })
 
 describe('buildPlan (bundle settings)', () => {

@@ -170,14 +170,14 @@ export async function buildPlan(input: {
     }
   }
 
-  // Bundles present in the previous lock but no longer selected → removals (only if untouched).
+  // Everything the previous lock owned that this plan does not re-render → removals (only if
+  // untouched). That covers a dropped bundle and a file a still-selected bundle stopped shipping
+  // (an upstream rename), which would otherwise sit on disk forever, owned by nobody.
   const removals: string[] = []
   const seen = new Set(files.map(f => f.path))
-  for (const [slug, entry] of Object.entries(prev?.bundles ?? {}).sort(byKey)) {
-    if (bundles.includes(slug)) continue
+  for (const [, entry] of Object.entries(prev?.bundles ?? {}).sort(byKey)) {
     for (const [path, hash] of Object.entries(entry.files).sort(byKey)) {
-      // A path a still-selected bundle installs is not a leftover, and two dropped bundles may
-      // have shipped the same file.
+      // A path this plan installs is not a leftover, and two bundles may have shipped the same file.
       if (seen.has(path)) continue
       seen.add(path)
       const current = await project.files(path)

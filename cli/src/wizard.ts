@@ -38,6 +38,33 @@ export function validateAnswers(schema: BaseSchema, answers: Record<string, stri
   return errors
 }
 
+/**
+ * The answers a lockfile recorded, reconciled with the schema the registry serves now: axes that no
+ * longer exist are dropped, an answer that is no longer an option falls back to the axis default,
+ * and axes added upstream get theirs. Warnings say what was corrected; the caller records the result.
+ */
+export function reconcileAnswers(schema: BaseSchema, recorded: Record<string, string>): { answers: Record<string, string>, warnings: string[] } {
+  const defaults = defaultAnswers(schema)
+  const answers: Record<string, string> = { ...defaults }
+  const warnings: string[] = []
+  for (const [id, value] of Object.entries(recorded)) {
+    const axis = schema.axes.find(a => a.id === id)
+    if (!axis) {
+      warnings.push(`lock answer ${id}=${value} is not an axis any more; dropped`)
+      continue
+    }
+    if (axis.options && !axis.options.some(o => o.id === value)) {
+      const fallback = defaults[id]
+      warnings.push(`lock answer ${id}=${value} is not an option; using ${fallback === undefined ? 'no answer' : `default ${fallback}`}`)
+      continue
+    }
+    answers[id] = value
+  }
+  // The defaults are the schema's own, so anything still invalid is a broken manifest, not a bad lock.
+  warnings.push(...validateAnswers(schema, answers).map(e => `registry base schema: ${e}`))
+  return { answers, warnings }
+}
+
 export function preselectedBundles(schema: BaseSchema, answers: Record<string, string>, profile: Profile | undefined, skills: SkillSummary[]): string[] {
   const picked = new Set<string>(profile?.bundles ?? [])
   for (const axis of activeAxes(schema, answers)) {
