@@ -1,5 +1,7 @@
 # CLI
 
+[![npm](https://img.shields.io/npm/v/@patrity/skills)](https://www.npmjs.com/package/@patrity/skills)
+
 `@patrity/skills` installs bundles from this registry into a project and keeps them up to date. It writes the same files you would otherwise download and unzip, plus a `CLAUDE.md` assembled from your answers.
 
 ## Install
@@ -11,6 +13,8 @@ pnpx @patrity/skills
 ```
 
 With no command it runs `init`. Node 22 or newer is required. `npx` and `bunx` work the same way.
+
+Releases are tagged `cli-vX.Y.Z` and published to [npmjs.com/package/@patrity/skills](https://www.npmjs.com/package/@patrity/skills) with npm provenance.
 
 ## Commands
 

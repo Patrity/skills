@@ -12,6 +12,18 @@ The site renders those bundles straight from this repository at request time, so
 
 Full instructions live on the site under **Docs**.
 
+## CLI
+
+Or skip the copy-paste: [`@patrity/skills`](https://www.npmjs.com/package/@patrity/skills) assembles
+a project's `.claude/` and `CLAUDE.md` from these bundles for you, and keeps them up to date.
+
+```bash
+pnpx @patrity/skills
+```
+
+See `cli/README.md` or [skills.patrity.com/docs/cli](https://skills.patrity.com/docs/cli) for every
+command.
+
 ## Adding a bundle
 
 Create `skills/<slug>/README.md` with frontmatter (`name`, `description`, `tags`, `author`, optional `authorUrl`/`requires`) and add the `.claude` content beside it. Run `pnpm validate:skills`, open a PR. See `content/docs/contributing.md`.

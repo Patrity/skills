@@ -1,0 +1,25 @@
+name: release-cli
+on:
+  push:
+    tags: ['cli-v*']
+permissions:
+  contents: read
+  id-token: write   # npm provenance
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 22, cache: pnpm, registry-url: https://registry.npmjs.org }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @patrity/skills test
+      - run: pnpm --filter @patrity/skills build
+      - name: Check the tag matches package.json
+        run: |
+          v=$(node -p "require('./cli/package.json').version")
+          [ "cli-v$v" = "${GITHUB_REF_NAME}" ] || { echo "tag ${GITHUB_REF_NAME} != cli-v$v"; exit 1; }
+      - run: cd cli && npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
