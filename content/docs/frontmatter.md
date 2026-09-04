@@ -10,6 +10,8 @@ tags: [nuxt, nuxt-ui, vue, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3]
+dependsOn: [doc-fetcher]
+suggests: [nuxt-ui]
 ---
 ```
 
@@ -20,7 +22,13 @@ requires: [python3]
 | `tags` | string[] | yes | Lowercase. At least one. Drives the filter chips on the index. |
 | `author` | string | yes | A person or org name. |
 | `authorUrl` | URL | no | Where the author name links to. |
-| `requires` | string[] | no | External tooling the bundle needs, e.g. `python3`, `playwright-cli`. |
+| `requires` | string[] | no | External tooling the bundle needs on your machine, e.g. `python3`, `curl`, `playwright-cli`. |
+| `dependsOn` | string[] | no | Bundle slugs this one cannot work without. `add` and the wizard install them automatically. |
+| `suggests` | string[] | no | Bundle slugs that pair well with this one. Pre-selected in the wizard, easy to untick. |
+
+`dependsOn` and `suggests` take **registry slugs** and are validated against the registry: a slug
+that names no bundle fails the build. They are the bundle graph; `requires` is about your machine,
+not the registry.
 
 ## Validation
 
@@ -36,6 +44,6 @@ Messages look like `frontmatter.tags: required` or `slug "Bad_Slug" must match /
 
 You never write these; the site computes them from the files:
 
-- **badges** — which of `skills/`, `rules/`, `hooks/`, `settings.local.json`, `CLAUDE.md` exist
+- **badges** — which of `skills/`, `rules/`, `hooks/`, `settings.json`/`settings.local.json`, `CLAUDE.md` exist
 - **file count** and **total size**
 - **freshness** — the commit that the whole snapshot was read from

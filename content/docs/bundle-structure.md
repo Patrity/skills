@@ -9,11 +9,12 @@ skills/
     ├── skills/<name>/SKILL.md optional — one folder per skill
     ├── rules/*.md             optional — path-scoped rules
     ├── hooks/*                optional — scripts referenced by settings
-    ├── settings.local.json    optional — hooks/permissions config
+    ├── settings.json          optional — shared settings, merged by the CLI
+    ├── settings.local.json    optional — machine-local settings, merged by the CLI
     └── CLAUDE.md              optional — pointer snippet
 ```
 
-Only `README.md` is required. Everything else is copied into a project's `.claude/` verbatim, so structure it exactly as Claude Code expects.
+Only `README.md` is required. Everything else is copied into a project's `.claude/` verbatim — except the two settings files, which are merged — so structure it exactly as Claude Code expects.
 
 ## README.md
 
@@ -27,9 +28,12 @@ Standard Claude Code skills: `skills/<name>/SKILL.md` with `name` and `descripti
 
 Markdown files with a `paths:` frontmatter glob. Rules state *when* and *what constraints*; they should point at a skill for the *how*.
 
-## hooks/ and settings.local.json
+## hooks/, settings.json and settings.local.json
 
-See [Hooks and settings](/docs/hooks-and-settings).
+A bundle may ship either settings file, or both. `settings.json` is the committed, shared half
+(hooks); `settings.local.json` is the per-machine half (permission allowlists). The CLI merges each
+into the consumer's file of the same name rather than copying over it. See
+[Hooks and settings](/docs/hooks-and-settings).
 
 ## CLAUDE.md
 

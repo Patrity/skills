@@ -19,7 +19,7 @@
     "PreCompact": [
       {
         "hooks": [
-          { "type": "prompt", "prompt": "Before context is compacted: if this session surfaced a reusable pattern, gotcha or convention that is not yet written down, save it now as a path-scoped rule under .claude/rules/ (direction + constraint, pointing at a skill for the how-to) or as a skill. Respond with {\"ok\": true} if nothing new was learned, or {\"ok\": false, \"reason\": \"…\"} to save it." }
+          { "type": "prompt", "prompt": "This session is about to be compacted. Read the transcript and decide whether it surfaced a reusable convention, gotcha or pattern that is not already written down in CLAUDE.md, a rule or a skill. Answer {\"ok\": true} if there is nothing new. Otherwise answer {\"ok\": false, \"reason\": \"<the lesson, and where it belongs: a path-scoped rule under .claude/rules/ or a skill>\"} — the reason is surfaced to Claude, which can then write it down before the context that learned it is gone." }
         ]
       }
     ]

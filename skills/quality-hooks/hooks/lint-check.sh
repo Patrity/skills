@@ -1,12 +1,13 @@
 #!/bin/bash
-# lint-check.sh — lint the project after every edit, and block while it is red.
+# lint-check.sh — lint the project after every edit, and report while it is red.
 #
-# Event:  PostToolUse, matcher "Edit|Write". The edit has already been written;
-#         this decides whether Claude may keep going.
+# Event:  PostToolUse, matcher "Edit|Write". The edit has already been written,
+#         so nothing here can undo it; this decides what Claude is told next.
 # Exit 0: lint is clean.
-# Exit 2: BLOCK. stderr is handed back to Claude as the reason, so it fixes the
-#         lint errors in the same turn instead of stacking more edits on top.
-#         Any other non-zero exit is a hook *error* and does NOT block.
+# Exit 2: stderr is handed back to Claude as the reason before it continues, so
+#         it fixes the lint errors in the same turn instead of stacking more
+#         edits on top. On PostToolUse this does not block the edit — only a
+#         PreToolUse hook can do that. Any other non-zero exit is a hook *error*.
 #
 # `{{pm}}` is rendered to your package manager at install time.
 

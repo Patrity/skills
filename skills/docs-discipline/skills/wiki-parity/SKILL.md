@@ -45,6 +45,7 @@ and replace the entries.
    convention it already uses:
 
    ```bash
+   mkdir -p test/docs
    cp .claude/skills/wiki-parity/wiki-parity.test.ts test/docs/wiki-parity.test.ts
    ```
 

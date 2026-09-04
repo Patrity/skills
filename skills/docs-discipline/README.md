@@ -43,7 +43,7 @@ trusts. It enforces the mechanical half and leaves the status to the change that
 
 ```bash
 unzip docs-discipline.zip
-mkdir -p .claude/skills .claude/rules docs/wiki
+mkdir -p .claude/skills .claude/rules docs/wiki test/docs
 cp -R docs-discipline/skills/. .claude/skills/
 cp -R docs-discipline/rules/. .claude/rules/
 cat docs-discipline/CLAUDE.md >> CLAUDE.md
@@ -59,13 +59,13 @@ pages — that list is the backlog.
 
 ## Requirements
 
-- A vitest-compatible runner for `wiki-parity.test.ts` (the file imports `vitest` and `node:fs`
-  only; port the three assertions to any other runner in a few minutes).
+- A vitest-compatible runner for `wiki-parity.test.ts` (the file imports `vitest`, `node:fs` and
+  `node:path` only; port its five assertions to any other runner in a few minutes).
 - Nothing at all for the handover skill.
 
 ## Companion bundles
 
 - **[`iterative-spec-design`](/skill/iterative-spec-design)** — how the frozen tier gets written in
   the first place, section by section.
-- **[`quality-hooks`](/skill/quality-hooks)** — the `PreCompact` hook that saves a lesson as a rule
-  before the context that learned it is compacted away.
+- **[`quality-hooks`](/skill/quality-hooks)** — the `PreCompact` hook that asks whether the session
+  learned something worth writing down, while the context that learned it still exists.

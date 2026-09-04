@@ -55,6 +55,7 @@ Create it once, in a migration, so every environment gets the same grants and th
 see what Claude can read:
 
 ```sql
+-- No password here: this file is committed. It is set out of band, below.
 CREATE ROLE <app>_claude_ro LOGIN;
 GRANT CONNECT ON DATABASE <database> TO <app>_claude_ro;
 GRANT USAGE ON SCHEMA public TO <app>_claude_ro;
@@ -68,7 +69,17 @@ REVOKE SELECT ON audit_log, user_secrets FROM <app>_claude_ro;
 ALTER ROLE <app>_claude_ro SET statement_timeout = '15s';
 ```
 
-Set the credential in the secret manager the project already uses; never in a committed file.
+`LOGIN` alone cannot connect: the role has no password yet, and the migration must never carry
+one. A human sets it out of band, once per database, from a psql session or the provider's console:
+
+```sql
+ALTER ROLE <app>_claude_ro PASSWORD '<value>';
+```
+
+That value goes into the secret manager the project already uses — never a committed file, never
+the migration — as the read-only connection string the runner reads from `DATABASE_URL_RO`
+(`postgres://<app>_claude_ro:<value>@<host>/<database>`). Rotating it is an `ALTER ROLE` and a
+secret-manager update; nothing in the repo changes.
 
 **Revokes are not obstacles.** A `permission denied` is the correct outcome — do not route around
 it and do not ask the user to grant it. Audit or history tables deserve special attention: a

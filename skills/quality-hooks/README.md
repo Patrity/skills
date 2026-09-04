@@ -1,6 +1,6 @@
 ---
 name: Quality Hooks
-description: "Fail-closed Claude Code hooks: protect .env and credential files, lint after every edit, and capture new insights as rules before context compaction."
+description: "Fail-closed Claude Code hooks: protect .env and credential files, lint after every edit, and flag an unwritten convention before context is compacted."
 tags: [hooks, quality, safety]
 author: Patrity
 authorUrl: https://github.com/Patrity
@@ -9,15 +9,15 @@ requires: [bash, jq, git]
 
 # Quality Hooks
 
-Three gates the harness runs for you, so they hold on the turn where Claude is in a hurry.
+Three checks the harness runs for you, so they hold on the turn where Claude is in a hurry.
 
 ## What's inside
 
 | Path | Purpose |
 | --- | --- |
 | `hooks/protect-env.sh` | `PreToolUse` on `Edit`/`Write`: reads the tool call from stdin and refuses `.env*`, `credentials.json` and `secrets.*` — templates (`.env.example`, `.env.sample`) stay editable. |
-| `hooks/lint-check.sh` | `PostToolUse` on `Edit`/`Write`: runs `{{pm}} lint --quiet` and blocks while it is red. |
-| `settings.json` | The wiring, including the `PreCompact` prompt hook that writes new lessons down as a rule before context is compacted. |
+| `hooks/lint-check.sh` | `PostToolUse` on `Edit`/`Write`: runs `{{pm}} lint --quiet` and, while it is red, hands the failure back to Claude to fix in the same turn. |
+| `settings.json` | The wiring, including the `PreCompact` prompt hook that asks whether the session learned something worth writing down. |
 | `rules/hooks.md` | Fires on `.claude/hooks/**` and `.claude/settings.json` — the fail-closed pattern to copy when adding a check. |
 | `CLAUDE.md` | A pointer block to paste into your project's `CLAUDE.md`. |
 
@@ -31,10 +31,11 @@ s="$CLAUDE_PROJECT_DIR/.claude/hooks/protect-env.sh"; if [ -f "$s" ]; then exec 
 git -C "$CLAUDE_PROJECT_DIR" cat-file -e HEAD:.claude/hooks/protect-env.sh 2>/dev/null && exit 2; exit 0
 ```
 
-A tracked hook that has been deleted, renamed, or lost to a bad checkout **blocks the edit**
-(exit 2) instead of silently waving it through. A repo that never installed the bundle is
-unaffected. The tempting one-liner — `[ ! -f "$s" ] || exec "$s"` — is the exact opposite: the
-gate vanishes the moment the file does.
+A tracked hook that has been deleted, renamed, or lost to a bad checkout exits 2 instead of
+silently waving the action through: on `PreToolUse` that **refuses the edit**, and on `PostToolUse`
+— where the edit is already written — it tells Claude the gate is missing before it continues. A
+repo that never installed the bundle is unaffected. The tempting one-liner —
+`[ ! -f "$s" ] || exec "$s"` — is the exact opposite: the gate vanishes the moment the file does.
 
 ## Install
 
@@ -56,6 +57,10 @@ Commit the hooks with the executable bit set (`git ls-files -s .claude/hooks` mu
 An unexecutable hook exits non-zero for the wrong reason, which the harness treats as a hook error
 — it is logged, and the action goes ahead.
 
+Exit 2 means two different things by event: on `PreToolUse` it refuses the tool call, and on
+`PostToolUse` the tool has already run, so the write stands and stderr is what Claude reads before
+it continues. `rules/hooks.md` has the full contract.
+
 ## Placeholders
 
 `hooks/lint-check.sh` contains `{{pm}}`. The setup CLI renders it from your answers; installing by
@@ -74,10 +79,16 @@ The pattern list is the whole policy — add your project's own (`*.pem`, `servi
 
 ## The PreCompact hook
 
-`PreCompact` fires just before a long session is compressed, and this one is a `prompt` hook: it
-asks Claude, in that last moment of full context, whether the session surfaced a pattern or gotcha
-that is not written down yet — and to save it as a path-scoped rule or a skill if so. Insights
-otherwise die with the context window that discovered them.
+`PreCompact` fires just before a long session is compressed, and this one is a `prompt` hook: the
+prompt and the hook input go to a separate fast model for a single turn, which answers
+`{"ok": true}` or `{"ok": false, "reason": "…"}`. It is asked one question — does this transcript
+hold a convention, pattern or gotcha that is not written down yet?
+
+That model has no session context, no tools and no way to write a file, and `PreCompact` is not a
+blocking event: an `ok: false` reason is *surfaced to Claude*, nothing more. That is the whole
+value — the reminder arrives in the last moment where the context that learned the lesson still
+exists, and Claude can save it as a path-scoped rule or a skill before compaction takes it. The
+hook never writes the rule itself, and it never stops the compaction.
 
 ## Requirements
 

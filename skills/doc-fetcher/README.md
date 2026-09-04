@@ -4,7 +4,7 @@ description: A generator for per-library documentation skills — configure a te
 tags: [docs, generator, python]
 author: Patrity
 authorUrl: https://github.com/Patrity
-requires: [python3]
+requires: [python3, curl]
 ---
 
 # Doc Fetcher
