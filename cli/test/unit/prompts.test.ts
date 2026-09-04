@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { summarize } from '../../src/prompts'
 import { emptyLockfile } from '../../src/lockfile'
+import { GITIGNORE_UNTERMINATED } from '../../../shared/setup/gitignore'
 import type { FileOp, SetupPlan } from '../../src/plan'
 
 const op = (path: string, action: FileOp['action']): FileOp => ({ path, bytes: new Uint8Array(), owner: 'bundle:demo', action })
@@ -37,6 +38,37 @@ describe('summarize', () => {
     const out = summarize(plan([op('a.md', 'conflict'), op('b.md', 'conflict')]), new Set(['a.md']))
     expect(out).toContain('conflict: a.md (overwriting)')
     expect(out).toContain('conflict: b.md (kept yours)')
+  })
+
+  it('says what happens to .gitignore and .claude/.env.example', () => {
+    const both = summarize(plan([], {
+      gitignore: { content: '', changed: true },
+      envExample: { content: '', changed: true }
+    }))
+    expect(both).toContain('.gitignore: updated')
+    expect(both).toContain('.claude/.env.example: written')
+
+    const quiet = summarize(plan([], {
+      gitignore: { content: '', changed: false },
+      envExample: { content: '', changed: false }
+    }))
+    expect(quiet).toContain('.gitignore: unchanged')
+    expect(quiet).toContain('.claude/.env.example: unchanged')
+
+    // No .gitignore in the plan means the file is not this tool's business at all: no line for it.
+    const none = summarize(plan([], { envExampleRemove: true }))
+    expect(none).not.toContain('.gitignore:')
+    expect(none).toContain('.claude/.env.example: removed')
+    expect(summarize(plan([]))).toContain('.claude/.env.example: —')
+  })
+
+  it('says a .gitignore was left alone rather than calling it unchanged', () => {
+    const out = summarize(plan([], {
+      gitignore: { content: '', changed: false },
+      warnings: [GITIGNORE_UNTERMINATED]
+    }))
+    expect(out).toContain('.gitignore: unterminated block, left in place')
+    expect(out).toContain(`⚠ ${GITIGNORE_UNTERMINATED}`)
   })
 
   it('keeps the counts, removals and warnings it always had', () => {

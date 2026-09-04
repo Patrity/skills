@@ -4,10 +4,14 @@ import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { runAdd, runDiff, runInit, runList, runRemove, runUpdate } from '../../src/run'
 import { applyPlan } from '../../src/apply'
-import { emptyLockfile, sha256 } from '../../src/lockfile'
+import { emptyLockfile, serializeLockfile, sha256 } from '../../src/lockfile'
+import { createRegistryClient } from '../../src/registry'
 import { ADVERTISED_REGISTRY, startRegistry } from '../helpers/registry-server'
+import { fixtureManifest, loadFixtureBundle } from '../helpers/fixtures'
 import { startMarker } from '../../../shared/setup/markers'
 import { GITIGNORE_END, GITIGNORE_START } from '../../../shared/setup/gitignore'
+import { planFresh } from '../../../shared/setup/plan'
+import { applyProfile, defaultAnswers, preselectedBundles, resolveBundles } from '../../../shared/setup/wizard'
 
 /**
  * Stand-ins for the four clack prompts, so an interactive run is deterministic and a run that
@@ -89,6 +93,31 @@ describe('@patrity/skills end to end', () => {
     expect(emitted.written).toContain('CLAUDE.md')
     expect(emitted.written).toContain('.claude/rules/demo.md')
     expect(emitted).toMatchObject({ applied: true, removed: [], skipped: [], warnings: [], handEdited: [] })
+  })
+
+  it('writes exactly what the shared planner renders, so a downloaded zip is the same project', async () => {
+    // skills.patrity.com/build never runs the CLI: it calls `planFresh` and zips the result. The
+    // two are only interchangeable — unzip a setup, then `add`/`update`/`remove` it — while a fresh
+    // `init` is byte-for-byte what `planFresh` would have produced from the same inputs.
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, profile: 'demo' })
+
+    const manifest = fixtureManifest()
+    const base = manifest.base!
+    const profile = manifest.profiles.find(p => p.name === 'demo')
+    const answers = applyProfile(base, profile, defaultAnswers(base))
+    const bundles = resolveBundles(preselectedBundles(base, answers, profile, manifest.skills), manifest.skills).bundles
+    expect(bundles).toEqual(['demo', 'second'])
+
+    const client = createRegistryClient(registry.url)
+    const bundleFiles: Record<string, Awaited<ReturnType<typeof client.download>>> = {}
+    for (const slug of bundles) bundleFiles[slug] = await client.download(slug)
+    // What the registry served for `demo` is the fixture bundle on disk, byte for byte.
+    expect(bundleFiles.demo).toEqual(loadFixtureBundle())
+
+    const plan = planFresh({ manifest, projectName: basename(dir), answers, bundles, bundleFiles, registry: registry.url })
+    expect(await read(dir, 'CLAUDE.md')).toBe(plan.claudeMd.content)
+    expect(await read(dir, '.claude/skills.lock.json')).toBe(serializeLockfile(plan.lock))
   })
 
   it('is idempotent and honours --answer and --with', async () => {

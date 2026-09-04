@@ -1,6 +1,8 @@
 import { cancel, confirm, groupMultiselect, isCancel, note, select, text } from '@clack/prompts'
 import type { BaseSchema, Profile } from '../../shared/types/setup'
 import type { SkillSummary } from '../../shared/types/skills'
+import { ENV_EXAMPLE_PATH } from '../../shared/setup/env-example'
+import { GITIGNORE_UNTERMINATED } from '../../shared/setup/gitignore'
 import { activeAxes } from './contributions'
 import type { SetupPlan } from './plan'
 import { groupByTag } from './wizard'
@@ -48,6 +50,14 @@ export async function askBundles(skills: SkillSummary[], preselected: string[], 
 export function summarize(plan: SetupPlan, overwrite: ReadonlySet<string> = new Set()): string {
   const count = (a: string) => plan.files.filter(f => f.action === a).length
   const paths = (a: string) => plan.files.filter(f => f.action === a).map(f => f.path)
+  // The warning is already in the list below, but the `.gitignore` line is where someone looks to
+  // find out what happened to their .gitignore, so it says "nothing" rather than "unchanged".
+  const gitignore = plan.warnings.includes(GITIGNORE_UNTERMINATED)
+    ? 'unterminated block, left in place'
+    : plan.gitignore?.changed ? 'updated' : 'unchanged'
+  const envExample = plan.envExample
+    ? (plan.envExample.changed ? 'written' : 'unchanged')
+    : plan.envExampleRemove ? 'removed' : '—'
   const lines = [
     `create ${count('create')} · update ${count('update')} · unchanged ${count('unchanged')} · conflicts ${count('conflict')} · protected ${count('protected')}`,
     ...paths('conflict').map(p => `conflict: ${p} (${overwrite.has(p) ? 'overwriting' : 'kept yours'})`),
@@ -55,6 +65,8 @@ export function summarize(plan: SetupPlan, overwrite: ReadonlySet<string> = new 
     ...(plan.removals.length ? [`remove ${plan.removals.length}: ${plan.removals.join(', ')}`] : []),
     `CLAUDE.md: ${plan.claudeMd.changed ? 'updated' : 'unchanged'}${plan.claudeMd.handEdited.length ? ` (hand-edited kept: ${plan.claudeMd.handEdited.join(', ')})` : ''}`,
     `settings.json: ${plan.settings ? (plan.settings.changed ? 'merged' : 'unchanged') : '—'} · settings.local.json: ${plan.settingsLocal ? (plan.settingsLocal.changed ? 'merged' : 'unchanged') : '—'}`,
+    ...(plan.gitignore ? [`.gitignore: ${gitignore}`] : []),
+    `${ENV_EXAMPLE_PATH}: ${envExample}`,
     ...plan.warnings.map(w => `⚠ ${w}`)
   ]
   return lines.join('\n')

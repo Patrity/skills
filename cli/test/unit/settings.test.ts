@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ensureGitignoreLine, hookIdentity, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, subtractSettings } from '../../src/settings'
+import { hookIdentity, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, subtractSettings } from '../../src/settings'
 
 const hook = (command: string) => ({ type: 'command', command })
 
@@ -102,15 +102,5 @@ describe('splitBundleSettings', () => {
   })
   it('drops empty permissions objects', () => {
     expect(splitBundleSettings({ permissions: { allow: ['a'] } }, null)).toEqual({ shared: {}, local: { permissions: { allow: ['a'] } } })
-  })
-})
-
-describe('ensureGitignoreLine', () => {
-  it('appends once, preserving the file', () => {
-    const once = ensureGitignoreLine('node_modules\n', '.claude/settings.local.json')
-    expect(once).toBe('node_modules\n.claude/settings.local.json\n')
-    expect(ensureGitignoreLine(once, '.claude/settings.local.json')).toBe(once)
-    expect(ensureGitignoreLine(null, 'x')).toBe('x\n')
-    expect(ensureGitignoreLine('a', 'b')).toBe('a\nb\n')
   })
 })
