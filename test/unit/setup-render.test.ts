@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { SectionDef } from '../../shared/types/setup'
 import { endMarker, findMarkerBlocks, startMarker, stripMarkerBlocks } from '../../shared/setup/markers'
 import { placeholderVars, renderPlaceholders } from '../../shared/setup/placeholders'
 import { composeClaudeMd } from '../../shared/setup/render'
@@ -15,6 +16,12 @@ describe('markers', () => {
   it('can keep selected sources', () => {
     expect(stripMarkerBlocks(doc, id => id === 'bundle:nuxt')).toContain('- nuxt')
     expect(stripMarkerBlocks(doc, id => id === 'bundle:nuxt')).not.toContain('- pnpm')
+  })
+  it('handles CRLF line endings correctly', () => {
+    const crlfDoc = doc.replace(/\n/g, '\r\n')
+    const blocks = findMarkerBlocks(crlfDoc)
+    expect(blocks.map(b => b.sourceId)).toEqual(['base:pm=pnpm', 'bundle:nuxt'])
+    expect(stripMarkerBlocks(crlfDoc)).toContain('keep me')
   })
 })
 
@@ -80,5 +87,35 @@ describe('composeClaudeMd', () => {
     expect(without).not.toContain('bundle:nuxt')
     expect(without).not.toContain('## Skills and rules')
     expect(without).toContain('## Commands')
+  })
+
+  it('is idempotent with CRLF line endings', () => {
+    const crlfContrib = { sourceId: 'test:crlf', sectionId: 'commands', markdown: '- crlf test' }
+    const once = composeClaudeMd(null, { title: 'T', contributions: [crlfContrib] })
+    const crlfVersion = once.replace(/\n/g, '\r\n')
+    const twice = composeClaudeMd(crlfVersion, { title: 'T', contributions: [crlfContrib] })
+    expect(twice).toBe(once)
+    const markerCount = (twice.match(/<!-- skills:test:crlf -->/g) || []).length
+    expect(markerCount).toBe(1)
+  })
+
+  it('respects custom sections when reusing headings', () => {
+    const customSections: SectionDef[] = [
+      { id: 'setup', title: 'Setup' },
+      { id: 'usage', title: 'Usage Guide' }
+    ]
+
+    const existing = '# App\n\n## Setup\nUser content here.\n'
+    const contribs = [{ sourceId: 'custom:setup', sectionId: 'setup', markdown: '- do setup' }]
+
+    const composed = composeClaudeMd(existing, {
+      title: 'App',
+      sections: customSections,
+      contributions: contribs
+    })
+
+    expect((composed.match(/## Setup/g) || []).length).toBe(1)
+    expect(composed).toContain('User content here.')
+    expect(composed).toContain('- do setup')
   })
 })

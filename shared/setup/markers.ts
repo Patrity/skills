@@ -15,6 +15,7 @@ export interface MarkerBlock {
 }
 
 export function findMarkerBlocks(md: string): MarkerBlock[] {
+  md = md.replace(/\r\n/g, '\n')
   const lines = md.split('\n')
   const blocks: MarkerBlock[] = []
   for (let i = 0; i < lines.length; i++) {
@@ -35,6 +36,8 @@ export function findMarkerBlocks(md: string): MarkerBlock[] {
 
 /** Remove marker blocks (and one following blank line) except those `keep` returns true for. */
 export function stripMarkerBlocks(md: string, keep: (sourceId: string) => boolean = () => false): string {
+  const hadTrailingNewline = md.endsWith('\n')
+  md = md.replace(/\r\n/g, '\n')
   const lines = md.split('\n')
   const drop = new Set<number>()
   for (const block of findMarkerBlocks(md)) {
@@ -44,7 +47,7 @@ export function stripMarkerBlocks(md: string, keep: (sourceId: string) => boolea
   }
   const result = lines.filter((_, i) => !drop.has(i)).join('\n')
   // Preserve trailing newline if original had one
-  if (md.endsWith('\n') && !result.endsWith('\n')) {
+  if (hadTrailingNewline && !result.endsWith('\n')) {
     return result + '\n'
   }
   return result

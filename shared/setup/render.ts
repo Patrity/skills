@@ -15,12 +15,13 @@ interface DocSection {
   lines: string[]
 }
 
-function parseDoc(md: string): DocSection[] {
+function parseDoc(md: string, sections?: SectionDef[]): DocSection[] {
+  md = md.replace(/\r\n/g, '\n')
   const out: DocSection[] = [{ id: 'intro', heading: null, lines: [] }]
   for (const line of md.split('\n')) {
     const h2 = /^##\s+(.+?)\s*$/.exec(line)
     if (h2) {
-      out.push({ id: sectionIdForHeading(h2[1]!), heading: line, lines: [] })
+      out.push({ id: sectionIdForHeading(h2[1]!, sections), heading: line, lines: [] })
     } else {
       out[out.length - 1]!.lines.push(line)
     }
@@ -54,7 +55,7 @@ export function composeClaudeMd(existing: string | null, opts: {
   const sections = opts.sections ?? CANONICAL_SECTIONS
   const order = sections.map(s => s.id)
   const base = existing ? stripMarkerBlocks(existing) : `# ${opts.title}\n${opts.intro ? `\n${opts.intro}\n` : ''}`
-  const doc = parseDoc(base)
+  const doc = parseDoc(base, sections)
 
   const bySection = new Map<string, Contribution[]>()
   for (const c of opts.contributions) {
