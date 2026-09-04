@@ -5,11 +5,12 @@ tags: [nuxt-ui, vue, ui, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3]
+dependsOn: [nuxt]
 ---
 
 # Nuxt UI
 
-Two doc-fetching skills plus one path-scoped rule. The rule fires when Claude touches a `.vue` file under `app/` and tells it to look up the real v4 API instead of recalling a v2/v3 prop that no longer exists.
+Two doc-fetching skills plus two path-scoped rules. The rules fire when Claude touches a `.vue` file under the app directory and tell it to look up the real v4 API instead of recalling a v2/v3 prop that no longer exists.
 
 ## What's inside
 
@@ -17,8 +18,13 @@ Two doc-fetching skills plus one path-scoped rule. The rule fires when Claude to
 | --- | --- |
 | `skills/nuxt-ui-docs/` | Fetches Nuxt UI v4 component docs (`python3 .claude/skills/nuxt-ui-docs/fetch.py Button`, `fetch.py Tree`). |
 | `skills/nuxt-ui-templates/` | Pulls real files from the official Nuxt UI templates (dashboard, docs, saas, chat…). |
-| `rules/web-vue-ui.md` | Nuxt UI v4: `U*` components over raw markup, semantic color tokens only, invoke `nuxt-ui-docs` first, validate with playwright-cli. |
+| `rules/web-vue-ui.md` | The entry rule: `U*` components over raw markup, semantic color tokens only, invoke `nuxt-ui-docs` first, validate with playwright-cli. |
+| `rules/nuxt-ui.md` | v4 conventions: palette aliases in `app.config.ts`, no `dark:`/`@apply`, icons and forms, the slot-only components (`UDashboard*`, `UPageCard`, `UTree`). |
 | `CLAUDE.md` | A pointer block to paste into your project's `CLAUDE.md`. |
+
+## Placeholders
+
+The rule globs contain an `{{appDir}}` placeholder that the setup CLI renders from your answers. Installing by hand? Replace it with your srcDir — `app` in a standard Nuxt 4 project.
 
 ## Install
 

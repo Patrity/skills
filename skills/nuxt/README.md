@@ -5,19 +5,29 @@ tags: [nuxt, vue, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3]
+suggests: [nuxt-ui, browser-testing]
 ---
 
 # Nuxt
 
-One doc-fetching skill plus one path-scoped rule. The rule fires when Claude touches `.ts`/`.vue` files under `app/`, anything under `server/`, or `nuxt.config.ts`, and tells it to consult the docs before guessing a composable signature or a config key.
+One doc-fetching skill plus six path-scoped rules. The rules fire when Claude touches `.ts`/`.vue` files under the app directory, anything under `server/`, or `nuxt.config.ts`, and tell it to consult the docs before guessing a composable signature or a config key.
 
 ## What's inside
 
 | Path | Purpose |
 | --- | --- |
 | `skills/nuxt-docs/` | Fetches Nuxt 4 docs from GitHub by topic (`python3 .claude/skills/nuxt-docs/fetch.py useFetch`). |
-| `rules/web-nuxt.md` | Nuxt 4 conventions: `app/` layout, `runtimeConfig` for secrets, invoke `nuxt-docs` first. |
+| `rules/web-nuxt.md` | The entry rule: invoke `nuxt-docs` first, Nuxt 4 layout, `runtimeConfig` for secrets. |
+| `rules/nuxt4.md` | Directory layout, aliases, auto-imports and component naming, `useFetch`/`useAsyncData` discipline, route rules. |
+| `rules/ssr.md` | SSR vs SPA, auth during SSR, hydration pitfalls, `.client.vue`/`.server.vue`, payload and prerender rules. |
+| `rules/backend.md` | Nitro routes: file-per-method, zod validation, `createError` shape, lazy singletons, no `process.env` in handlers. |
+| `rules/database.md` | Drizzle + Postgres: generated migrations applied from CI, read-only roles for exploration, nothing destructive against prod. |
+| `rules/cli.md` | Scripts under `scripts/` run through `tsx`: explicit env loading, exit codes, dry-run before anything destructive. |
 | `CLAUDE.md` | A pointer block to paste into your project's `CLAUDE.md`. |
+
+## Placeholders
+
+The rule globs and the `CLAUDE.md` snippet contain `{{appDir}}` and `{{pm}}`/`{{pmx}}` placeholders. The setup CLI renders them from your answers. Installing by hand? Replace `{{appDir}}` with your srcDir (`app` in a standard Nuxt 4 project) and `{{pm}}`/`{{pmx}}` with your package manager (`pnpm`/`pnpx`).
 
 ## Install
 

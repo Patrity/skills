@@ -1,7 +1,7 @@
 ---
 paths:
-  - "app/**/*.ts"
-  - "app/**/*.vue"
+  - "{{appDir}}/**/*.ts"
+  - "{{appDir}}/**/*.vue"
   - "server/**/*.ts"
   - "nuxt.config.ts"
 ---

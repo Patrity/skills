@@ -1,6 +1,6 @@
 ---
 paths:
-  - "app/**/*.vue"
+  - "{{appDir}}/**/*.vue"
 ---
 
 # Vue / Nuxt UI components

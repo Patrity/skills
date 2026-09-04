@@ -1,5 +1,5 @@
-## Browser testing
+## Testing
+- Prove UI changes in a real browser with `playwright-cli` before saying they are done; typecheck and unit tests never catch rendering or wiring bugs. If `playwright-cli` is missing, install it with `npm install -g @playwright/cli@latest`.
 
-- After any UI change (pages, components, layouts, styles, client logic), invoke the `browser-testing` skill and prove it in a real browser with `playwright-cli` before calling the work done. Never the Playwright MCP.
-- If `playwright-cli` is not on PATH, install it: `npm install -g @playwright/cli@latest` (browsers are a separate `npx playwright install`).
-- Test-account credentials, the dev URL and the routes worth covering belong in a project-local skill (`.claude/skills/<project>-browser-testing/SKILL.md`), never in the shared bundle and never against production.
+## Skills and rules
+- Invoke `browser-testing` after any change to pages, components, styles or client logic. The project-local browser-testing skill (if present) holds this app's URL, routes and dev test account.
