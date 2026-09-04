@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import type { SettingsContribution } from './settings'
 
 export const LOCKFILE_PATH = '.claude/skills.lock.json'
@@ -32,9 +31,7 @@ export interface Lockfile {
   blocks: Record<string, string>
 }
 
-export function sha256(bytes: Uint8Array | string): string {
-  return createHash('sha256').update(bytes).digest('hex')
-}
+export { sha256 } from '../../shared/setup/hash'
 
 export function emptyLockfile(init: { registry: string, schemaVersion: number, projectName: string, answers: Record<string, string> }): Lockfile {
   return {

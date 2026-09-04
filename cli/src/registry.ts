@@ -1,20 +1,11 @@
-import { posix as pathPosix } from 'node:path'
 import { unzipSync } from 'fflate'
 import type { CliManifest } from '../../shared/types/setup'
+import { isSafeBundlePath } from '../../shared/setup/paths'
 import { CLI_VERSION } from './version'
 
 export type BundleFiles = Record<string, Uint8Array>
 
-/**
- * A bundle entry may only name a file inside the bundle: no absolute path, no `..` segment, no
- * backslash, and nothing whose normalized form climbs out. Everything downstream joins these onto
- * the project directory, so an escaping name would write outside it.
- */
-export function isSafeBundlePath(rel: string): boolean {
-  if (rel === '' || rel.startsWith('/') || /^[A-Za-z]:/.test(rel) || rel.includes('\\')) return false
-  if (rel.split('/').includes('..')) return false
-  return !pathPosix.normalize(`x/${rel}`).startsWith('..')
-}
+export { isSafeBundlePath }
 
 /**
  * The two fields every caller walks unconditionally. A host that answers `/api/cli/manifest` with
