@@ -7,6 +7,7 @@ import { isBinary } from './sniff'
 import { buildTree, deriveBadges } from './tree'
 import { parseBaseSchema, validateBaseAgainstSlugs } from '../setup/base'
 import { parseProfiles } from '../setup/profiles'
+import { splitSnippet } from '../../../shared/setup/sections'
 
 const decoder = new TextDecoder()
 
@@ -29,6 +30,11 @@ export function parseBundle(raw: RawBundle): { manifest: SkillManifest, files: B
     errors.push(...parsed.errors)
   }
 
+  const claudeKey = Object.keys(files).find(p => p.toLowerCase() === 'claude.md')
+  if (claudeKey) {
+    for (const e of splitSnippet(decoder.decode(files[claudeKey])).errors) errors.push(`CLAUDE.md: ${e}`)
+  }
+
   const entries: Record<string, { size: number, kind: FileKind }> = {}
   let totalBytes = 0
   for (const [path, bytes] of Object.entries(files)) {
@@ -46,6 +52,8 @@ export function parseBundle(raw: RawBundle): { manifest: SkillManifest, files: B
     author: fm?.author ?? '',
     authorUrl: fm?.authorUrl,
     requires: fm?.requires,
+    dependsOn: fm?.dependsOn,
+    suggests: fm?.suggests,
     badges: deriveBadges(paths),
     fileCount: paths.length,
     totalBytes,

@@ -50,7 +50,7 @@ export function deriveBadges(paths: string[]): ContentBadge[] {
     if (p.startsWith('skills/')) found.add('skills')
     else if (p.startsWith('rules/')) found.add('rules')
     else if (p.startsWith('hooks/')) found.add('hooks')
-    else if (p === 'settings.local.json') found.add('settings')
+    else if (p === 'settings.local.json' || p === 'settings.json') found.add('settings')
     else if (p.toLowerCase() === 'claude.md') found.add('claude-md')
   }
   return BADGE_ORDER.filter(b => found.has(b))

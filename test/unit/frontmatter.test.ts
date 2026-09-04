@@ -59,6 +59,14 @@ describe('parseFrontmatter', () => {
     expect(r.errors.some(e => e.startsWith('frontmatter.tags:'))).toBe(true)
     expect(r.errors.some(e => e.startsWith('frontmatter.authorUrl:'))).toBe(true)
   })
+
+  it('accepts dependsOn/suggests slugs and rejects malformed ones', () => {
+    const ok = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ndependsOn: [nuxt]\nsuggests: [browser-testing]\n---\n')
+    expect(ok.errors).toEqual([])
+    expect(ok.data).toMatchObject({ dependsOn: ['nuxt'], suggests: ['browser-testing'] })
+    const bad = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ndependsOn: [Bad_Slug]\n---\n')
+    expect(bad.errors.some(e => e.startsWith('frontmatter.dependsOn.0:'))).toBe(true)
+  })
 })
 
 describe('SLUG_RE', () => {

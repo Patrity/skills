@@ -63,6 +63,16 @@ describe('parseBundle', () => {
     const { manifest } = parseBundle({ slug: 'demo', files: { 'readme.md': enc(readme) } })
     expect(manifest.errors).toEqual([])
   })
+
+  it('validates CLAUDE.md snippet headings', () => {
+    const { manifest } = parseBundle({ slug: 'demo', files: { 'README.md': enc(readme), 'CLAUDE.md': enc('## Nope\n- x\n## Commands\n- y\n') } })
+    expect(manifest.errors).toEqual(['CLAUDE.md: unknown section heading "Nope" (use a canonical title or ## @id)'])
+  })
+
+  it('accepts an unheaded CLAUDE.md snippet (goes to skills-and-rules)', () => {
+    const { manifest } = parseBundle({ slug: 'demo', files: { 'README.md': enc(readme), 'CLAUDE.md': enc('- invoke things\n') } })
+    expect(manifest.errors).toEqual([])
+  })
 })
 
 describe('buildSnapshot', () => {
@@ -104,7 +114,7 @@ describe('buildSnapshot', () => {
     expect(snap.profiles).toEqual([])
   })
 
-  it.todo('flags dependsOn/suggests that reference unknown bundles', () => {
+  it('flags dependsOn/suggests that reference unknown bundles', () => {
     const meta = { sha: 'x', committedAt: '2026-09-03T00:00:00.000Z', fetchedAt: '2026-09-03T00:00:01.000Z', source: 'fs' as const }
     const withDeps = readme.replace('author: Tester', 'author: Tester\ndependsOn: [nuxt]\nsuggests: [ghost]')
     const snap = buildSnapshot([{ slug: 'demo', files: { 'README.md': enc(withDeps) } }, { slug: 'nuxt', files: { 'README.md': enc(readme) } }], meta)

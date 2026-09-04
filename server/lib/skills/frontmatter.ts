@@ -10,7 +10,9 @@ export const frontmatterSchema = z.object({
   tags: z.array(z.string().min(1)).min(1),
   author: z.string().min(1),
   authorUrl: z.url().optional(),
-  requires: z.array(z.string().min(1)).optional()
+  requires: z.array(z.string().min(1)).optional(),
+  dependsOn: z.array(z.string().regex(SLUG_RE)).optional(),
+  suggests: z.array(z.string().regex(SLUG_RE)).optional()
 })
 
 export interface FrontmatterResult {

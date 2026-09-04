@@ -44,4 +44,8 @@ describe('deriveBadges', () => {
     expect(deriveBadges(['claude.md'])).toEqual(['claude-md'])
     expect(deriveBadges(['Settings.local.json'])).toEqual([])
   })
+
+  it('treats settings.json like settings.local.json for the badge', () => {
+    expect(deriveBadges(['settings.json'])).toEqual(['settings'])
+  })
 })

@@ -21,6 +21,20 @@ async function walk(dir: string, root: string, out: FoundFile[]): Promise<void> 
   }
 }
 
+/** Reads `<dir>/**` from disk as relative-path → bytes. A missing directory yields `{}`. */
+export async function readDirFiles(dir: string): Promise<Record<string, Uint8Array>> {
+  const root = resolve(dir)
+  const found: FoundFile[] = []
+  try {
+    await walk(root, root, found)
+  } catch {
+    return {}
+  }
+  const out: Record<string, Uint8Array> = {}
+  for (const f of found) out[f.rel] = new Uint8Array(await readFile(f.abs))
+  return out
+}
+
 /** Reads `<dir>/<slug>/**` from disk. Dev/CI source; zero network. */
 export function createFsSource(dir: string, opts: { baseDir?: string, profilesDir?: string } = {}): SkillsSource {
   const root = resolve(dir)

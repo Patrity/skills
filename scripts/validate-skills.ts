@@ -1,5 +1,7 @@
-import { createFsSource } from '../server/lib/skills/fs-source'
+import { join } from 'node:path'
+import { createFsSource, readDirFiles } from '../server/lib/skills/fs-source'
 import { splitFrontmatter } from '../server/lib/skills/frontmatter'
+import { scanForSecrets } from '../server/lib/setup/secrets'
 
 const dir = process.argv[2] ?? 'skills'
 const snapshot = await createFsSource(dir).load()
@@ -37,6 +39,38 @@ for (const skill of snapshot.skills) {
     console.log(`✓ ${skill.slug} — ${skill.name} (${skill.fileCount} files; ${skill.badges.join(', ') || 'no badges'})`)
   }
   warnOnNameMismatch(skill.slug, snapshot.files[skill.slug] ?? {})
+}
+
+// Base + profiles
+if (snapshot.baseErrors.length) {
+  failed++
+  console.error('✗ base')
+  for (const err of snapshot.baseErrors) console.error(`    - ${err}`)
+} else if (snapshot.base) {
+  console.log(`✓ base (${snapshot.base.axes.length} axes, ${snapshot.profiles.length} profiles)`)
+}
+if (snapshot.profileErrors.length) {
+  failed++
+  console.error('✗ profiles')
+  for (const err of snapshot.profileErrors) console.error(`    - ${err}`)
+}
+
+// Secrets and private infrastructure must never be published.
+const baseFiles = await readDirFiles(join(dir, '..', 'base'))
+const profileFiles = await readDirFiles(join(dir, '..', 'profiles'))
+const findings = [
+  ...Object.entries(snapshot.files).flatMap(([slug, files]) => scanForSecrets(files, `skills/${slug}/`)),
+  ...scanForSecrets(baseFiles, 'base/'),
+  ...scanForSecrets(profileFiles, 'profiles/')
+]
+for (const f of findings) {
+  const line = `${f.severity === 'fail' ? '✗' : '⚠'} ${f.path}:${f.line} [${f.rule}] ${f.excerpt}`
+  if (f.severity === 'fail') {
+    failed++
+    console.error(line)
+  } else {
+    console.warn(line)
+  }
 }
 
 if (failed) {
