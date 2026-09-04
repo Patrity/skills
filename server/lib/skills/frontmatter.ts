@@ -10,11 +10,16 @@ const relativePath = z.string().min(1).refine(
   { message: 'must be a project-relative path (no leading /, no .. segment)' }
 )
 
+// Both of these are written straight into `.claude/.env.example` — the description as a `# …`
+// comment, the example as the right-hand side of `NAME=…` — where the file format is one entry per
+// line. A newline would silently split the entry in two and hand the reader a broken example.
+const oneLine = (s: z.ZodString) => s.refine(v => !/[\r\n]/.test(v), { message: 'must be one line' })
+
 const envVar = z.object({
   name: z.string().regex(ENV_NAME_RE, { message: 'must match ^[A-Z][A-Z0-9_]*$' }),
-  description: z.string().min(1),
+  description: oneLine(z.string().min(1)),
   required: z.boolean().optional(),
-  example: z.string().optional()
+  example: oneLine(z.string()).optional()
 })
 
 // zod 4.5.4's `refine` only accepts `params?: string | $ZodCustomParams` — no function-of-value

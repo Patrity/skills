@@ -81,6 +81,15 @@ describe('parseFrontmatter', () => {
       'frontmatter.env: duplicate name DUP'
     ])
   })
+
+  it('rejects a multi-line env description or example', () => {
+    // Each becomes one line of `.claude/.env.example`; a newline would split the entry in two.
+    const r = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\nenv:\n  - name: API_KEY\n    description: "first\\nsecond"\n    example: "a\\nb"\n---\n')
+    expect(r.errors).toEqual([
+      'frontmatter.env.0.description: must be one line',
+      'frontmatter.env.0.example: must be one line'
+    ])
+  })
 })
 
 describe('SLUG_RE', () => {
