@@ -171,6 +171,32 @@ are tagged `cli-vX.Y.Z` and built with npm provenance.
 
 Full documentation also lives at [skills.patrity.com/docs/cli](https://skills.patrity.com/docs/cli).
 
+## Changelog
+
+### 0.2.0
+
+The `.gitignore` line became a managed block: `# >>> skills` … `# <<< skills`, regenerated on every
+run from the current selection, with every line outside it left alone. A project set up with 0.1.0
+keeps its old loose `.claude/settings.local.json` line above the block; it is harmless, and yours to
+delete. A block that was opened and never closed stops the CLI touching the file at all — it warns
+and moves on, because there is no telling where that block was meant to end.
+
+Bundles declare `gitignore` paths and `env` variables in their frontmatter now. The variables are
+collected into `.claude/.env.example`, one commented line each, and the file is deleted again when
+the last bundle declaring any is removed. It is fully managed: edit it and the next run overwrites
+you. Copy it to `.claude/.env` and edit that instead; the CLI never creates, reads or deletes
+`.claude/.env`.
+
+The lockfile carries `bundles.<slug>.gitignore` and `bundles.<slug>.env`, so `remove` subtracts
+exactly what a bundle added, and an `envExample` hash so an example you edited is left in place
+rather than deleted. A 0.1.0 lockfile still parses; it just has none of that until the next run
+records it.
+
+The renderer is shared with the web builder at
+[skills.patrity.com/build](https://skills.patrity.com/build). Unzip a setup from there and it is
+already a project this CLI understands: `diff` reports no drift, and `add`, `update` and `remove`
+work without an `init` first.
+
 ## License
 
 MIT

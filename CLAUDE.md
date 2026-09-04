@@ -30,6 +30,10 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - `UDashboardNavbar` nests its `<h1>` inside `#left`'s default content: override `#left` (not `#title`) to keep one h1 per page.
 - Markdown is parsed server-side (`server/utils/markdown.ts` → `MarkdownView :body`). Never `<MDC :value>`: it re-parses in the browser and hits `/api/_mdc/highlight` once per code block.
 - `nitro.serverAssets` needs an absolute `dir`; a relative one mounts an empty store.
+- `/build` is ISR + `Vercel-Cache-Tag: skills` like every other page; `POST /api/build` and `POST /api/build/render` set `Cache-Control: no-store` themselves (they answer per request body, which ISR cannot key on).
+- Builder state lives in the URL hash, never the query: a query string would be its own ISR entry per share link. Every hash field is attacker-controlled — `n=`, `a=` and `b=` are each validated in `decodeBuildState`, and a dropped value raises a warning the page toasts.
+- `shared/setup/**` must stay Node-free (the browser bundles it): no `node:` imports, no `process`. `renderFresh` is the single render both planners use — `planFresh` (web zip) and `buildPlan` (CLI overlay) — so a new `SetupPlan` field must be handled in both.
+- The `.gitignore` block is `# >>> skills (managed by @patrity/skills; edit outside this block)` … `# <<< skills`, regenerated every run; an unterminated one leaves the whole file alone with a warning. `.claude/.env.example` is fully managed (rewritten every run, deleted with the last bundle that declares `env`); `.claude/.env` is never created, read or deleted.
 
 ## Production (verified 2026-09-03)
 - https://skills.patrity.com on Vercel team `patritys-projects`, project `skills`; repo `Patrity/skills` is public. Vercel CLI is linked from this directory (`.vercel/`, gitignored).
@@ -37,7 +41,7 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - `invalidateByTag('skills')` DOES purge ISR entries: after `POST /api/revalidate` the next hit is `x-vercel-cache: STALE`, then `HIT`. No bypass-token fallback needed.
 - A skills-only push is ignored by Vercel (`scripts/should-build.sh`) and the `revalidate` workflow puts the new sha on the CDN in ~5 s. A redeploy of the same commit (env changes) always builds.
 - Env changes need a redeploy: `vercel redeploy <latest-production-url> --scope patritys-projects`.
-- CLI `@patrity/skills` (workspace `cli/`) is published from `.github/workflows/release-cli.yml` on `cli-v*` tags (repo secret `NPM_TOKEN`); first release `cli-v0.1.0` on 2026-09-04. Bump `cli/package.json` before tagging — the workflow refuses a mismatched tag. Smoke: `pnpm dlx @patrity/skills init --yes --profile nuxt-app --json` in a scratch dir.
+- CLI `@patrity/skills` (workspace `cli/`) is published from `.github/workflows/release-cli.yml` on `cli-v*` tags (repo secret `NPM_TOKEN`); first release `cli-v0.1.0` on 2026-09-04, next tag `cli-v0.2.0`. Bump `cli/package.json` and add the `cli/README.md` changelog entry before tagging — the workflow refuses a mismatched tag. Smoke: `pnpm dlx @patrity/skills init --yes --profile nuxt-app --json` in a scratch dir.
 - A push that adds API routes AND touches `skills/**` makes the `revalidate` workflow's warm step 404 on the new routes (it runs before Vercel finishes deploying); the deploy-triggered `warm` workflow fixes it. Expected, not a regression.
 - A local `.env` that sets `NUXT_SKILLS_DIR` or `NUXT_REVALIDATE_SECRET` overrides the e2e fixture config and fails 14 `pnpm test` assertions; unset them (or use `.env.example` values only) before running the e2e suite.
 
