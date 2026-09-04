@@ -67,3 +67,9 @@ export interface CliManifest extends SnapshotMeta {
   skills: SkillSummary[]
   errors: string[]
 }
+
+/** Bundle-relative path → file bytes, as the registry serves them and the planner renders them. */
+export type BundleFiles = Record<string, Uint8Array>
+
+export type { Lockfile, LockBundle, LockSettings } from '../setup/lock'
+export type { FileOp, SetupPlan } from '../setup/plan'

@@ -1,9 +1,13 @@
 import { getCache } from '@vercel/functions'
 import type { SkillManifest, SnapshotMeta } from '~~/shared/types/skills'
 import { createSnapshotStore, type ManifestRecord, type SnapshotStore } from '../lib/skills/store'
+import { isPublicSkill } from '../lib/skills/public'
 import type { BundleFiles } from '../lib/skills/types'
 import { createFsSource } from '../lib/skills/fs-source'
 import { createGithubSource } from '../lib/skills/github-source'
+
+/** Re-exported (and auto-imported by routes) from the pure module the CLI manifest projection uses. */
+export { isPublicSkill }
 
 let store: SnapshotStore | undefined
 
@@ -48,11 +52,6 @@ export async function getBundleFilesOr503(slug: string): Promise<BundleFiles | n
   } catch (err) {
     unavailable(err)
   }
-}
-
-/** Invalid bundles are visible (with their errors) only when reading from disk. */
-export function isPublicSkill(skill: SkillManifest, meta: SnapshotMeta): boolean {
-  return meta.source === 'fs' || skill.errors.length === 0
 }
 
 export async function requirePublicSkill(slug: string): Promise<{ skill: SkillManifest, meta: SnapshotMeta }> {

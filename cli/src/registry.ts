@@ -1,9 +1,9 @@
 import { unzipSync } from 'fflate'
-import type { CliManifest } from '../../shared/types/setup'
+import type { BundleFiles, CliManifest } from '../../shared/types/setup'
 import { isSafeBundlePath } from '../../shared/setup/paths'
 import { CLI_VERSION } from './version'
 
-export type BundleFiles = Record<string, Uint8Array>
+export type { BundleFiles }
 
 export { isSafeBundlePath }
 

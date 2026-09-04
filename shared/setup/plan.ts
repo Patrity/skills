@@ -1,0 +1,185 @@
+import type { BundleFiles, CliManifest } from '../types/setup'
+import { composeClaudeMd } from './render'
+import { findMarkerBlocks, type MarkerBlock } from './markers'
+import { placeholderVars, renderPlaceholders, type PlaceholderVars } from './placeholders'
+import { isSafeBundlePath } from './paths'
+import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
+import { emptyLockfile, sha256, type Lockfile, type LockSettings } from './lock'
+import { formatJson, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, type Json } from './settings'
+
+export interface FileOp {
+  path: string
+  bytes: Uint8Array
+  mode?: number
+  owner: string
+  action: 'create' | 'update' | 'unchanged' | 'conflict' | 'protected'
+}
+
+export interface SetupPlan {
+  files: FileOp[]
+  /** Owned files of bundles no longer selected, removed only when untouched since install. */
+  removals: string[]
+  claudeMd: { content: string, changed: boolean, handEdited: string[] }
+  settings: { content: string, changed: boolean } | null
+  settingsLocal: { content: string, changed: boolean } | null
+  gitignore: { content: string, changed: boolean } | null
+  lock: Lockfile
+  warnings: string[]
+}
+
+const decoder = new TextDecoder()
+const encoder = new TextEncoder()
+const SKIP = new Set(['readme.md', 'claude.md', 'settings.json', 'settings.local.json'])
+
+/** Sort `Object.entries` by key so a plan is byte-identical run to run. */
+export const byKey = ([a]: [string, unknown], [b]: [string, unknown]): number => (a < b ? -1 : a > b ? 1 : 0)
+
+function isBinary(bytes: Uint8Array): boolean {
+  for (let i = 0; i < Math.min(bytes.length, 8000); i++) {
+    if (bytes[i] === 0) return true
+  }
+  return false
+}
+
+/**
+ * One source contributes one block per section, so its lock entry hashes every block it owns,
+ * joined in document order. Used identically when recording and when detecting a hand edit.
+ */
+export function hashForSource(blocks: MarkerBlock[], sourceId: string): string {
+  return sha256(blocks.filter(b => b.sourceId === sourceId).map(b => b.content).join('\n'))
+}
+
+export function sourceIds(blocks: MarkerBlock[]): string[] {
+  return [...new Set(blocks.map(b => b.sourceId))]
+}
+
+/** Text-axis answers double as placeholders ({{appDir}}, {{domainName}} …). */
+export function varsFor(manifest: CliManifest, answers: Record<string, string>, projectName: string): PlaceholderVars & Record<string, string> {
+  const vars: Record<string, string> = { ...placeholderVars(answers, projectName) }
+  for (const axis of manifest.base ? activeAxes(manifest.base, answers) : []) {
+    if (axis.input && answers[axis.id]) vars[axis.id] = answers[axis.id]!
+  }
+  return vars as PlaceholderVars & Record<string, string>
+}
+
+/**
+ * Everything a setup renders for a project that has nothing yet: bundle files under `.claude/`,
+ * scaffolds, the composed CLAUDE.md and the two settings files, with a complete lockfile.
+ * Synchronous and pure — no disk, no previous state — so it runs unchanged in the browser. The CLI
+ * overlays an existing project on top of this (classification, removals, hand edits) in `buildPlan`.
+ */
+export function planFresh(input: {
+  manifest: CliManifest
+  projectName: string
+  answers: Record<string, string>
+  bundles: string[]
+  bundleFiles: Record<string, BundleFiles>
+  /** The base URL the manifest was fetched from — not what it advertises, which may be a mirror. */
+  registry: string
+}): SetupPlan {
+  const { manifest, projectName, answers, bundles, bundleFiles, registry } = input
+  const warnings: string[] = []
+  const vars = varsFor(manifest, answers, projectName)
+  const lock = emptyLockfile({ registry, schemaVersion: manifest.base?.version ?? 0, projectName, answers })
+  const files: FileOp[] = []
+  let shared: Json = {}
+  let local: Json = {}
+
+  /** Render a bundle's settings file; a malformed one is reported and skipped, not thrown. */
+  const readSettings = (raw: Uint8Array, label: string): Json | null => {
+    const { text, unknown } = renderPlaceholders(decoder.decode(raw), vars)
+    for (const k of unknown) warnings.push(`${label}: unknown placeholder {{${k}}}`)
+    try {
+      return JSON.parse(text) as Json
+    } catch {
+      warnings.push(`${label}: not valid JSON, skipped`)
+      return null
+    }
+  }
+
+  for (const slug of [...bundles].sort()) {
+    const bundle = bundleFiles[slug] ?? {}
+    lock.bundles[slug] = { sha: manifest.sha, files: {} }
+    let settingsJson: Json | null = null
+    let settingsLocalJson: Json | null = null
+    for (const [rel, raw] of Object.entries(bundle).sort(byKey)) {
+      const lower = rel.toLowerCase()
+      if (lower === 'settings.json') {
+        settingsJson = readSettings(raw, `${slug}/settings.json`)
+        continue
+      }
+      if (lower === 'settings.local.json') {
+        settingsLocalJson = readSettings(raw, `${slug}/settings.local.json`)
+        continue
+      }
+      if (SKIP.has(lower)) continue
+      if (!isSafeBundlePath(rel)) {
+        warnings.push(`${slug}/${rel}: unsafe path, skipped`)
+        continue
+      }
+      const path = `.claude/${rel}`
+      let bytes = raw
+      if (!isBinary(raw)) {
+        const r = renderPlaceholders(decoder.decode(raw), vars)
+        for (const k of r.unknown) warnings.push(`${slug}/${rel}: unknown placeholder {{${k}}}`)
+        bytes = encoder.encode(r.text)
+      }
+      files.push({ path, bytes, owner: `bundle:${slug}`, action: 'create', ...(rel.startsWith('hooks/') ? { mode: 0o755 } : {}) })
+      lock.bundles[slug]!.files[path] = sha256(bytes)
+    }
+    const split = splitBundleSettings(settingsJson, settingsLocalJson)
+    shared = mergeSettings(shared, split.shared)
+    local = mergeSettings(local, split.local)
+    // Recorded per file, so a later `remove` disarms exactly these hooks and permissions again and
+    // only in the file they were merged into: an identical entry the user keeps in the other file
+    // is not this bundle's and must survive.
+    const contribution: LockSettings = { shared: settingsContribution(split.shared), local: settingsContribution(split.local) }
+    if (!isEmptyContribution(contribution.shared) || !isEmptyContribution(contribution.local)) lock.bundles[slug]!.settings = contribution
+  }
+
+  // Scaffolds from base options (templates rendered; append mode concatenates onto the same path).
+  const scaffolded = new Map<string, string>()
+  if (manifest.base) {
+    for (const s of scaffoldsFor(manifest.base, answers)) {
+      const template = manifest.base.templates[s.template]
+      if (template === undefined) {
+        warnings.push(`scaffold template ${s.template} missing from manifest`)
+        continue
+      }
+      const to = renderPlaceholders(s.to, vars).text
+      const text = renderPlaceholders(template, vars).text
+      scaffolded.set(to, s.mode === 'append' && scaffolded.has(to) ? `${scaffolded.get(to)!.replace(/\n*$/, '\n')}${text}` : text)
+    }
+  }
+  for (const [path, text] of scaffolded) {
+    const bytes = encoder.encode(text)
+    files.push({ path, bytes, owner: 'scaffold', action: 'create' })
+    lock.scaffolds[path] = sha256(bytes)
+  }
+
+  // CLAUDE.md
+  const { contributions, warnings: cw } = contributionsFor({ manifest, answers, bundles, bundleFiles, vars })
+  warnings.push(...cw)
+  const sections = manifest.base?.sections
+  const claudeMd = composeClaudeMd(null, { title: projectName, sections, contributions })
+  const composedBlocks = findMarkerBlocks(claudeMd)
+  for (const id of sourceIds(composedBlocks)) lock.blocks[id] = hashForSource(composedBlocks, id)
+
+  return {
+    files,
+    removals: [],
+    claudeMd: { content: claudeMd, changed: true, handEdited: [] },
+    settings: settingsFileFor(null, shared),
+    settingsLocal: settingsFileFor(null, local),
+    gitignore: null,
+    lock,
+    warnings
+  }
+}
+
+/** A settings file the plan may write: `null` only when there is nothing there and nothing to add. */
+export function settingsFileFor(existing: Json | null, next: Json): { content: string, changed: boolean } | null {
+  if (existing === null && !Object.keys(next).length) return null
+  const content = formatJson(next)
+  return { content, changed: content !== (existing ? formatJson(existing) : '') }
+}
