@@ -47,7 +47,7 @@ function isBinary(bytes: Uint8Array): boolean {
  * One source contributes one block per section, so its lock entry hashes every block it owns,
  * joined in document order. Used identically when recording and when detecting a hand edit.
  */
-function hashForSource(blocks: MarkerBlock[], sourceId: string): string {
+export function hashForSource(blocks: MarkerBlock[], sourceId: string): string {
   return sha256(blocks.filter(b => b.sourceId === sourceId).map(b => b.content).join('\n'))
 }
 
@@ -190,10 +190,18 @@ export async function buildPlan(input: {
   warnings.push(...cw)
   const sections = manifest.base?.sections
   const handEdited: string[] = []
+  const contributing = new Set(contributions.map(c => c.sourceId))
   const existingBlocks = project.claudeMd ? findMarkerBlocks(project.claudeMd) : []
   for (const id of sourceIds(existingBlocks)) {
     const recorded = prev?.blocks[id]
-    if (recorded && recorded !== hashForSource(existingBlocks, id)) handEdited.push(id)
+    if (!recorded || recorded === hashForSource(existingBlocks, id)) continue
+    // A hand-edited block whose source stopped contributing (its bundle was removed, or an answer
+    // changed) is dropped: re-contributing it would resurrect what the user asked to take out.
+    if (!contributing.has(id)) {
+      warnings.push(`${id}: dropped a hand-edited block (recover it from git)`)
+      continue
+    }
+    handEdited.push(id)
   }
   let effective: Contribution[] = contributions
   if (handEdited.length && !force) {

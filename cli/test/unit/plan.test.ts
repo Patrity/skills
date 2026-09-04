@@ -101,6 +101,19 @@ describe('buildPlan (existing project)', () => {
     expect(plan.removals).toEqual(['.claude/rules/demo.md'])
     expect(plan.lock.bundles.demo).toBeUndefined()
   })
+
+  it('drops a hand-edited block whose source no longer contributes, with a warning', async () => {
+    const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
+    lock.bundles.demo = { sha: 'x', files: {} }
+    lock.blocks['bundle:demo'] = sha256('- installed block')
+    const claudeMd = `# proj\n\n## Commands\n\n${startMarker('bundle:demo')}\n- I edited this by hand\n<!-- /skills:bundle:demo -->\n`
+    const plan = await buildPlan({ manifest, project: project({ lock, claudeMd }), answers, bundles: [], bundleFiles: {} })
+    expect(plan.warnings).toContain('bundle:demo: dropped a hand-edited block (recover it from git)')
+    expect(plan.claudeMd.handEdited).toEqual([])
+    expect(plan.claudeMd.content).not.toContain('bundle:demo')
+    expect(plan.claudeMd.content).not.toContain('I edited this by hand')
+    expect(plan.lock.blocks['bundle:demo']).toBeUndefined()
+  })
 })
 
 describe('buildPlan (re-run over its own output)', () => {
