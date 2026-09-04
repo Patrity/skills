@@ -5,8 +5,8 @@ paths:
 
 # Nitro server routes
 
-Everything below is relative to the package root (`{{pkgDir}}`), which is the project root unless
-the app lives in a sub-package.
+Everything below is relative to the package root — `{{pkgDir}}server/` — which is the project root
+unless the app lives in a sub-package.
 
 **Invoke the `nuxt-docs` skill** before reaching for an h3 helper or a Nitro config key you have not used in this codebase — the h3 surface changed across major versions.
 

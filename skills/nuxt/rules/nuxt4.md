@@ -11,7 +11,7 @@ paths:
 
 ## Directory layout
 
-App code lives under the srcDir (`{{appDir}}/`); Nitro, `nuxt.config.ts` and the rest of the package sit beside it at `{{pkgDir}}` — the project root in a single-app repo, the package root in a monorepo.
+App code lives under the srcDir (`{{appDir}}/`); Nitro, `{{pkgDir}}nuxt.config.ts` and the rest of the package sit beside it — at the project root in a single-app repo, the package root in a monorepo.
 
 ```
 app/            # srcDir: components, composables, layouts, middleware,
