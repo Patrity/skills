@@ -44,11 +44,33 @@ unzip doc-fetcher.zip
 mkdir -p .claude/skills
 cp -R doc-fetcher/skills/. .claude/skills/
 cat doc-fetcher/CLAUDE.md >> CLAUDE.md
-echo '.claude/skills/*/cache/' >> .gitignore
 ```
 
 Then ask Claude to generate a docs skill for the library you care about; the procedure is the
 skill.
+
+## The cache
+
+`CACHE_DIR` is `SCRIPT_DIR / "cache"`, so every generated skill caches inside its own directory and
+nowhere else. Delete the skill and the cache goes with it; delete the cache and the next fetch
+rebuilds it. Nothing here is worth committing.
+
+This bundle declares its own cache path in the `gitignore` frontmatter key, so installing through
+`pnpx @patrity/skills` puts it in the project's managed `.gitignore` block. A skill you generate
+lives under a new directory, so add its path yourself:
+
+```text
+.claude/skills/<lib>-docs/cache/
+```
+
+## Configuration
+
+The template needs none: it reads a public GitHub repo over `curl` and takes everything else from
+`CONFIG`. If you extend a generated skill to need a value — a token for a private docs repo, say —
+read it from `.claude/.env` rather than the repo root `.env`, so the project can give Claude a
+different credential than the app uses. Publishing that skill as a bundle, declare the variable
+with the `env` frontmatter key and let the tool write `.claude/.env.example`; never ship an example
+file of your own.
 
 ## Requirements
 

@@ -31,6 +31,44 @@ Bundle content is read from GitHub **at runtime**. Merging to `main`:
 
 Your bundle is live within seconds of the merge.
 
+## Skill conventions
+
+Three habits keep a bundle composable with the others. All three are about files a bundle must not
+own.
+
+**Read configuration from `.claude/.env`, never the repo root `.env`.** That separation is the
+whole point: a project can hand Claude a read-only database replica while the app keeps its own
+connection string. Declare each variable in the [`env` frontmatter](/docs/frontmatter) and let the
+tool write `.claude/.env.example`.
+
+```bash
+set -a; . "$CLAUDE_PROJECT_DIR/.claude/.env"; set +a
+```
+
+```python
+from pathlib import Path
+from dotenv import dotenv_values  # python-dotenv
+
+config = dotenv_values(Path(__file__).resolve().parents[2] / '.env')
+```
+
+```js
+process.loadEnvFile('.claude/.env')
+```
+
+The Python path walks up from `.claude/skills/<name>/script.py` to `.claude/`, so a skill nested one
+level deeper needs `parents[3]`. Take an explicit path argument if the script can be run from
+anywhere.
+
+**Cache under your own skill directory, and declare it.** A skill that downloads or generates
+anything writes it beside its own `SKILL.md`, so removing the skill removes the cache. Put the path
+in the [`gitignore` frontmatter](/docs/frontmatter) and the tool adds it to the project's managed
+block. The site never zips or serves a `cache/` directory anyway, so a committed cache is dead
+weight in the repo and nothing else.
+
+**Never ship a `.env.example` file.** The project gets exactly one, assembled from every installed
+bundle, and a bundle that ships its own fails validation with a pointer to the `env` key.
+
 ## Ground rules
 
 - No secrets, credentials, internal hostnames or IPs. Bundles are public.

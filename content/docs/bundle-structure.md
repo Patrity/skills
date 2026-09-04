@@ -6,6 +6,8 @@ Every bundle is a directory under `skills/` in the repository. The directory nam
 skills/
 └── <slug>/
     ├── README.md              required — frontmatter + docs
+    │     frontmatter: gitignore  optional — paths the project should ignore
+    │     frontmatter: env        optional — variables the skills read
     ├── skills/<name>/SKILL.md optional — one folder per skill
     ├── rules/*.md             optional — path-scoped rules
     ├── hooks/*                optional — scripts referenced by settings
@@ -38,6 +40,14 @@ into the consumer's file of the same name rather than copying over it. See
 ## CLAUDE.md
 
 A short block the user pastes into their own `CLAUDE.md`. Keep it to pointers: which skills to invoke, which rules exist, one or two hard constraints.
+
+## Caches and configuration
+
+Neither is a file you ship. Both are declared in the README's frontmatter and assembled per project.
+
+A skill that caches something writes it inside its own directory, never in a shared scratch folder, so deleting the skill deletes the cache with it. Declare the path in [`gitignore`](/docs/frontmatter) and the tool adds it to the project's managed `.gitignore` block, then takes it back out if the bundle is removed.
+
+Configuration comes from `.claude/.env`. Declare each variable in [`env`](/docs/frontmatter) — name, one-line description, whether it is required, a fake example — and the tool writes `.claude/.env.example` for the whole project and keeps `.claude/.env` out of git. A skill reads that file directly rather than the repo root `.env`, which is what lets a project point Claude at a read-only replica while the app keeps its own connection string. See [Contributing](/docs/contributing) for the snippets that do the reading.
 
 ## What the site ignores
 

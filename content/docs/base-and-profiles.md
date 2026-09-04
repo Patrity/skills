@@ -2,6 +2,8 @@
 
 The wizard does not paste a template into your project. It answers a short list of questions, collects one markdown **fragment** per answer, adds the `CLAUDE.md` snippet from every bundle you picked, and merges them into a single file where each rule lands under the heading it belongs to. This page describes the pieces and how to add your own.
 
+"The wizard" is two front ends over one implementation. [The builder](/build) runs in the browser and `pnpx @patrity/skills init` runs in a terminal, but the questions, the fragments, the pre-ticked bundles and the composition all come from `shared/setup/` — the same `planFresh()` the CLI calls. So an axis you add here shows up in both, and the zip the builder downloads holds the files `init` writes into an empty directory. The one difference is scope: `init` can also merge into a project that already has a `CLAUDE.md`, and the builder only ever plans a fresh one.
+
 ## The section convention
 
 `base/sections.yaml` defines the canonical, ordered sections. Every base fragment and every bundle `CLAUDE.md` snippet is markdown whose `##` headings must be canonical titles (or `## @<id>`); the content under a heading is that section's contribution. Content before any heading lands in `skills-and-rules`. One snippet may contribute to several sections.

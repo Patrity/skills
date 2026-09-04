@@ -122,18 +122,25 @@ describe('GET /api/skills/:slug/download', () => {
 
 describe('GET /api/docs/:slug', () => {
   it('reads the doc out of the server asset bundle and renders it', async () => {
-    const res = await $fetch<DocResponse>('/api/docs/getting-started')
-    expect(res.entry).toMatchObject({ slug: 'getting-started', title: 'Getting started' })
+    const res = await $fetch<DocResponse>('/api/docs/start-here')
+    expect(res.entry).toMatchObject({ slug: 'start-here', title: 'Start here' })
     expect(res.body.type).toBe('root')
     expect(res.body.children.length).toBeGreaterThan(0)
     expect(res.data).toEqual({})
   })
+  it('serves the philosophy doc', async () => {
+    const res = await $fetch<DocResponse>('/api/docs/philosophy')
+    expect(res.entry).toMatchObject({ slug: 'philosophy', title: 'Philosophy' })
+  })
   it('serves the CLI doc', async () => {
     expect((await fetch('/api/docs/cli')).status).toBe(200)
     expect((await fetch('/api/docs/base-and-profiles')).status).toBe(200)
+    expect((await fetch('/api/docs/single-bundle')).status).toBe(200)
   })
   it('404s for a slug that is not in the nav', async () => {
     expect((await fetch('/api/docs/nope')).status).toBe(404)
+    // getting-started was renamed to single-bundle; only the page redirects, not the API.
+    expect((await fetch('/api/docs/getting-started')).status).toBe(404)
   })
 })
 
@@ -172,6 +179,13 @@ describe('meta routes', () => {
 describe('docs pages', () => {
   it('renders a known doc', async () => {
     expect((await fetch('/docs/frontmatter')).status).toBe(200)
+    expect((await fetch('/docs/start-here')).status).toBe(200)
+    expect((await fetch('/docs/philosophy')).status).toBe(200)
+  })
+  it('301s the old getting-started URL to single-bundle', async () => {
+    const res = await fetch('/docs/getting-started', { redirect: 'manual' })
+    expect(res.status).toBe(301)
+    expect(res.headers.get('location')).toBe('/docs/single-bundle')
   })
   it('404s for an unknown doc', async () => {
     expect((await fetch('/docs/nope')).status).toBe(404)

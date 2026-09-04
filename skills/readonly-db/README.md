@@ -50,8 +50,27 @@ cat readonly-db/CLAUDE.md >> CLAUDE.md
 ```
 
 Then ask Claude to run the `readonly-db` skill: it writes the migration that creates the role and
-the `db:q` script, and wires the npm script. Put the role's credential in whatever secret manager
-the project already uses — never in a committed file.
+the `db:q` script, and wires the npm script.
+
+## Configuration
+
+The runner reads one variable, `DATABASE_URL_RO`, from `.claude/.env` — not from the repo root
+`.env`, and not from your shell profile. That is the whole point of the separation: the app keeps
+its own connection string, and Claude gets a different one that cannot write.
+
+```bash
+# .claude/.env
+DATABASE_URL_RO=postgres://<app>_claude_ro:<password>@<host>/<database>
+```
+
+Installed through `pnpx @patrity/skills`, the variable is already described in
+`.claude/.env.example` and `.claude/.env` is already in the managed `.gitignore` block. Installing
+by hand, create `.claude/.env` yourself and add it to `.gitignore` before you paste a password into
+it. `.claude/.env.example` is regenerated on every run, so it is never the place for a real value.
+
+The password itself is set out of band, once per database, as the skill describes. It belongs in
+whatever secret manager the project already uses, and in `.claude/.env` on the machine that runs
+the queries. Never in a committed file.
 
 ## Placeholders
 

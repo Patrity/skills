@@ -41,6 +41,8 @@ export default defineNuxtConfig({
     '/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/skill/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/build': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    // Renamed in the reframe; the old URL is public and indexed, so keep it pointing somewhere.
+    '/docs/getting-started': { redirect: { to: '/docs/single-bundle', statusCode: 301 } },
     '/docs/**': { isr: true },
     '/api/docs/**': { isr: true },
     '/api/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },

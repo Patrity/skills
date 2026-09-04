@@ -77,6 +77,10 @@ it, so templates stay editable and do not go stale when config changes.
 The pattern list is the whole policy — add your project's own (`*.pem`, `service-account.json`,
 `*.keystore`) to the blocking arm, and any further templates to the exempt arm.
 
+Because the match is on the basename, `.claude/.env` is covered by the same `.env` arm as the repo
+root one, while `.claude/.env.example` stays editable with the other templates — which is what the
+setup tool needs, since it rewrites that file on every run.
+
 ## The PreCompact hook
 
 `PreCompact` fires just before a long session is compressed, and this one is a `prompt` hook: the
