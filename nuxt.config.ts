@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     '/': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/skill/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    '/build': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/docs/**': { isr: true },
     '/api/docs/**': { isr: true },
     '/api/skills': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },

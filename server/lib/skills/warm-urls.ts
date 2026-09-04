@@ -40,6 +40,10 @@ export function buildWarmUrls(sitemapXml: string, details: SkillDetailResponse[]
   // The site root's payload is /_payload.json, not //_payload.json.
   const payload = (path: string) => `${path === '/' ? '' : path}/_payload.json${query}`
 
+  // The builder page: nothing in the sitemap links to it (it is not a bundle or doc page).
+  urls.add('/build')
+  urls.add(payload('/build'))
+
   const paths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => pathOf(m[1]!))
   for (const path of paths) {
     urls.add(path)

@@ -76,6 +76,11 @@ describe('buildWarmUrls', () => {
     expect(urls).toContain('/api/cli/manifest')
   })
 
+  it('always warms the /build page and its payload, even though nothing in the sitemap links to it', () => {
+    expect(urls).toContain('/build')
+    expect(urls).toContain('/build/_payload.json')
+  })
+
   it('warms the payload behind every sitemap page too, not just the bundle files', () => {
     expect(urls).toContain('/docs/getting-started/_payload.json')
     expect(urls).toContain('/docs/frontmatter/_payload.json')
@@ -101,6 +106,7 @@ describe('buildWarmUrls with a build id', () => {
   it('keeps the path encoding it uses without a build id', () => {
     expect(urls).toContain('/skill/demo/my%20docs/a%20b.md/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f')
     expect(urls).toContain('/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f')
+    expect(urls).toContain('/build/_payload.json?_b=ae943e82-ec05-4981-8881-ea2cd48aac1f')
   })
 
   it('escapes a build id that is not URL-safe', () => {

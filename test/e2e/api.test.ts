@@ -5,6 +5,11 @@ import { unzipSync } from 'fflate'
 import type { SkillDetailResponse, SkillFileResponse, SkillsListResponse } from '../../shared/types/skills'
 import type { DocResponse } from '../../shared/types/docs'
 import type { BaseResponse, CliManifest, ProfilesResponse } from '../../shared/types/setup'
+import { planFresh } from '../../shared/setup/plan'
+import { serializeLockfile } from '../../shared/setup/lock'
+import { setupZipEntries } from '../../server/lib/setup/setup-zip'
+
+const skillsDir = fileURLToPath(new URL('../fixtures/skills', import.meta.url))
 
 await setup({
   rootDir: fileURLToPath(new URL('../..', import.meta.url)),
@@ -13,9 +18,18 @@ await setup({
   nuxtConfig: {
     runtimeConfig: {
       skillsSource: 'fs',
-      skillsDir: fileURLToPath(new URL('../fixtures/skills', import.meta.url)),
+      skillsDir,
       revalidateSecret: 'test-secret'
     }
+  },
+  // A root .env (see nuxt.config.ts) sets NUXT_SKILLS_DIR / NUXT_REVALIDATE_SECRET, which
+  // override the runtimeConfig defaults above once the built server's own env resolution
+  // runs. This spread wins: startServer merges { ...process.env, ...env }, so it lands
+  // after anything .env loaded into the parent process and keeps the fixtures wired up.
+  env: {
+    NUXT_SKILLS_SOURCE: 'fs',
+    NUXT_SKILLS_DIR: skillsDir,
+    NUXT_REVALIDATE_SECRET: 'test-secret'
   }
 })
 
@@ -199,5 +213,44 @@ describe('setup endpoints', () => {
   it('caches the manifest with the skills tag', async () => {
     const res = await fetch('/api/cli/manifest')
     expect(res.headers.get('vercel-cache-tag')).toBe('skills')
+  })
+})
+
+describe('POST /api/build', () => {
+  const body = { projectName: 'e2e-app', answers: { pm: 'pnpm', layout: 'single' }, bundles: ['demo'] }
+  it('returns a zip identical to an in-process planFresh, uncached', async () => {
+    const res = await fetch('/api/build', { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('application/zip')
+    expect(res.headers.get('cache-control')).toContain('no-store')
+    expect(res.headers.get('content-disposition')).toContain('e2e-app-claude-setup.zip')
+    const zip = unzipSync(new Uint8Array(await res.arrayBuffer()))
+    const manifest = await $fetch<CliManifest>('/api/cli/manifest')
+    const demo = await $fetch<SkillFileResponse>('/api/skills/demo/file/CLAUDE.md')
+    // The in-process plan needs the bundle files: rebuild them from the download zip.
+    const bundleZip = unzipSync(new Uint8Array(await (await fetch('/api/skills/demo/download')).arrayBuffer()))
+    const bundleFiles = Object.fromEntries(Object.entries(bundleZip).map(([k, v]) => [k.replace(/^demo\//, ''), v]))
+    const plan = planFresh({ manifest, projectName: 'e2e-app', answers: body.answers, bundles: ['demo'], bundleFiles: { demo: bundleFiles }, registry: manifest.registry })
+    expect(new TextDecoder().decode(zip['CLAUDE.md']!)).toBe(plan.claudeMd.content)
+    expect(new TextDecoder().decode(zip['.claude/skills.lock.json']!)).toBe(serializeLockfile(plan.lock))
+    expect(Object.keys(zip).sort()).toEqual(setupZipEntries(plan).map(e => e.path))
+    void demo
+  })
+  it('validates', async () => {
+    const bad = await fetch('/api/build', { method: 'POST', body: JSON.stringify({ ...body, bundles: ['ghost'] }), headers: { 'content-type': 'application/json' } })
+    expect(bad.status).toBe(400)
+    expect((await bad.json()).statusMessage).toBe('unknown bundle: ghost')
+    const big = await fetch('/api/build', { method: 'POST', body: JSON.stringify({ ...body, answers: { pad: 'x'.repeat(20000) } }), headers: { 'content-type': 'application/json' } })
+    expect(big.status).toBe(413)
+  })
+})
+
+describe('POST /api/build/render', () => {
+  it('renders markdown to the docs AST shape', async () => {
+    const res = await fetch('/api/build/render', { method: 'POST', body: JSON.stringify({ markdown: '# T\n\n## Commands\n- x' }), headers: { 'content-type': 'application/json' } })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('cache-control')).toContain('no-store')
+    const json = await res.json()
+    expect(json.body.type).toBe('root')
   })
 })
