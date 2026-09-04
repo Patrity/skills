@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ensureGitignoreLine, mergeSettings, splitBundleSettings } from '../../src/settings'
+import { ensureGitignoreLine, hookIdentity, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, subtractSettings } from '../../src/settings'
 
 const hook = (command: string) => ({ type: 'command', command })
 
@@ -20,6 +20,77 @@ describe('mergeSettings', () => {
   })
   it('handles a missing existing file', () => {
     expect(mergeSettings(null, { a: 1 })).toEqual({ a: 1 })
+  })
+  it('replaces a hook whose command matches but whose other fields changed', () => {
+    const existing = { hooks: { PreToolUse: [{ matcher: 'Edit', hooks: [{ ...hook('a'), timeout: 5 }, hook('keep')] }] } }
+    const incoming = { hooks: { PreToolUse: [{ matcher: 'Edit', hooks: [{ ...hook('a'), timeout: 30 }] }] } }
+    expect(mergeSettings(existing, incoming)).toEqual({
+      hooks: { PreToolUse: [{ matcher: 'Edit', hooks: [{ ...hook('a'), timeout: 30 }, hook('keep')] }] }
+    })
+  })
+})
+
+describe('hookIdentity', () => {
+  it('is matcher + type + command, so a timeout change is the same hook', () => {
+    expect(hookIdentity('Edit', { ...hook('a'), timeout: 5 })).toBe(hookIdentity('Edit', { ...hook('a'), timeout: 30 }))
+    expect(hookIdentity('Edit', hook('a'))).not.toBe(hookIdentity('Write', hook('a')))
+    expect(hookIdentity('Edit', hook('a'))).not.toBe(hookIdentity('Edit', hook('b')))
+    expect(hookIdentity(undefined, { type: 'prompt', prompt: 'p' })).toBe(hookIdentity('', { type: 'prompt', prompt: 'p' }))
+  })
+})
+
+describe('settingsContribution', () => {
+  it('collects hook identities per event plus allow, deny and plugin keys', () => {
+    const c = settingsContribution(
+      { hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [hook('a')] }] }, permissions: { deny: ['Bash(rm:*)'] }, enabledPlugins: { p: true } },
+      { permissions: { allow: ['Bash(echo:*)'] } }
+    )
+    expect(c.hooks).toEqual({ PostToolUse: [hookIdentity('Edit', hook('a'))] })
+    expect(c).toMatchObject({ allow: ['Bash(echo:*)'], deny: ['Bash(rm:*)'], enabledPlugins: ['p'] })
+    expect(isEmptyContribution(c)).toBe(false)
+    expect(isEmptyContribution(settingsContribution({ outputStyle: 'Concise' }, null))).toBe(true)
+  })
+})
+
+describe('subtractSettings', () => {
+  const bundle = settingsContribution(
+    { hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [hook('bundle')] }] }, permissions: { deny: ['Bash(rm:*)'] }, enabledPlugins: { p: true } },
+    { permissions: { allow: ['Bash(echo:*)'] } }
+  )
+
+  it('takes a bundle back out and prunes what it emptied', () => {
+    const existing = {
+      hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [{ ...hook('bundle'), timeout: 30 }] }] },
+      permissions: { deny: ['Bash(rm:*)'], allow: ['Bash(echo:*)'] },
+      enabledPlugins: { p: true }
+    }
+    expect(subtractSettings(existing, bundle)).toEqual({})
+  })
+
+  it('leaves everything the user added alone', () => {
+    const existing = {
+      hooks: {
+        PostToolUse: [{ matcher: 'Edit', hooks: [hook('bundle'), hook('mine')] }, { matcher: 'Bash', hooks: [hook('mine')] }],
+        SessionStart: [{ hooks: [hook('mine')] }]
+      },
+      permissions: { deny: ['Bash(rm:*)', 'Bash(curl:*)'], allow: ['Bash(echo:*)'], defaultMode: 'acceptEdits' },
+      enabledPlugins: { p: true, mine: true },
+      outputStyle: 'Concise'
+    }
+    expect(subtractSettings(existing, bundle)).toEqual({
+      hooks: {
+        PostToolUse: [{ matcher: 'Edit', hooks: [hook('mine')] }, { matcher: 'Bash', hooks: [hook('mine')] }],
+        SessionStart: [{ hooks: [hook('mine')] }]
+      },
+      permissions: { deny: ['Bash(curl:*)'], defaultMode: 'acceptEdits' },
+      enabledPlugins: { mine: true },
+      outputStyle: 'Concise'
+    })
+  })
+
+  it('is a no-op on a file that never had the contribution', () => {
+    expect(subtractSettings({ outputStyle: 'Concise' }, bundle)).toEqual({ outputStyle: 'Concise' })
+    expect(subtractSettings(null, bundle)).toEqual({})
   })
 })
 

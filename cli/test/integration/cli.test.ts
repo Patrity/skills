@@ -151,6 +151,10 @@ describe('@patrity/skills end to end', () => {
     // The bundle that stays keeps its block, and `.claude` itself survives.
     expect(await read(dir, 'CLAUDE.md')).toContain(startMarker('bundle:second'))
     expect((await stat(join(dir, '.claude/settings.json'))).isFile()).toBe(true)
+    // Its hooks are disarmed with it: a fail-closed hook whose script was just deleted would block
+    // every Edit and Write until someone noticed.
+    expect(JSON.parse(await read(dir, '.claude/settings.json'))).toEqual({})
+    expect(JSON.parse(await read(dir, '.claude/settings.local.json'))).toEqual({})
   })
 
   it('re-running init keeps what add installed', async () => {

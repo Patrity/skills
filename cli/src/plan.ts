@@ -7,7 +7,7 @@ import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
 import { emptyLockfile, sha256, type Lockfile } from './lockfile'
 import { isSafeBundlePath, type BundleFiles } from './registry'
 import type { ProjectState } from './project'
-import { ensureGitignoreLine, formatJson, mergeSettings, splitBundleSettings, type Json } from './settings'
+import { ensureGitignoreLine, formatJson, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, subtractSettings, type Json, type SettingsContribution } from './settings'
 
 export interface FileOp {
   path: string
@@ -143,6 +143,9 @@ export async function buildPlan(input: {
     const split = splitBundleSettings(settingsJson, settingsLocalJson)
     shared = mergeSettings(shared, split.shared)
     local = mergeSettings(local, split.local)
+    // Recorded so a later `remove` can disarm exactly these hooks and permissions again.
+    const contribution = settingsContribution(split.shared, split.local)
+    if (!isEmptyContribution(contribution)) lock.bundles[slug]!.settings = contribution
   }
 
   // Scaffolds from base options (templates rendered; append mode concatenates onto the same path).
@@ -223,20 +226,32 @@ export async function buildPlan(input: {
     lock.blocks[id] = kept ?? hashForSource(composedBlocks, id)
   }
 
-  const settingsContent = Object.keys(shared).length ? formatJson(mergeSettings(project.settings, shared)) : null
-  const localContent = Object.keys(local).length ? formatJson(mergeSettings(project.settingsLocal, local)) : null
-  const gitignoreContent = localContent ? ensureGitignoreLine(project.gitignore, '.claude/settings.local.json') : null
+  // Every contribution the previous lock recorded comes out before the new ones go in — of dropped
+  // bundles (so their fail-closed hooks stop firing once their scripts are gone) and of kept ones
+  // (so a changed hook or permission replaces the installed entry instead of accumulating).
+  const previous = Object.values(prev?.bundles ?? {}).map(b => b.settings).filter((c): c is SettingsContribution => c !== undefined)
+  const strip = (existing: Json | null): Json | null => (existing === null ? null : previous.reduce(subtractSettings, existing))
+  const settings = settingsFile(project.settings, mergeSettings(strip(project.settings), shared))
+  const settingsLocal = settingsFile(project.settingsLocal, mergeSettings(strip(project.settingsLocal), local))
+  const gitignoreContent = settingsLocal ? ensureGitignoreLine(project.gitignore, '.claude/settings.local.json') : null
 
   return {
     files,
     removals,
     claudeMd: { content: claudeMd, changed: claudeMd !== (project.claudeMd ?? ''), handEdited },
-    settings: settingsContent ? { content: settingsContent, changed: settingsContent !== (project.settings ? formatJson(project.settings) : '') } : null,
-    settingsLocal: localContent ? { content: localContent, changed: localContent !== (project.settingsLocal ? formatJson(project.settingsLocal) : '') } : null,
+    settings,
+    settingsLocal,
     gitignore: gitignoreContent ? { content: gitignoreContent, changed: gitignoreContent !== (project.gitignore ?? '') } : null,
     lock,
     warnings
   }
+}
+
+/** A settings file the plan may write: `null` only when there is nothing there and nothing to add. */
+function settingsFile(existing: Json | null, next: Json): { content: string, changed: boolean } | null {
+  if (existing === null && !Object.keys(next).length) return null
+  const content = formatJson(next)
+  return { content, changed: content !== (existing ? formatJson(existing) : '') }
 }
 
 /** The canonical section id of the `## …` heading above a given line, or skills-and-rules. */

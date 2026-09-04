@@ -1,26 +1,125 @@
 export type Json = Record<string, unknown>
 
+/**
+ * What one bundle put into the two settings files, recorded in the lockfile so a later run can take
+ * it back out: hook identities per event, and the permission/plugin entries it contributed.
+ */
+export interface SettingsContribution {
+  hooks: Record<string, string[]>
+  allow: string[]
+  deny: string[]
+  enabledPlugins: string[]
+}
+
+type HookGroup = { matcher?: string, hooks?: unknown[] }
+
 const isObject = (v: unknown): v is Json => typeof v === 'object' && v !== null && !Array.isArray(v)
-const unionStrings = (a: unknown, b: unknown): string[] => [...new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])].filter((x): x is string => typeof x === 'string'))]
+const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+const unionStrings = (a: unknown, b: unknown): string[] => [...new Set([...strings(a), ...strings(b)])]
+
+/**
+ * A hook's identity for merge and subtraction: matcher, type and command (spec §5.2 unions by
+ * command). Deliberately not the whole object — when upstream changes a `timeout`, the entry must
+ * replace the installed one rather than sit beside it as a duplicate.
+ */
+export function hookIdentity(matcher: string | undefined, hook: unknown): string {
+  const h = (isObject(hook) ? hook : {}) as { type?: unknown, command?: unknown, prompt?: unknown }
+  const body = typeof h.command === 'string' ? h.command : typeof h.prompt === 'string' ? h.prompt : ''
+  return JSON.stringify([matcher ?? '', typeof h.type === 'string' ? h.type : '', body])
+}
 
 function mergeHookEvent(existing: unknown, incoming: unknown): unknown[] {
-  type Group = { matcher?: string, hooks?: unknown[] }
-  const groups: Group[] = Array.isArray(existing) ? existing.map(g => ({ ...(g as Group), hooks: [...((g as Group).hooks ?? [])] })) : []
+  const groups: HookGroup[] = Array.isArray(existing) ? existing.map(g => ({ ...(g as HookGroup), hooks: [...((g as HookGroup).hooks ?? [])] })) : []
   for (const raw of Array.isArray(incoming) ? incoming : []) {
-    const g = raw as Group
+    const g = raw as HookGroup
     const target = groups.find(x => (x.matcher ?? '') === (g.matcher ?? ''))
     if (!target) {
       groups.push({ ...g, hooks: [...(g.hooks ?? [])] })
       continue
     }
-    const seen = new Set((target.hooks ?? []).map(h => JSON.stringify(h)))
-    for (const h of g.hooks ?? []) {
-      if (seen.has(JSON.stringify(h))) continue
-      target.hooks!.push(h)
-      seen.add(JSON.stringify(h))
+    for (const hook of g.hooks ?? []) {
+      const id = hookIdentity(target.matcher, hook)
+      const at = (target.hooks ?? []).findIndex(h => hookIdentity(target.matcher, h) === id)
+      if (at === -1) target.hooks!.push(hook)
+      else target.hooks![at] = hook // same command, changed timeout: replace, never duplicate
     }
   }
   return groups
+}
+
+/** Everything the given settings objects (a bundle's shared + local halves) contribute, deduped. */
+export function settingsContribution(...parts: (Json | null)[]): SettingsContribution {
+  const hooks: Record<string, Set<string>> = {}
+  const allow = new Set<string>()
+  const deny = new Set<string>()
+  const plugins = new Set<string>()
+  for (const part of parts) {
+    if (!part) continue
+    if (isObject(part.hooks)) {
+      for (const [event, groups] of Object.entries(part.hooks)) {
+        for (const raw of Array.isArray(groups) ? groups : []) {
+          const g = raw as HookGroup
+          for (const hook of g.hooks ?? []) (hooks[event] ??= new Set()).add(hookIdentity(g.matcher, hook))
+        }
+      }
+    }
+    if (isObject(part.permissions)) {
+      for (const entry of strings(part.permissions.allow)) allow.add(entry)
+      for (const entry of strings(part.permissions.deny)) deny.add(entry)
+    }
+    if (isObject(part.enabledPlugins)) for (const key of Object.keys(part.enabledPlugins)) plugins.add(key)
+  }
+  return {
+    hooks: Object.fromEntries(Object.entries(hooks).map(([event, ids]) => [event, [...ids]])),
+    allow: [...allow],
+    deny: [...deny],
+    enabledPlugins: [...plugins]
+  }
+}
+
+export const isEmptyContribution = (c: SettingsContribution): boolean =>
+  !Object.keys(c.hooks).length && !c.allow.length && !c.deny.length && !c.enabledPlugins.length
+
+/**
+ * Take one bundle's recorded contribution back out of a settings file. Hooks go by identity, so an
+ * entry the user retyped by hand survives; empty matcher groups, events and containers are pruned.
+ * Anything another selected bundle still contributes is merged straight back in afterwards.
+ */
+export function subtractSettings(existing: Json | null, contribution: SettingsContribution): Json {
+  const out: Json = { ...(existing ?? {}) }
+  if (isObject(out.hooks)) {
+    const hooks: Json = {}
+    for (const [event, groups] of Object.entries(out.hooks)) {
+      const drop = new Set(contribution.hooks[event] ?? [])
+      const kept: HookGroup[] = []
+      for (const raw of Array.isArray(groups) ? groups : []) {
+        const g = raw as HookGroup
+        const remaining = (g.hooks ?? []).filter(h => !drop.has(hookIdentity(g.matcher, h)))
+        if (remaining.length) kept.push({ ...g, hooks: remaining })
+      }
+      if (kept.length) hooks[event] = kept
+    }
+    if (Object.keys(hooks).length) out.hooks = hooks
+    else delete out.hooks
+  }
+  if (isObject(out.permissions)) {
+    const perms: Json = { ...out.permissions }
+    for (const [key, dropped] of [['allow', contribution.allow], ['deny', contribution.deny]] as const) {
+      if (!Array.isArray(perms[key])) continue
+      const kept = (perms[key] as unknown[]).filter(v => typeof v !== 'string' || !dropped.includes(v))
+      if (kept.length) perms[key] = kept
+      else delete perms[key]
+    }
+    if (Object.keys(perms).length) out.permissions = perms
+    else delete out.permissions
+  }
+  if (isObject(out.enabledPlugins)) {
+    const plugins: Json = { ...out.enabledPlugins }
+    for (const key of contribution.enabledPlugins) delete plugins[key]
+    if (Object.keys(plugins).length) out.enabledPlugins = plugins
+    else delete out.enabledPlugins
+  }
+  return out
 }
 
 export function mergeSettings(existing: Json | null, incoming: Json): Json {

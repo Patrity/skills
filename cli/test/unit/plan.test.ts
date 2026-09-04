@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildPlan, type SetupPlan } from '../../src/plan'
 import { emptyLockfile, sha256 } from '../../src/lockfile'
+import { mergeSettings } from '../../src/settings'
 import type { ProjectState } from '../../src/project'
 import { fixtureManifest, loadFixtureBundle } from '../helpers/fixtures'
 import { startMarker } from '../../../shared/setup/markers'
@@ -247,6 +248,58 @@ describe('buildPlan (bundle settings)', () => {
     expect(plan.settingsLocal).toBeNull()
     expect(plan.gitignore).toBeNull()
     expect(plan.files.some(f => f.path === '.claude/rules/demo.md')).toBe(true)
+  })
+
+  it('records what each bundle contributed to the two settings files', async () => {
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const contribution = plan.lock.bundles.demo!.settings!
+    expect(contribution.deny).toEqual(['Bash(rm -rf:*)'])
+    expect(contribution.allow).toEqual(['Bash(echo:*)'])
+    expect(Object.keys(contribution.hooks)).toEqual(['PostToolUse'])
+    // A bundle with nothing to merge records nothing.
+    const bare = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: { 'rules/x.md': enc('x') } } })
+    expect(bare.lock.bundles.demo!.settings).toBeUndefined()
+  })
+
+  it('disarms a removed bundle: its hooks and permissions leave the settings files', async () => {
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect(first.settings!.content).toContain('pre-commit.sh')
+    const after = projectAfter(first)
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: after, answers, bundles: [], bundleFiles: {} })
+    expect(plan.settings!.changed).toBe(true)
+    expect(JSON.parse(plan.settings!.content)).toEqual({})
+    expect(JSON.parse(plan.settingsLocal!.content)).toEqual({})
+  })
+
+  it('never touches hooks and permissions the user added by hand', async () => {
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const after = projectAfter(first)
+    const mine = { type: 'command', command: 'mine.sh' }
+    after.settings = mergeSettings(after.settings, { hooks: { PostToolUse: [{ matcher: 'Edit|Write', hooks: [mine] }] }, permissions: { deny: ['Bash(curl:*)'] } })
+    after.settingsLocal = mergeSettings(after.settingsLocal, { permissions: { allow: ['Bash(ls:*)'] } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: after, answers, bundles: [], bundleFiles: {} })
+    const settings = JSON.parse(plan.settings!.content) as { hooks: Record<string, { hooks: unknown[] }[]>, permissions: { deny: string[] } }
+    expect(settings.hooks.PostToolUse).toEqual([{ matcher: 'Edit|Write', hooks: [mine] }])
+    expect(settings.permissions.deny).toEqual(['Bash(curl:*)'])
+    expect(JSON.parse(plan.settingsLocal!.content)).toEqual({ permissions: { allow: ['Bash(ls:*)'] } })
+  })
+
+  it('replaces a hook whose timeout changed upstream instead of duplicating it', async () => {
+    const files = loadFixtureBundle()
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: files } })
+    const after = projectAfter(first)
+
+    const bumped = loadFixtureBundle()
+    const settings = JSON.parse(dec(bumped['settings.json']!)) as { hooks: { PostToolUse: { hooks: { timeout?: number }[] }[] } }
+    settings.hooks.PostToolUse[0]!.hooks[0]!.timeout = 30
+    bumped['settings.json'] = enc(JSON.stringify(settings))
+
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: after, answers, bundles: ['demo'], bundleFiles: { demo: bumped } })
+    const written = JSON.parse(plan.settings!.content) as { hooks: { PostToolUse: { hooks: { timeout?: number }[] }[] } }
+    expect(written.hooks.PostToolUse).toHaveLength(1)
+    expect(written.hooks.PostToolUse[0]!.hooks).toHaveLength(1)
+    expect(written.hooks.PostToolUse[0]!.hooks[0]!.timeout).toBe(30)
+    expect(plan.settings!.changed).toBe(true)
   })
 
   it('renders placeholders in settings.local.json too', async () => {

@@ -1,6 +1,14 @@
 import { createHash } from 'node:crypto'
+import type { SettingsContribution } from './settings'
 
 export const LOCKFILE_PATH = '.claude/skills.lock.json'
+
+export interface LockBundle {
+  sha: string
+  files: Record<string, string>
+  /** What this bundle merged into settings.json / settings.local.json, so removing it can undo it. */
+  settings?: SettingsContribution
+}
 
 export interface Lockfile {
   version: 1
@@ -8,7 +16,7 @@ export interface Lockfile {
   schemaVersion: number
   projectName: string
   answers: Record<string, string>
-  bundles: Record<string, { sha: string, files: Record<string, string> }>
+  bundles: Record<string, LockBundle>
   scaffolds: Record<string, string>
   blocks: Record<string, string>
 }
@@ -53,14 +61,42 @@ export function parseLockfile(text: string): Lockfile {
     schemaVersion: lock.schemaVersion,
     projectName: lock.projectName,
     answers: { ...lock.answers },
-    bundles: { ...lock.bundles },
+    bundles: Object.fromEntries(Object.entries(lock.bundles).map(([slug, b]) => [slug, parseBundle(b)])),
     scaffolds: { ...lock.scaffolds },
     blocks: { ...lock.blocks }
   }
 }
 
+const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+
+/** A lockfile written before `settings` existed simply has none: it parses, and nothing is undone. */
+function parseBundle(bundle: LockBundle): LockBundle {
+  const raw = bundle as LockBundle & { settings?: unknown }
+  const out: LockBundle = { sha: bundle.sha, files: { ...bundle.files } }
+  const s: unknown = raw.settings
+  if (typeof s === 'object' && s !== null && !Array.isArray(s)) {
+    const { hooks, allow, deny, enabledPlugins } = s as { hooks?: unknown, allow?: unknown, deny?: unknown, enabledPlugins?: unknown }
+    const events: Record<string, string[]> = {}
+    if (typeof hooks === 'object' && hooks !== null) {
+      for (const [event, ids] of Object.entries(hooks as Record<string, unknown>)) events[event] = strings(ids)
+    }
+    out.settings = { hooks: events, allow: strings(allow), deny: strings(deny), enabledPlugins: strings(enabledPlugins) }
+  }
+  return out
+}
+
 function sortedEntries<T>(o: Record<string, T>): Record<string, T> {
   return Object.fromEntries(Object.keys(o).sort().map(k => [k, o[k] as T]))
+}
+
+/** Sorted throughout, like every other lockfile field: the file must be byte-identical run to run. */
+function serializeContribution(c: SettingsContribution): SettingsContribution {
+  return {
+    hooks: sortedEntries(Object.fromEntries(Object.entries(c.hooks).map(([event, ids]) => [event, [...ids].sort()]))),
+    allow: [...c.allow].sort(),
+    deny: [...c.deny].sort(),
+    enabledPlugins: [...c.enabledPlugins].sort()
+  }
 }
 
 export function serializeLockfile(lock: Lockfile): string {
@@ -72,7 +108,11 @@ export function serializeLockfile(lock: Lockfile): string {
     answers: sortedEntries(lock.answers),
     bundles: sortedEntries(
       Object.fromEntries(
-        Object.entries(lock.bundles).map(([slug, b]) => [slug, { sha: b.sha, files: sortedEntries(b.files) }])
+        Object.entries(lock.bundles).map(([slug, b]) => [slug, {
+          sha: b.sha,
+          files: sortedEntries(b.files),
+          ...(b.settings ? { settings: serializeContribution(b.settings) } : {})
+        }])
       )
     ),
     scaffolds: sortedEntries(lock.scaffolds),
