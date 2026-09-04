@@ -113,6 +113,10 @@ describe('GET /api/docs/:slug', () => {
     expect(res.body.children.length).toBeGreaterThan(0)
     expect(res.data).toEqual({})
   })
+  it('serves the CLI doc', async () => {
+    expect((await fetch('/api/docs/cli')).status).toBe(200)
+    expect((await fetch('/api/docs/base-and-profiles')).status).toBe(200)
+  })
   it('404s for a slug that is not in the nav', async () => {
     expect((await fetch('/api/docs/nope')).status).toBe(404)
   })

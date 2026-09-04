@@ -9,6 +9,7 @@ export function useAnalytics() {
   return {
     trackSkillView: (slug: string) => track('skill-view', { slug }),
     trackDownload: (slug: string, from: 'index' | 'detail') => track('skill-download', { slug, from }),
-    trackSource: (slug: string) => track('skill-source', { slug })
+    trackSource: (slug: string) => track('skill-source', { slug }),
+    trackInstallCopy: (slug: string) => track('skill-install-copy', { slug })
   }
 }

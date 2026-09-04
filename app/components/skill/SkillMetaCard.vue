@@ -37,6 +37,11 @@ defineProps<{ skill: SkillManifest }>()
         :badges="skill.badges"
         class="mt-3"
       />
+      <SkillInstallCommand
+        :command="`pnpx @patrity/skills add ${skill.slug}`"
+        :slug="skill.slug"
+        class="mt-4"
+      />
       <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         <div>
           <dt class="text-xs text-muted">
