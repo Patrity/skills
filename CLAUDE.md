@@ -37,6 +37,9 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - `invalidateByTag('skills')` DOES purge ISR entries: after `POST /api/revalidate` the next hit is `x-vercel-cache: STALE`, then `HIT`. No bypass-token fallback needed.
 - A skills-only push is ignored by Vercel (`scripts/should-build.sh`) and the `revalidate` workflow puts the new sha on the CDN in ~5 s. A redeploy of the same commit (env changes) always builds.
 - Env changes need a redeploy: `vercel redeploy <latest-production-url> --scope patritys-projects`.
+- CLI `@patrity/skills` (workspace `cli/`) is published from `.github/workflows/release-cli.yml` on `cli-v*` tags (repo secret `NPM_TOKEN`); first release `cli-v0.1.0` on 2026-09-04. Bump `cli/package.json` before tagging — the workflow refuses a mismatched tag. Smoke: `pnpm dlx @patrity/skills init --yes --profile nuxt-app --json` in a scratch dir.
+- A push that adds API routes AND touches `skills/**` makes the `revalidate` workflow's warm step 404 on the new routes (it runs before Vercel finishes deploying); the deploy-triggered `warm` workflow fixes it. Expected, not a regression.
+- A local `.env` that sets `NUXT_SKILLS_DIR` or `NUXT_REVALIDATE_SECRET` overrides the e2e fixture config and fails 14 `pnpm test` assertions; unset them (or use `.env.example` values only) before running the e2e suite.
 
 ## Self-improvement
 - When a convention or gotcha emerges, add it here (short) or as a rule/skill (long). Mirror substantive docs to MyMind (project `skills`) and track deferred work as MyMind tasks.
