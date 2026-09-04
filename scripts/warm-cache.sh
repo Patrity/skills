@@ -73,6 +73,7 @@ if [ -n "$bad" ]; then
   exit 1
 fi
 
-slowest="$(sort -k2 -gr "$tmp/results.txt" | head -3)"
+sorted="$(sort -k2 -gr "$tmp/results.txt")"
+slowest="$(printf '%s\n' "$sorted" | head -3)"
 echo "warm-cache.sh: all $total URLs 2xx. Slowest:"
 echo "$slowest" | sed 's/^/  /'
