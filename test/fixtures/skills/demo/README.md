@@ -5,6 +5,9 @@ tags: [demo, fixture]
 author: Tester
 authorUrl: https://example.com
 requires: [python3]
+gitignore: [".claude/skills/demo-skill/cache/"]
+env:
+  - { name: DEMO_TOKEN, description: "Token the demo skill sends.", required: false, example: "<token>" }
 ---
 
 # Demo bundle

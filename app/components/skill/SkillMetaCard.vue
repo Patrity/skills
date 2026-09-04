@@ -77,6 +77,22 @@ defineProps<{ skill: SkillManifest }>()
             {{ skill.requires.join(', ') }}
           </dd>
         </div>
+        <div v-if="skill.gitignore?.length">
+          <dt class="text-xs text-muted">
+            Gitignore
+          </dt>
+          <dd class="font-mono text-xs">
+            {{ skill.gitignore.join(', ') }}
+          </dd>
+        </div>
+        <div v-if="skill.env?.length">
+          <dt class="text-xs text-muted">
+            Environment
+          </dt>
+          <dd class="font-mono text-xs">
+            {{ skill.env.map(v => v.name).join(', ') }}
+          </dd>
+        </div>
       </dl>
     </template>
   </UPageCard>

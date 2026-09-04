@@ -1,4 +1,5 @@
 import type { MDCRoot } from '@nuxtjs/mdc'
+import type { EnvVar } from './setup'
 
 /** Markdown parsed to the MDC AST on the server; `<MDCRenderer :body>` renders it as-is. */
 export type MarkdownBody = MDCRoot
@@ -25,6 +26,10 @@ export interface SkillFrontmatter {
   dependsOn?: string[]
   /** Bundle slugs the wizard pre-ticks alongside this one. */
   suggests?: string[]
+  /** Project-relative paths the tool adds to the managed block in the project's .gitignore. */
+  gitignore?: string[]
+  /** Variables the bundle's skills read from .claude/.env. */
+  env?: EnvVar[]
 }
 
 export interface TreeNode {

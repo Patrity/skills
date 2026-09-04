@@ -4,6 +4,8 @@ description: A dedicated read-only role, a one-statement runner wrapped in BEGIN
 tags: [database, postgres, safety]
 author: Patrity
 authorUrl: https://github.com/Patrity
+env:
+  - { name: DATABASE_URL_RO, description: "Read-only Postgres connection string for the db:q runner. Point it at a replica or a dedicated read-only role.", required: true, example: "postgres://<app>_claude_ro:<password>@<host>/<database>" }
 ---
 
 # Read-only DB Access

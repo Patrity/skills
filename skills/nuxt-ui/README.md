@@ -6,6 +6,7 @@ author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3]
 dependsOn: [nuxt]
+gitignore: [".claude/skills/nuxt-ui-docs/cache/", ".claude/skills/nuxt-ui-templates/cache/"]
 ---
 
 # Nuxt UI

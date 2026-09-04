@@ -17,6 +17,7 @@ export function parseBundle(raw: RawBundle): { manifest: SkillManifest, files: B
 
   const files: BundleFiles = {}
   for (const [path, bytes] of Object.entries(raw.files)) {
+    if (path.toLowerCase() === '.env.example') errors.push('.env.example: declare variables with the env frontmatter key instead of shipping a file')
     if (!isExcludedPath(path)) files[path] = bytes
   }
 
@@ -54,6 +55,8 @@ export function parseBundle(raw: RawBundle): { manifest: SkillManifest, files: B
     requires: fm?.requires,
     dependsOn: fm?.dependsOn,
     suggests: fm?.suggests,
+    gitignore: fm?.gitignore,
+    env: fm?.env,
     badges: deriveBadges(paths),
     fileCount: paths.length,
     totalBytes,

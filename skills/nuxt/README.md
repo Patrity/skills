@@ -6,6 +6,7 @@ author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3]
 suggests: [nuxt-ui, browser-testing]
+gitignore: [".claude/skills/nuxt-docs/cache/"]
 ---
 
 # Nuxt

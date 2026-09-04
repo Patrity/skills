@@ -5,6 +5,7 @@ tags: [docs, generator, python]
 author: Patrity
 authorUrl: https://github.com/Patrity
 requires: [python3, curl]
+gitignore: [".claude/skills/doc-fetcher/cache/"]
 ---
 
 # Doc Fetcher

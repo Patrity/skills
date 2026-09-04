@@ -31,6 +31,7 @@ describe('GET /api/skills', () => {
     expect(res.sha).toMatch(/^fs-/)
     expect(res.skills.map(s => s.slug)).toEqual(['broken', 'demo', 'no-readme'])
     expect(res.skills.find(s => s.slug === 'demo')).toMatchObject({ name: 'Demo', tags: ['demo', 'fixture'], errors: [] })
+    expect(res.skills.find(s => s.slug === 'demo')).toMatchObject({ gitignore: ['.claude/skills/demo-skill/cache/'], env: [{ name: 'DEMO_TOKEN', description: 'Token the demo skill sends.', required: false, example: '<token>' }] })
     expect('tree' in res.skills[0]!).toBe(false)
   })
 })

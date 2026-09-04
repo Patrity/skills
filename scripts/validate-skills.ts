@@ -39,6 +39,8 @@ for (const skill of snapshot.skills) {
     for (const err of skill.errors) console.error(`    - ${err}`)
   } else {
     console.log(`✓ ${skill.slug} — ${skill.name} (${skill.fileCount} files; ${skill.badges.join(', ') || 'no badges'})`)
+    if (skill.gitignore?.length) console.log(`    gitignore: ${skill.gitignore.join(', ')}`)
+    if (skill.env?.length) console.log(`    env: ${skill.env.map(v => `${v.name}${v.required ? ' (required)' : ''}`).join(', ')}`)
   }
   warnOnNameMismatch(skill.slug, snapshot.files[skill.slug] ?? {})
 }

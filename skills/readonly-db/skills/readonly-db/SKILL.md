@@ -36,6 +36,8 @@ which is the intended friction: the rules below should be in context whenever th
 
 `scripts/db-query.mjs` (name it what you like; wire it as `"db:q"` in `package.json`):
 
+- loads `.claude/.env` before connecting, e.g. `set -a; . "${CLAUDE_PROJECT_DIR:-.}/.claude/.env"; set +a`
+  in the wrapper that invokes the script, so `$DATABASE_URL_RO` is set;
 - connects with the **read-only role's** credential only — a separate env var from the app's, e.g.
   `DATABASE_URL_RO`;
 - accepts only `SELECT`, `WITH`, `EXPLAIN`, `SHOW`, `TABLE` and `VALUES`, matched on the first
@@ -48,6 +50,9 @@ which is the intended friction: the rules below should be in context whenever th
 
 The allowlist and the transaction are belt and braces on purpose: the allowlist gives a good error
 message, `BEGIN READ ONLY` is what actually makes it true.
+
+The runner reads `.claude/.env`, never the repo root `.env`, so a project can point Claude at a
+different database than the app uses.
 
 ## The role
 

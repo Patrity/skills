@@ -42,6 +42,9 @@ export interface BaseSchema {
   templates: Record<string, string>
 }
 
+/** A variable a bundle reads from `.claude/.env`; the tool writes it into `.claude/.env.example`. */
+export interface EnvVar { name: string, description: string, required?: boolean, example?: string }
+
 export interface Profile {
   name: string
   description: string

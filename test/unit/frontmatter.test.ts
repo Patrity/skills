@@ -67,6 +67,20 @@ describe('parseFrontmatter', () => {
     const bad = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ndependsOn: [Bad_Slug]\n---\n')
     expect(bad.errors.some(e => e.startsWith('frontmatter.dependsOn.0:'))).toBe(true)
   })
+
+  it('accepts gitignore and env declarations and rejects bad shapes', () => {
+    const ok = parseFrontmatter(`---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ngitignore: [".claude/skills/x/cache/"]\nenv:\n  - { name: API_KEY, description: key, required: true, example: "<key>" }\n---\n`)
+    expect(ok.errors).toEqual([])
+    expect(ok.data?.gitignore).toEqual(['.claude/skills/x/cache/'])
+    expect(ok.data?.env).toEqual([{ name: 'API_KEY', description: 'key', required: true, example: '<key>' }])
+    const bad = parseFrontmatter(`---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ngitignore: ["../x", "/abs"]\nenv:\n  - { name: lower, description: d }\n  - { name: DUP, description: d }\n  - { name: DUP, description: d }\n---\n`)
+    expect(bad.errors).toEqual([
+      'frontmatter.gitignore.0: must be a project-relative path (no leading /, no .. segment)',
+      'frontmatter.gitignore.1: must be a project-relative path (no leading /, no .. segment)',
+      'frontmatter.env.0.name: must match ^[A-Z][A-Z0-9_]*$',
+      'frontmatter.env: duplicate name DUP'
+    ])
+  })
 })
 
 describe('SLUG_RE', () => {

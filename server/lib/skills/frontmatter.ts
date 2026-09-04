@@ -3,6 +3,35 @@ import { z } from 'zod'
 import type { SkillFrontmatter } from '../../../shared/types/skills'
 
 export const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+export const ENV_NAME_RE = /^[A-Z][A-Z0-9_]*$/
+
+const relativePath = z.string().min(1).refine(
+  p => !p.startsWith('/') && !/(^|\/)\.\.(\/|$)/.test(p) && !/^[A-Za-z]:/.test(p) && !p.includes('\\'),
+  { message: 'must be a project-relative path (no leading /, no .. segment)' }
+)
+
+const envVar = z.object({
+  name: z.string().regex(ENV_NAME_RE, { message: 'must match ^[A-Z][A-Z0-9_]*$' }),
+  description: z.string().min(1),
+  required: z.boolean().optional(),
+  example: z.string().optional()
+})
+
+// zod 4.5.4's `refine` only accepts `params?: string | $ZodCustomParams` — no function-of-value
+// message — so the duplicate-name check uses `superRefine` with `ctx.addIssue({ path: [] })`
+// instead: an empty path keeps the issue attached to this array, which (nested under
+// `frontmatterSchema`'s `env` key) renders as `frontmatter.env` in parseFrontmatter below.
+const envList = z.array(envVar).optional().superRefine((list, ctx) => {
+  if (!list) return
+  const seen = new Set<string>()
+  for (const v of list) {
+    if (seen.has(v.name)) {
+      ctx.addIssue({ code: 'custom', message: `duplicate name ${v.name}`, path: [] })
+      return
+    }
+    seen.add(v.name)
+  }
+})
 
 export const frontmatterSchema = z.object({
   name: z.string().min(1),
@@ -12,7 +41,9 @@ export const frontmatterSchema = z.object({
   authorUrl: z.url().optional(),
   requires: z.array(z.string().min(1)).optional(),
   dependsOn: z.array(z.string().regex(SLUG_RE)).optional(),
-  suggests: z.array(z.string().regex(SLUG_RE)).optional()
+  suggests: z.array(z.string().regex(SLUG_RE)).optional(),
+  gitignore: z.array(relativePath).optional(),
+  env: envList
 })
 
 export interface FrontmatterResult {

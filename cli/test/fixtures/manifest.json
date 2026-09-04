@@ -181,6 +181,17 @@
       "suggests": [
         "second"
       ],
+      "gitignore": [
+        ".claude/skills/demo-skill/cache/"
+      ],
+      "env": [
+        {
+          "name": "DEMO_TOKEN",
+          "description": "Token the demo skill sends.",
+          "required": false,
+          "example": "<token>"
+        }
+      ],
       "fileCount": 6,
       "totalBytes": 600,
       "errors": []

@@ -73,6 +73,17 @@ describe('parseBundle', () => {
     const { manifest } = parseBundle({ slug: 'demo', files: { 'README.md': enc(readme), 'CLAUDE.md': enc('- invoke things\n') } })
     expect(manifest.errors).toEqual([])
   })
+
+  it('copies gitignore/env onto the manifest and rejects a shipped .env.example', () => {
+    const files = {
+      'README.md': enc('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ngitignore: [".claude/skills/x/cache/"]\nenv: [{ name: A, description: d }]\n---\n'),
+      '.env.example': enc('A=\n')
+    }
+    const { manifest } = parseBundle({ slug: 'x', files })
+    expect(manifest.gitignore).toEqual(['.claude/skills/x/cache/'])
+    expect(manifest.env).toEqual([{ name: 'A', description: 'd' }])
+    expect(manifest.errors).toContain('.env.example: declare variables with the env frontmatter key instead of shipping a file')
+  })
 })
 
 describe('buildSnapshot', () => {
