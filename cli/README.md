@@ -80,16 +80,18 @@ and command string (a changed timeout replaces the installed entry rather than d
 `permissions.deny` entries are merged there too; `permissions.allow` entries go into
 `settings.local.json` instead, and the CLI makes sure that file is gitignored.
 
-Each bundle's contribution is recorded in the lockfile, so `remove` takes its hooks and permissions
-back out — a fail-closed hook never stays armed after its script is deleted — and `update` replaces
-its own entries instead of stacking new ones beside them. Anything you added by hand is matched by
-identity and left alone.
+Each bundle's contribution is recorded in the lockfile once per settings file, so `remove` takes its
+hooks and permissions back out of the file it merged them into — a fail-closed hook never stays
+armed after its script is deleted — and `update` replaces its own entries instead of stacking new
+ones beside them. Anything you added by hand survives `remove` and `update` unless it is
+byte-identical to an entry the bundle contributed to that same file: an `allow` you keep in
+`settings.json` stays put when the bundle's copy leaves `settings.local.json`.
 
 ## The lockfile
 
 `.claude/skills.lock.json` records the registry a project was set up against, the answers given to
-every axis, which bundle owns which file (with its content hash), what each bundle merged into the
-two settings files, and the hash of every CLAUDE.md marker block. `add`, `remove`, `update`, `diff`
+every axis, which bundle owns which file (with its content hash), what each bundle merged into each
+of the two settings files, and the hash of every CLAUDE.md marker block. `add`, `remove`, `update`, `diff`
 and `list` all read it — there is no other place the CLI keeps state, and it is meant to be
 committed.
 

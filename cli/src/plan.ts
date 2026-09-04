@@ -4,7 +4,7 @@ import { findMarkerBlocks, type MarkerBlock } from '../../shared/setup/markers'
 import { sectionIdForHeading } from '../../shared/setup/sections'
 import { placeholderVars, renderPlaceholders, type PlaceholderVars } from '../../shared/setup/placeholders'
 import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
-import { emptyLockfile, sha256, type Lockfile } from './lockfile'
+import { emptyLockfile, sha256, type Lockfile, type LockSettings } from './lockfile'
 import { isSafeBundlePath, type BundleFiles } from './registry'
 import type { ProjectState } from './project'
 import { ensureGitignoreLine, formatJson, isEmptyContribution, mergeSettings, settingsContribution, splitBundleSettings, subtractSettings, type Json, type SettingsContribution } from './settings'
@@ -143,9 +143,11 @@ export async function buildPlan(input: {
     const split = splitBundleSettings(settingsJson, settingsLocalJson)
     shared = mergeSettings(shared, split.shared)
     local = mergeSettings(local, split.local)
-    // Recorded so a later `remove` can disarm exactly these hooks and permissions again.
-    const contribution = settingsContribution(split.shared, split.local)
-    if (!isEmptyContribution(contribution)) lock.bundles[slug]!.settings = contribution
+    // Recorded per file, so a later `remove` disarms exactly these hooks and permissions again and
+    // only in the file they were merged into: an identical entry the user keeps in the other file
+    // is not this bundle's and must survive.
+    const contribution: LockSettings = { shared: settingsContribution(split.shared), local: settingsContribution(split.local) }
+    if (!isEmptyContribution(contribution.shared) || !isEmptyContribution(contribution.local)) lock.bundles[slug]!.settings = contribution
   }
 
   // Scaffolds from base options (templates rendered; append mode concatenates onto the same path).
@@ -229,10 +231,14 @@ export async function buildPlan(input: {
   // Every contribution the previous lock recorded comes out before the new ones go in — of dropped
   // bundles (so their fail-closed hooks stop firing once their scripts are gone) and of kept ones
   // (so a changed hook or permission replaces the installed entry instead of accumulating).
-  const previous = Object.values(prev?.bundles ?? {}).map(b => b.settings).filter((c): c is SettingsContribution => c !== undefined)
-  const strip = (existing: Json | null): Json | null => (existing === null ? null : previous.reduce(subtractSettings, existing))
-  const settings = settingsFile(project.settings, mergeSettings(strip(project.settings), shared))
-  const settingsLocal = settingsFile(project.settingsLocal, mergeSettings(strip(project.settingsLocal), local))
+  // Each half comes out of its own file only: `permissions.allow` is merged into settings.local.json
+  // and hooks/`permissions.deny` into settings.json, so subtracting a contribution from both files
+  // would delete a byte-identical entry the user had added to the other one by hand.
+  const previous = Object.values(prev?.bundles ?? {}).map(b => b.settings).filter((c): c is LockSettings => c !== undefined)
+  const strip = (existing: Json | null, half: (c: LockSettings) => SettingsContribution): Json | null =>
+    (existing === null ? null : previous.reduce((acc, c) => subtractSettings(acc, half(c)), existing))
+  const settings = settingsFile(project.settings, mergeSettings(strip(project.settings, c => c.shared), shared))
+  const settingsLocal = settingsFile(project.settingsLocal, mergeSettings(strip(project.settingsLocal, c => c.local), local))
   const gitignoreContent = settingsLocal ? ensureGitignoreLine(project.gitignore, '.claude/settings.local.json') : null
 
   return {

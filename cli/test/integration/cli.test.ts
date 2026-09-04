@@ -157,6 +157,28 @@ describe('@patrity/skills end to end', () => {
     expect(JSON.parse(await read(dir, '.claude/settings.local.json'))).toEqual({})
   })
 
+  it('leaves a hand-added entry alone when the removed bundle contributed it to the other file', async () => {
+    const dir = await tmpProject()
+    await runInit({ ...common(), dir, profile: 'demo' })
+    // demo puts allow into settings.local.json and deny into settings.json; the user wants each of
+    // them in the other file too. Those copies are theirs, and no `update` or `remove` may take them.
+    await writeFile(join(dir, '.claude/settings.json'), JSON.stringify({
+      ...JSON.parse(await read(dir, '.claude/settings.json')) as Record<string, unknown>,
+      permissions: { allow: ['Bash(echo:*)'], deny: ['Bash(rm -rf:*)'] }
+    }, null, 2))
+    await writeFile(join(dir, '.claude/settings.local.json'), JSON.stringify({
+      permissions: { allow: ['Bash(echo:*)'], deny: ['Bash(rm -rf:*)'] }
+    }, null, 2))
+
+    await runUpdate({ ...common(), dir })
+    expect(JSON.parse(await read(dir, '.claude/settings.json')).permissions.allow).toEqual(['Bash(echo:*)'])
+    expect(JSON.parse(await read(dir, '.claude/settings.local.json')).permissions.deny).toEqual(['Bash(rm -rf:*)'])
+
+    await runRemove({ ...common(), dir, slugs: ['demo'] })
+    expect(JSON.parse(await read(dir, '.claude/settings.json'))).toEqual({ permissions: { allow: ['Bash(echo:*)'] } })
+    expect(JSON.parse(await read(dir, '.claude/settings.local.json'))).toEqual({ permissions: { deny: ['Bash(rm -rf:*)'] } })
+  })
+
   it('re-running init keeps what add installed', async () => {
     const dir = await tmpProject()
     await runInit({ ...common(), dir, profile: 'demo' })

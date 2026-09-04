@@ -253,9 +253,13 @@ describe('buildPlan (bundle settings)', () => {
   it('records what each bundle contributed to the two settings files', async () => {
     const plan = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     const contribution = plan.lock.bundles.demo!.settings!
-    expect(contribution.deny).toEqual(['Bash(rm -rf:*)'])
-    expect(contribution.allow).toEqual(['Bash(echo:*)'])
-    expect(Object.keys(contribution.hooks)).toEqual(['PostToolUse'])
+    // Recorded per file: deny and hooks against settings.json, allow against settings.local.json.
+    expect(contribution.shared.deny).toEqual(['Bash(rm -rf:*)'])
+    expect(contribution.shared.allow).toEqual([])
+    expect(Object.keys(contribution.shared.hooks)).toEqual(['PostToolUse'])
+    expect(contribution.local.allow).toEqual(['Bash(echo:*)'])
+    expect(contribution.local.deny).toEqual([])
+    expect(contribution.local.hooks).toEqual({})
     // A bundle with nothing to merge records nothing.
     const bare = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: { 'rules/x.md': enc('x') } } })
     expect(bare.lock.bundles.demo!.settings).toBeUndefined()
@@ -282,6 +286,36 @@ describe('buildPlan (bundle settings)', () => {
     expect(settings.hooks.PostToolUse).toEqual([{ matcher: 'Edit|Write', hooks: [mine] }])
     expect(settings.permissions.deny).toEqual(['Bash(curl:*)'])
     expect(JSON.parse(plan.settingsLocal!.content)).toEqual({ permissions: { allow: ['Bash(ls:*)'] } })
+  })
+
+  it('keeps a hand-added allow in settings.json even though the bundle contributes it locally', async () => {
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    // The same permission, committed for the whole team rather than left per-machine.
+    const after = projectAfter(first)
+    after.settings = mergeSettings(after.settings, { permissions: { allow: ['Bash(echo:*)'] } })
+
+    const updated = await buildPlan({ manifest, registry: manifest.registry, project: after, answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect((JSON.parse(updated.settings!.content) as { permissions: { allow?: string[] } }).permissions.allow).toEqual(['Bash(echo:*)'])
+    expect(JSON.parse(updated.settingsLocal!.content)).toEqual({ permissions: { allow: ['Bash(echo:*)'] } })
+
+    // And it outlives the bundle: settings.json never got that entry from us, so we cannot take it.
+    const removed = await buildPlan({ manifest, registry: manifest.registry, project: projectAfter(updated), answers, bundles: [], bundleFiles: {} })
+    expect(JSON.parse(removed.settings!.content)).toEqual({ permissions: { allow: ['Bash(echo:*)'] } })
+    expect(JSON.parse(removed.settingsLocal!.content)).toEqual({})
+  })
+
+  it('keeps a hand-added deny in settings.local.json even though the bundle contributes it to settings.json', async () => {
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const after = projectAfter(first)
+    after.settingsLocal = mergeSettings(after.settingsLocal, { permissions: { deny: ['Bash(rm -rf:*)'] } })
+
+    const updated = await buildPlan({ manifest, registry: manifest.registry, project: after, answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    expect((JSON.parse(updated.settingsLocal!.content) as { permissions: { deny?: string[] } }).permissions.deny).toEqual(['Bash(rm -rf:*)'])
+    expect((JSON.parse(updated.settings!.content) as { permissions: { deny?: string[] } }).permissions.deny).toEqual(['Bash(rm -rf:*)'])
+
+    const removed = await buildPlan({ manifest, registry: manifest.registry, project: projectAfter(updated), answers, bundles: [], bundleFiles: {} })
+    expect(JSON.parse(removed.settingsLocal!.content)).toEqual({ permissions: { deny: ['Bash(rm -rf:*)'] } })
+    expect(JSON.parse(removed.settings!.content)).toEqual({})
   })
 
   it('replaces a hook whose timeout changed upstream instead of duplicating it', async () => {
