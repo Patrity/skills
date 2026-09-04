@@ -16,7 +16,7 @@ This spec adds a `/build` page that runs the same wizard as the CLI in the brows
 - Merging into an existing project on the web (no upload of an existing `CLAUDE.md`; the zip is for a fresh project; the CLI handles updates).
 - Accounts, saved setups, or server-side state. Sharing is a URL.
 - Changing the base schema, the section convention, or any bundle content.
-- A CLI release, unless the shared-code move changes the CLI's built output (then `cli-v0.1.1`).
+- Prompting for secret values anywhere (the CLI and the builder only ever write `.claude/.env.example`).
 
 ## 3. Decisions already made
 
@@ -86,7 +86,7 @@ The CLAUDE.md tab shows the composed markdown as source in the existing `CodeVie
 
 ### 5.3 `buildSetupZip(plan)`
 
-`server/lib/setup/setup-zip.ts` beside the existing `buildZip`: entries in sorted order — `CLAUDE.md`, every `FileOp.path`, `.claude/settings.json` and `.claude/settings.local.json` when present, `.gitignore` (only the `settings.local.json` line when a local settings file exists), `.claude/skills.lock.json` (serialized with `serializeLockfile`). Hook scripts (`.claude/hooks/*`) carry external attributes for mode 0755 so `unzip` restores them. Fixed mtime (the snapshot's `committedAt`) so identical plans yield identical bytes.
+`server/lib/setup/setup-zip.ts` beside the existing `buildZip`: entries in sorted order — `CLAUDE.md`, every `FileOp.path`, `.claude/settings.json` and `.claude/settings.local.json` when present, `.gitignore` (the managed block from 10.2), `.claude/.env.example` when any bundle declares `env` (10.3), `.claude/skills.lock.json` (serialized with `serializeLockfile`). Hook scripts (`.claude/hooks/*`) carry external attributes for mode 0755 so `unzip` restores them. Fixed mtime (the snapshot's `committedAt`) so identical plans yield identical bytes.
 
 ### 5.4 `sha256` in shared code
 
@@ -138,6 +138,62 @@ E2E (root `pnpm test`): `POST /api/build` happy path (zip entries equal an in-pr
 
 Browser (`playwright-cli`, `:3210`): pick `nuxt-app`; set `layout` to monorepo and see `appDir`; untick a bundle and see its marker blocks leave the preview; download, unzip into a temp dir, run `pnpx @patrity/skills diff` there and expect a clean result; reload a share link and see the same state; one `<h1>`; no console errors; 375 px width.
 
+Gitignore and env (unit + CLI integration + e2e): frontmatter parsing and validation of `gitignore`/`env`; the managed `.gitignore` block is created, regenerated and removed without touching lines outside it (CRLF file, file without trailing newline, block already present); `.claude/.env.example` regenerated from installed bundles and dropped when none declares env; `remove` subtracts a bundle's entries; the zip contains the same block and example file as the CLI; the validator rejects a bundle `.env.example` with a non-placeholder value.
+
 ## 9. Rollout
 
-One implementation plan, executed subagent-driven on `main`, pushed at the end (Vercel deploys the site; the `warm` workflow refills caches). If `npm pack --dry-run` in `cli/` differs from the published 0.1.0 after the move, bump to 0.1.1 and tag `cli-v0.1.1`. Update `CLAUDE.md` (builder route, `no-store` rule for the two POST routes, hash-state convention) and the MyMind handover.
+One implementation plan, executed subagent-driven on `main`, pushed at the end (Vercel deploys the site; the `warm` workflow refills caches). The CLI's on-disk behaviour changes (section 10), so the plan ends with `cli/package.json` at `0.2.0` and the tag `cli-v0.2.0`. Update `CLAUDE.md` (builder route, `no-store` rule for the two POST routes, hash-state convention, managed gitignore block) and the MyMind handover.
+
+## 10. Bundle-declared gitignore entries and `.claude/.env`
+
+### 10.1 Frontmatter
+
+Two optional keys in a bundle README's frontmatter (`SkillFrontmatter`, zod schema in `server/lib/skills/frontmatter.ts`, documented in the frontmatter reference):
+
+```yaml
+gitignore:
+  - .claude/skills/nuxt-docs/cache/
+env:
+  - name: DATABASE_URL_RO
+    description: Read-only Postgres connection string used by the db:q runner.
+    required: true
+    example: postgres://<app>_claude_ro:<password>@<host>/<database>
+```
+
+Validation (validator and `parseBundle` errors): `gitignore` entries are project-relative, contain no `..` segment, are not absolute, and end with `/` when they name a directory; `env[].name` matches `^[A-Z][A-Z0-9_]*$` and is unique within the bundle; `example`, when present, contains no real-looking secret (the secrets scanner runs over it). Summaries expose both keys (`SkillSummary`), and the bundle page shows "Gitignore" and "Environment" rows beside "Requires".
+
+### 10.2 Managed `.gitignore` block
+
+The CLI (`applyPlan`) and the web zip stop appending loose lines and own exactly one block in the project's root `.gitignore`:
+
+```
+# >>> skills (managed by @patrity/skills; edit outside this block)
+.claude/settings.local.json
+.claude/.env
+.claude/skills/nuxt-docs/cache/
+# <<< skills
+```
+
+Rules: the block is regenerated on every run from the installed bundles (sorted, de-duplicated); `.claude/settings.local.json` is present whenever a local settings file is written and `.claude/.env` whenever any installed bundle declares `env`; lines outside the block are never modified; a file with no block gets the block appended after one blank line; when the block would be empty it is removed; CRLF files are preserved as CRLF. `ensureGitignoreLine` is replaced by `renderGitignoreBlock(existing, entries)` in `shared/setup/gitignore.ts` (pure, shared by CLI and zip). The lockfile records each bundle's `gitignore` entries (`LockBundle.gitignore: string[]`) so `remove` subtracts them.
+
+### 10.3 `.claude/.env.example`
+
+When any installed bundle declares `env`, the CLI and the zip write `.claude/.env.example`, fully managed (regenerated each run, never merged), one group per bundle:
+
+```
+# skills: readonly-db
+# Read-only Postgres connection string used by the db:q runner. (required)
+DATABASE_URL_RO=postgres://<app>_claude_ro:<password>@<host>/<database>
+```
+
+`.claude/.env` itself is never created, read or modified by the tool. The lockfile records each bundle's env names (`LockBundle.env: string[]`); when no installed bundle declares env, the example file is removed if it is byte-identical to what the tool last wrote (hash in `lock.scaffolds`-style ownership), otherwise left with a warning.
+
+### 10.4 Skill convention
+
+Skills read configuration from `.claude/.env` only, never from the repo root `.env`, so a project can point a skill (for example `readonly-db`) at a different resource than the application uses. Documented patterns: shell — `set -a; . "$CLAUDE_PROJECT_DIR/.claude/.env"; set +a`; Python — `dotenv_values(Path(__file__).resolve().parents[2] / '.env')` or an explicit path argument; Node — `process.loadEnvFile('.claude/.env')`. Caches live under the skill's own directory and are declared in `gitignore`. `protect-env.sh` already blocks Claude from editing any file whose basename is `.env`, which covers `.claude/.env`; `.env.example` stays editable.
+
+Content changes in this spec: `readonly-db` declares `DATABASE_URL_RO` and its runner reads `.claude/.env`; `nuxt-docs`, `nuxt-ui-docs`, `nuxt-ui-templates` and `doc-fetcher` declare their cache directories; the Contributing docs gain the convention; `hooks-and-settings.md`, `bundle-structure.md`, `frontmatter.md` and `cli.md` describe the two keys, the managed block and the example file.
+
+### 10.5 Registry validator
+
+New checks: `gitignore`/`env` shape as in 10.1; a bundle that ships a `.env.example` file directly (rather than declaring `env`) is an error with a pointer to the convention; skills that reference `process.env`/`os.environ` without loading `.claude/.env` are not detectable mechanically and are covered by review, not by the validator.
