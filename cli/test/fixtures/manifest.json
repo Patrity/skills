@@ -1,0 +1,222 @@
+{
+  "registry": "http://registry.test",
+  "sha": "fixture0000000000000000000000000000000",
+  "committedAt": "2026-09-01T00:00:00.000Z",
+  "fetchedAt": "2026-09-01T00:05:00.000Z",
+  "source": "fs",
+  "errors": [],
+  "base": {
+    "version": 1,
+    "sections": [
+      {
+        "id": "intro",
+        "title": ""
+      },
+      {
+        "id": "read-first",
+        "title": "Read first"
+      },
+      {
+        "id": "stack",
+        "title": "Stack"
+      },
+      {
+        "id": "commands",
+        "title": "Commands"
+      },
+      {
+        "id": "workflow",
+        "title": "Workflow"
+      },
+      {
+        "id": "testing",
+        "title": "Testing"
+      },
+      {
+        "id": "docs",
+        "title": "Docs"
+      },
+      {
+        "id": "git",
+        "title": "Git"
+      },
+      {
+        "id": "deploy",
+        "title": "Deploy"
+      },
+      {
+        "id": "constraints",
+        "title": "Constraints that bit before"
+      },
+      {
+        "id": "memory",
+        "title": "Memory"
+      },
+      {
+        "id": "skills-and-rules",
+        "title": "Skills and rules"
+      },
+      {
+        "id": "self-improvement",
+        "title": "Self-improvement"
+      }
+    ],
+    "axes": [
+      {
+        "id": "pm",
+        "question": "Which package manager?",
+        "default": "pnpm",
+        "options": [
+          {
+            "id": "pnpm",
+            "label": "pnpm",
+            "fragment": "pm/pnpm.md",
+            "selects": [
+              "demo"
+            ]
+          },
+          {
+            "id": "npm",
+            "label": "npm",
+            "fragment": "pm/npm.md"
+          }
+        ]
+      },
+      {
+        "id": "layout",
+        "question": "How is the repo laid out?",
+        "default": "single",
+        "options": [
+          {
+            "id": "single",
+            "label": "Single app"
+          },
+          {
+            "id": "monorepo",
+            "label": "Monorepo",
+            "fragment": "layout/monorepo.md",
+            "selects": [
+              "demo"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "appDir",
+        "question": "Where does the app live?",
+        "when": {
+          "axis": "layout",
+          "option": "monorepo"
+        },
+        "input": {
+          "placeholder": "apps/web/app",
+          "default": "apps/web/app"
+        }
+      },
+      {
+        "id": "browser",
+        "question": "How will you do browser testing?",
+        "default": "cli",
+        "options": [
+          {
+            "id": "cli",
+            "label": "playwright-cli",
+            "scaffolds": [
+              {
+                "template": "browser-testing-project.md",
+                "to": ".claude/skills/{{projectName}}-browser-testing/SKILL.md"
+              }
+            ]
+          },
+          {
+            "id": "none",
+            "label": "None"
+          }
+        ]
+      }
+    ],
+    "fragments": {
+      "pm/pnpm.md": "## Commands\n- Always `{{pm}}`; never npm or yarn.\n",
+      "pm/npm.md": "## Commands\n- This project uses npm (package-lock.json present).\n",
+      "layout/monorepo.md": "## Constraints that bit before\n- App code lives under `{{appDir}}`; rule globs must use that prefix.\n"
+    },
+    "always": {
+      "self-improvement.md": "## Self-improvement\n- Update CLAUDE.md proactively; keep it concise.\n"
+    },
+    "templates": {
+      "browser-testing-project.md": "# Browser testing for {{projectName}}\n\nDev URL: TODO\n"
+    }
+  },
+  "profiles": [
+    {
+      "name": "demo",
+      "description": "d",
+      "answers": {
+        "pm": "pnpm",
+        "layout": "single",
+        "browser": "none"
+      },
+      "bundles": [
+        "demo"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "slug": "demo",
+      "name": "Demo",
+      "description": "Demo bundle used by the CLI registry client tests.",
+      "tags": [
+        "demo",
+        "fixture"
+      ],
+      "author": "Fixture",
+      "badges": [
+        "skills",
+        "rules",
+        "hooks",
+        "settings",
+        "claude-md"
+      ],
+      "suggests": [
+        "second"
+      ],
+      "fileCount": 6,
+      "totalBytes": 600,
+      "errors": []
+    },
+    {
+      "slug": "second",
+      "name": "Second",
+      "description": "A second fixture bundle with no dependencies.",
+      "tags": [
+        "fixture"
+      ],
+      "author": "Fixture",
+      "badges": [
+        "skills"
+      ],
+      "fileCount": 2,
+      "totalBytes": 200,
+      "errors": []
+    },
+    {
+      "slug": "third",
+      "name": "Third",
+      "description": "A third fixture bundle that depends on second.",
+      "tags": [
+        "fixture"
+      ],
+      "author": "Fixture",
+      "badges": [
+        "skills"
+      ],
+      "dependsOn": [
+        "second"
+      ],
+      "fileCount": 2,
+      "totalBytes": 200,
+      "errors": []
+    }
+  ]
+}

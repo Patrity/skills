@@ -1,0 +1,44 @@
+import { describe, expect, it, vi } from 'vitest'
+import { createRegistryClient, RegistryError } from '../../src/registry'
+import { fixtureManifest, zipFixtureBundle } from '../helpers/fixtures'
+
+function fakeFetch(handler: (url: string, init?: RequestInit) => Response | Promise<Response>) {
+  return vi.fn(async (input: string | URL | Request, init?: RequestInit) => handler(String(input), init)) as unknown as typeof fetch
+}
+
+describe('createRegistryClient', () => {
+  it('fetches the manifest with the CLI user agent', async () => {
+    const seen: Record<string, string> = {}
+    const client = createRegistryClient('http://registry.test/', {
+      version: '9.9.9',
+      fetchImpl: fakeFetch((url, init) => {
+        seen.url = url
+        seen.ua = new Headers(init?.headers).get('user-agent') ?? ''
+        return Response.json(fixtureManifest())
+      })
+    })
+    const m = await client.manifest()
+    expect(seen.url).toBe('http://registry.test/api/cli/manifest')
+    expect(seen.ua).toBe('@patrity/skills/9.9.9')
+    expect(m.skills.map(s => s.slug)).toEqual(['demo', 'second', 'third'])
+    expect(client.registry).toBe('http://registry.test')
+  })
+
+  it('rejects a manifest whose base has errors', async () => {
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => Response.json({ ...fixtureManifest(), errors: ['axis "pm": bad'] })) })
+    await expect(client.manifest()).rejects.toThrow(/base schema has errors: axis "pm": bad/)
+  })
+
+  it('downloads and unpacks a bundle rooted at <slug>/', async () => {
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response(zipFixtureBundle('demo'))) })
+    const files = await client.download('demo')
+    expect(Object.keys(files).sort()).toEqual(['CLAUDE.md', 'README.md', 'hooks/pre-commit.sh', 'rules/demo.md', 'settings.json', 'skills/demo-skill/SKILL.md'])
+    expect(new TextDecoder().decode(files['rules/demo.md'])).toContain('{{appDir}}')
+  })
+
+  it('turns non-2xx into RegistryError with status and url', async () => {
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response('nope', { status: 503 })) })
+    await expect(client.download('demo')).rejects.toMatchObject({ name: 'RegistryError', status: 503, url: 'http://registry.test/api/skills/demo/download' })
+    expect(await client.download('demo').catch(e => e instanceof RegistryError)).toBe(true)
+  })
+})
