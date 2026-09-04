@@ -25,6 +25,12 @@ export interface CommonOpts {
   interactive?: boolean
 }
 
+/** What a mutating command did: the plan it built, and whether it reached disk. */
+export interface RunResult {
+  plan: SetupPlan
+  applied: boolean
+}
+
 export interface DiffReport {
   modified: string[]
   missing: string[]
@@ -40,7 +46,8 @@ export interface ListReport {
   installedSha: string
 }
 
-const isInteractive = (opts: CommonOpts): boolean => opts.interactive ?? (!opts.yes && Boolean(process.stdout.isTTY))
+// `--json` owns stdout, so it never prompts — a clack prompt would write into the JSON.
+const isInteractive = (opts: CommonOpts): boolean => opts.interactive ?? (!opts.yes && !opts.json && Boolean(process.stdout.isTTY))
 
 /** `--json` is the whole of stdout: one object, printed once, by whichever command produced it. */
 const emit = (opts: CommonOpts, value: unknown): void => {
@@ -71,24 +78,28 @@ async function render(
   client: RegistryClient,
   answers: Record<string, string>,
   bundles: string[]
-): Promise<SetupPlan> {
+): Promise<RunResult> {
   const resolved = resolveBundles(bundles, manifest.skills)
   if (resolved.missing.length) throw new Error(`unknown bundle: ${resolved.missing.join(', ')}`)
   const bundleFiles = await download(client, resolved.bundles)
-  const plan = await buildPlan({ manifest, project, answers, bundles: resolved.bundles, bundleFiles, force: opts.force })
+  // The lockfile records where the bundles actually came from, not the origin the manifest claims.
+  const plan = await buildPlan({ manifest, registry: client.registry, project, answers, bundles: resolved.bundles, bundleFiles, force: opts.force })
 
   const interactive = isInteractive(opts)
   // Without a prompt a conflicting file is never overwritten: it belongs to someone else.
   const overwrite = interactive ? await resolveConflicts(plan) : new Set<string>()
-  if (interactive && !(await confirmPlan(plan))) return plan
+  if (interactive && !(await confirmPlan(plan))) {
+    emit(opts, { applied: false, warnings: plan.warnings })
+    return { plan, applied: false }
+  }
 
   const result = await applyPlan(plan, opts.dir, { overwrite })
-  emit(opts, { ...result, warnings: plan.warnings, handEdited: plan.claudeMd.handEdited })
-  return plan
+  emit(opts, { ...result, applied: true, warnings: plan.warnings, handEdited: plan.claudeMd.handEdited })
+  return { plan, applied: true }
 }
 
 /** `add`/`remove`/`update`: re-render every kept bundle from the lockfile's recorded answers. */
-async function fromLock(opts: CommonOpts, select: (lock: Lockfile) => string[]): Promise<SetupPlan> {
+async function fromLock(opts: CommonOpts, select: (lock: Lockfile) => string[]): Promise<RunResult> {
   const project = await readProject(opts.dir)
   const lock = requireLock(project)
   const bundles = select(lock) // validated before a single request goes out
@@ -97,7 +108,7 @@ async function fromLock(opts: CommonOpts, select: (lock: Lockfile) => string[]):
   return render(opts, project, manifest, client, lock.answers, bundles)
 }
 
-export async function runInit(opts: CommonOpts & { profile?: string, with?: string[], answers?: string[] }): Promise<SetupPlan> {
+export async function runInit(opts: CommonOpts & { profile?: string, with?: string[], answers?: string[] }): Promise<RunResult> {
   const project = await readProject(opts.dir)
   const client = clientFor(opts, project.lock)
   const manifest = await client.manifest()
@@ -120,18 +131,18 @@ export async function runInit(opts: CommonOpts & { profile?: string, with?: stri
   return render(opts, project, manifest, client, answers, bundles)
 }
 
-export function runAdd(opts: CommonOpts & { slugs: string[] }): Promise<SetupPlan> {
+export function runAdd(opts: CommonOpts & { slugs: string[] }): Promise<RunResult> {
   return fromLock(opts, lock => [...Object.keys(lock.bundles), ...opts.slugs])
 }
 
-export function runRemove(opts: CommonOpts & { slugs: string[] }): Promise<SetupPlan> {
+export function runRemove(opts: CommonOpts & { slugs: string[] }): Promise<RunResult> {
   return fromLock(opts, (lock) => {
     for (const slug of opts.slugs) if (!(slug in lock.bundles)) throw new Error(`${slug} is not installed`)
     return Object.keys(lock.bundles).filter(slug => !opts.slugs.includes(slug))
   })
 }
 
-export function runUpdate(opts: CommonOpts & { slugs?: string[] }): Promise<SetupPlan> {
+export function runUpdate(opts: CommonOpts & { slugs?: string[] }): Promise<RunResult> {
   return fromLock(opts, (lock) => {
     // Naming a slug only narrows what must be installed: the plan is always a full re-render.
     for (const slug of opts.slugs ?? []) if (!(slug in lock.bundles)) throw new Error(`${slug} is not installed`)

@@ -41,7 +41,7 @@ function projectAfter(plan: SetupPlan): ProjectState {
 
 describe('buildPlan (fresh project)', () => {
   it('creates bundle files under .claude, renders placeholders, marks hooks executable, scaffolds, merges settings', async () => {
-    const plan = await buildPlan({ manifest, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     const paths = plan.files.map(f => f.path).sort()
     expect(paths).toEqual(['.claude/hooks/pre-commit.sh', '.claude/rules/demo.md', '.claude/skills/demo-skill/SKILL.md', '.claude/skills/proj-browser-testing/SKILL.md'])
     expect(plan.files.every(f => f.action === 'create')).toBe(true)
@@ -59,12 +59,19 @@ describe('buildPlan (fresh project)', () => {
     expect(plan.lock.bundles.demo!.files['.claude/rules/demo.md']).toBe(sha256(plan.files.find(f => f.path.endsWith('rules/demo.md'))!.bytes))
     expect(plan.lock.blocks['bundle:demo']).toMatch(/^[0-9a-f]{64}$/)
   })
+
+  it('records the registry it was handed, not the one the manifest advertises', async () => {
+    const fetchedFrom = 'http://fetched-from.test'
+    expect(manifest.registry).not.toBe(fetchedFrom)
+    const plan = await buildPlan({ manifest, registry: fetchedFrom, project: project(), answers, bundles: [], bundleFiles: {} })
+    expect(plan.lock.registry).toBe(fetchedFrom)
+  })
 })
 
 describe('buildPlan (existing project)', () => {
   it('flags conflicts for foreign files, updates owned ones, and leaves unchanged ones alone', async () => {
     const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
-    const first = await buildPlan({ manifest, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const first = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     const ruleBytes = first.files.find(f => f.path === '.claude/rules/demo.md')!.bytes
     lock.bundles.demo = { sha: 'old', files: { '.claude/rules/demo.md': sha256(ruleBytes), '.claude/skills/demo-skill/SKILL.md': sha256('stale') } }
     const disk = {
@@ -72,7 +79,7 @@ describe('buildPlan (existing project)', () => {
       '.claude/skills/demo-skill/SKILL.md': 'stale', // owned, upstream changed
       '.claude/hooks/pre-commit.sh': 'someone elses hook' // not owned → conflict
     }
-    const plan = await buildPlan({ manifest, project: project({ disk, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     const byPath = Object.fromEntries(plan.files.map(f => [f.path, f.action]))
     expect(byPath['.claude/rules/demo.md']).toBe('unchanged')
     expect(byPath['.claude/skills/demo-skill/SKILL.md']).toBe('update')
@@ -85,11 +92,11 @@ describe('buildPlan (existing project)', () => {
     lock.blocks['bundle:demo'] = sha256('- installed block')
     const claudeMd = `# proj\n\n## Commands\n\n${startMarker('bundle:demo')}\n- I edited this by hand\n<!-- /skills:bundle:demo -->\n`
     const disk = { '.claude/rules/demo.md': 'edited by hand' }
-    const plan = await buildPlan({ manifest, project: project({ disk, lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk, lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     expect(plan.files.find(f => f.path === '.claude/rules/demo.md')!.action).toBe('protected')
     expect(plan.claudeMd.handEdited).toEqual(['bundle:demo'])
     expect(plan.claudeMd.content).toContain('- I edited this by hand')
-    const forced = await buildPlan({ manifest, project: project({ disk, lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() }, force: true })
+    const forced = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk, lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() }, force: true })
     expect(forced.files.find(f => f.path === '.claude/rules/demo.md')!.action).toBe('update')
     expect(forced.claudeMd.content).not.toContain('- I edited this by hand')
   })
@@ -97,7 +104,7 @@ describe('buildPlan (existing project)', () => {
   it('drops files and blocks of a bundle that is no longer selected (remove)', async () => {
     const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
     lock.bundles.demo = { sha: 'x', files: { '.claude/rules/demo.md': sha256('r') } }
-    const plan = await buildPlan({ manifest, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: [], bundleFiles: {} })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: [], bundleFiles: {} })
     expect(plan.removals).toEqual(['.claude/rules/demo.md'])
     expect(plan.lock.bundles.demo).toBeUndefined()
   })
@@ -107,7 +114,7 @@ describe('buildPlan (existing project)', () => {
     lock.bundles.demo = { sha: 'x', files: {} }
     lock.blocks['bundle:demo'] = sha256('- installed block')
     const claudeMd = `# proj\n\n## Commands\n\n${startMarker('bundle:demo')}\n- I edited this by hand\n<!-- /skills:bundle:demo -->\n`
-    const plan = await buildPlan({ manifest, project: project({ lock, claudeMd }), answers, bundles: [], bundleFiles: {} })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ lock, claudeMd }), answers, bundles: [], bundleFiles: {} })
     expect(plan.warnings).toContain('bundle:demo: dropped a hand-edited block (recover it from git)')
     expect(plan.claudeMd.handEdited).toEqual([])
     expect(plan.claudeMd.content).not.toContain('bundle:demo')
@@ -118,7 +125,7 @@ describe('buildPlan (existing project)', () => {
 
 describe('buildPlan (re-run over its own output)', () => {
   const run = (project: ProjectState, bundleFiles = { demo: loadFixtureBundle() }) =>
-    buildPlan({ manifest, project, answers, bundles: ['demo'], bundleFiles })
+    buildPlan({ manifest, registry: manifest.registry, project, answers, bundles: ['demo'], bundleFiles })
 
   it('is idempotent: nothing is hand-edited and CLAUDE.md does not change', async () => {
     const first = await run(project())
@@ -149,6 +156,7 @@ describe('buildPlan (ownership and safety)', () => {
   it('skips bundle entries whose path escapes the project', async () => {
     const plan = await buildPlan({
       manifest,
+      registry: manifest.registry,
       project: project(),
       answers: { pm: 'pnpm', layout: 'single', browser: 'none' },
       bundles: ['demo'],
@@ -163,7 +171,7 @@ describe('buildPlan (ownership and safety)', () => {
       '.claude/hooks/pre-commit.sh': 'someone elses hook',
       '.claude/skills/proj-browser-testing/SKILL.md': 'someone elses skill'
     }
-    const plan = await buildPlan({ manifest, project: project({ disk }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     expect(plan.files.find(f => f.path === '.claude/hooks/pre-commit.sh')!.action).toBe('conflict')
     expect(plan.files.find(f => f.path === '.claude/skills/proj-browser-testing/SKILL.md')!.action).toBe('conflict')
     expect(Object.keys(plan.lock.bundles.demo!.files)).not.toContain('.claude/hooks/pre-commit.sh')
@@ -174,7 +182,7 @@ describe('buildPlan (ownership and safety)', () => {
     const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
     lock.blocks['bundle:demo'] = sha256('- installed block')
     const claudeMd = `# proj\n\n## Commands\n\n${startMarker('bundle:demo')}\n- I edited this by hand\n<!-- /skills:bundle:demo -->\n`
-    const plan = await buildPlan({ manifest, project: project({ lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project({ lock, claudeMd }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     expect(plan.claudeMd.handEdited).toEqual(['bundle:demo'])
     expect(plan.lock.blocks['bundle:demo']).toBe(sha256('- installed block'))
     expect(plan.lock.blocks['bundle:demo']).not.toBe(sha256('- I edited this by hand'))
@@ -184,7 +192,7 @@ describe('buildPlan (ownership and safety)', () => {
     const path = '.claude/skills/proj-browser-testing/SKILL.md'
     const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
     lock.scaffolds[path] = sha256('installed scaffold')
-    const args = { manifest, project: project({ disk: { [path]: 'hand edited scaffold' }, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } }
+    const args = { manifest, registry: manifest.registry, project: project({ disk: { [path]: 'hand edited scaffold' }, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } }
     const plan = await buildPlan(args)
     expect(plan.files.find(f => f.path === path)!.action).toBe('protected')
     expect(plan.lock.scaffolds[path]).toBe(sha256('installed scaffold'))
@@ -200,10 +208,10 @@ describe('buildPlan (removals)', () => {
     const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: 1, projectName: 'proj', answers })
     lock.bundles.demo = { sha: 'x', files: { '.claude/rules/demo.md': sha256('r') } }
     lock.bundles.other = { sha: 'x', files: { '.claude/rules/demo.md': sha256('r') } }
-    const kept = await buildPlan({ manifest, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
+    const kept = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: ['demo'], bundleFiles: { demo: loadFixtureBundle() } })
     expect(kept.removals).toEqual([])
 
-    const dropped = await buildPlan({ manifest, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: [], bundleFiles: {} })
+    const dropped = await buildPlan({ manifest, registry: manifest.registry, project: project({ disk: { '.claude/rules/demo.md': 'r' }, lock }), answers, bundles: [], bundleFiles: {} })
     expect(dropped.removals).toEqual(['.claude/rules/demo.md'])
   })
 })
@@ -212,7 +220,7 @@ describe('buildPlan (bundle settings)', () => {
   it('warns and keeps going when a bundle ships malformed settings', async () => {
     const files = loadFixtureBundle()
     files['settings.json'] = enc('{ bad')
-    const plan = await buildPlan({ manifest, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: files } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: files } })
     expect(plan.warnings).toContain('demo/settings.json: not valid JSON, skipped')
     expect(plan.settings).toBeNull()
     expect(plan.settingsLocal).toBeNull()
@@ -223,7 +231,7 @@ describe('buildPlan (bundle settings)', () => {
   it('renders placeholders in settings.local.json too', async () => {
     const files = loadFixtureBundle()
     files['settings.local.json'] = enc('{ "permissions": { "allow": ["Bash({{pm}} test:*)"] } }')
-    const plan = await buildPlan({ manifest, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: files } })
+    const plan = await buildPlan({ manifest, registry: manifest.registry, project: project(), answers, bundles: ['demo'], bundleFiles: { demo: files } })
     expect(plan.settingsLocal!.content).toContain('Bash(pnpm test:*)')
     expect(plan.settingsLocal!.content).not.toContain('{{pm}}')
   })

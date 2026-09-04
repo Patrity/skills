@@ -1,12 +1,27 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { runAdd, runDiff, runInit, runList, runRemove, runUpdate } from '../../src/run'
 import { applyPlan } from '../../src/apply'
 import { emptyLockfile } from '../../src/lockfile'
-import { startRegistry } from '../helpers/registry-server'
+import { ADVERTISED_REGISTRY, startRegistry } from '../helpers/registry-server'
 import { startMarker } from '../../../shared/setup/markers'
+
+/**
+ * Stand-ins for the four clack prompts, so an interactive run is deterministic and a run that
+ * should never prompt can be asserted on rather than hanging on stdin.
+ */
+const prompts = vi.hoisted(() => ({
+  askAxes: vi.fn(async (_schema: unknown, answers: Record<string, string>) => answers),
+  askBundles: vi.fn(async (_skills: unknown, preselected: string[]) => ({ bundles: preselected })),
+  confirmPlan: vi.fn(async () => true),
+  resolveConflicts: vi.fn(async () => new Set<string>())
+}))
+vi.mock('../../src/prompts', async importOriginal => ({
+  ...(await importOriginal<typeof import('../../src/prompts')>()),
+  ...prompts
+}))
 
 let registry: Awaited<ReturnType<typeof startRegistry>>
 const dirs: string[] = []
@@ -26,6 +41,11 @@ afterAll(async () => {
   await Promise.all(dirs.map(dir => rm(dir, { recursive: true, force: true })))
 })
 
+beforeEach(() => {
+  // Call counts only; the prompt stand-ins keep their implementations.
+  vi.clearAllMocks()
+})
+
 const common = () => ({ registry: registry.url, yes: true, force: false, json: true, interactive: false })
 const read = (dir: string, rel: string) => readFile(join(dir, rel), 'utf8')
 const lastJson = <T>(): T => JSON.parse(logs[logs.length - 1]!) as T
@@ -39,7 +59,7 @@ async function tmpProject(): Promise<string> {
 describe('@patrity/skills end to end', () => {
   it('init --yes --profile demo writes .claude, CLAUDE.md, settings and the lockfile', async () => {
     const dir = await tmpProject()
-    const plan = await runInit({ ...common(), dir, profile: 'demo' })
+    const { plan } = await runInit({ ...common(), dir, profile: 'demo' })
     expect(plan.warnings).toEqual([])
     const claude = await read(dir, 'CLAUDE.md')
     expect(claude.startsWith(`# ${basename(dir)}\n`)).toBe(true)
@@ -55,13 +75,15 @@ describe('@patrity/skills end to end', () => {
     const lock = JSON.parse(await read(dir, '.claude/skills.lock.json'))
     expect(Object.keys(lock.bundles).sort()).toEqual(['demo', 'second'])
     expect(lock.answers).toMatchObject({ pm: 'pnpm', browser: 'none' })
+    // The lockfile records where the bundles came from, not what the manifest advertised.
     expect(lock.registry).toBe(registry.url)
+    expect(lock.registry).not.toBe(ADVERTISED_REGISTRY)
 
     // --json emits exactly one machine-readable object.
     const emitted = lastJson<{ written: string[], removed: string[], skipped: string[], warnings: string[], handEdited: string[] }>()
     expect(emitted.written).toContain('CLAUDE.md')
     expect(emitted.written).toContain('.claude/rules/demo.md')
-    expect(emitted).toMatchObject({ removed: [], skipped: [], warnings: [], handEdited: [] })
+    expect(emitted).toMatchObject({ applied: true, removed: [], skipped: [], warnings: [], handEdited: [] })
   })
 
   it('is idempotent and honours --answer and --with', async () => {
@@ -101,7 +123,8 @@ describe('@patrity/skills end to end', () => {
     expect(diff.handEdited).toEqual([])
 
     await expect(runUpdate({ ...common(), dir })).resolves.toMatchObject({
-      files: expect.arrayContaining([expect.objectContaining({ path: '.claude/rules/demo.md', action: 'protected' })])
+      applied: true,
+      plan: { files: expect.arrayContaining([expect.objectContaining({ path: '.claude/rules/demo.md', action: 'protected' })]) }
     })
     expect(await read(dir, '.claude/rules/demo.md')).toBe('hand edited\n')
     await runUpdate({ ...common(), dir, force: true })
@@ -110,7 +133,7 @@ describe('@patrity/skills end to end', () => {
     // A hand-edited block whose bundle is being removed is dropped, with a warning — not resurrected.
     const edited = (await read(dir, 'CLAUDE.md')).replace('- third', '- third, and I edited this by hand')
     await writeFile(join(dir, 'CLAUDE.md'), edited)
-    const removed = await runRemove({ ...common(), dir, slugs: ['third'] })
+    const { plan: removed } = await runRemove({ ...common(), dir, slugs: ['third'] })
     expect(removed.warnings).toContain('bundle:third: dropped a hand-edited block (recover it from git)')
     const afterRemove = await read(dir, 'CLAUDE.md')
     expect(afterRemove).not.toContain('bundle:third')
@@ -121,7 +144,7 @@ describe('@patrity/skills end to end', () => {
   it('deletes the files of a removed bundle and the directories they emptied', async () => {
     const dir = await tmpProject()
     await runInit({ ...common(), dir, profile: 'demo' })
-    const plan = await runRemove({ ...common(), dir, slugs: ['demo'] })
+    const { plan } = await runRemove({ ...common(), dir, slugs: ['demo'] })
     expect(plan.removals).toEqual(['.claude/hooks/pre-commit.sh', '.claude/rules/demo.md', '.claude/skills/demo-skill/SKILL.md'])
     await expect(stat(join(dir, '.claude/rules'))).rejects.toThrow()
     await expect(stat(join(dir, '.claude/skills/demo-skill'))).rejects.toThrow()
@@ -143,6 +166,37 @@ describe('@patrity/skills end to end', () => {
     await expect(runUpdate({ ...common(), dir, slugs: ['ghost'] })).rejects.toThrow(/ghost is not installed/)
     await expect(runInit({ ...common(), dir, profile: 'ghost' })).rejects.toThrow(/unknown profile: ghost/)
     await expect(runInit({ ...common(), dir, answers: ['pm=cargo'] })).rejects.toThrow(/pm: "cargo" is not an option/)
+  })
+
+  it('treats --json as non-interactive even on a TTY, and prints exactly one line', async () => {
+    const dir = await tmpProject()
+    const isTTY = process.stdout.isTTY
+    Object.defineProperty(process.stdout, 'isTTY', { value: true, configurable: true })
+    try {
+      const before = logs.length
+      // No `interactive` override and `yes: false`: only `json` can keep the prompts away.
+      const { applied } = await runInit({ registry: registry.url, dir, yes: false, force: false, json: true, profile: 'demo' })
+      expect(applied).toBe(true)
+      expect(logs.length - before).toBe(1)
+      expect(prompts.askAxes).not.toHaveBeenCalled()
+      expect(prompts.confirmPlan).not.toHaveBeenCalled()
+      expect(lastJson<{ applied: boolean }>().applied).toBe(true)
+    } finally {
+      Object.defineProperty(process.stdout, 'isTTY', { value: isTTY, configurable: true })
+    }
+  })
+
+  it('writes nothing and says so when the confirmation is declined', async () => {
+    const dir = await tmpProject()
+    prompts.confirmPlan.mockResolvedValueOnce(false)
+    const before = logs.length
+    const { plan, applied } = await runInit({ registry: registry.url, dir, yes: false, force: false, json: true, interactive: true, profile: 'demo' })
+    expect(applied).toBe(false)
+    expect(plan.files.length).toBeGreaterThan(0)
+    await expect(stat(join(dir, 'CLAUDE.md'))).rejects.toThrow()
+    await expect(stat(join(dir, '.claude/skills.lock.json'))).rejects.toThrow()
+    expect(logs.length - before).toBe(1)
+    expect(lastJson()).toEqual({ applied: false, warnings: [] })
   })
 
   it('reports an unreachable registry without a stack trace', async () => {

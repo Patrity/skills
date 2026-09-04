@@ -1,8 +1,8 @@
 import { resolve } from 'node:path'
 import { intro, outro } from '@clack/prompts'
 import type { ArgsDef } from 'citty'
-import type { SetupPlan } from '../plan'
 import { summarize } from '../prompts'
+import type { RunResult } from '../run'
 import { CLI_VERSION } from '../version'
 
 /** Flags every command shares. `registry` has no default: `run.ts` resolves flag → lockfile → prod. */
@@ -57,6 +57,32 @@ export function repeatedArg(rawArgs: string[], name: string): string[] {
   return values.flatMap(v => v.split(',')).map(v => v.trim()).filter(Boolean)
 }
 
+/**
+ * Move an explicit subcommand token to the front so `skills --dir X list` behaves like
+ * `skills list --dir X`. citty dispatches with `rawArgs.slice(subCommandIndex + 1)`, so anything
+ * written before the subcommand is parsed against the root command and then thrown away.
+ *
+ * `names` must include every subcommand alias; `valueFlags` every flag whose value is a separate
+ * token (`--dir X` consumes `X`, `--dir=X` does not).
+ */
+export function hoistSubcommand(rawArgs: string[], names: string[], valueFlags: string[]): string[] {
+  const known = new Set(names)
+  const takesValue = new Set(valueFlags)
+  for (let i = 0; i < rawArgs.length; i++) {
+    const arg = rawArgs[i]!
+    if (arg === '--') break
+    if (arg.startsWith('-')) {
+      if (!arg.includes('=') && takesValue.has(arg.replace(/^-+/, ''))) i++
+      continue
+    }
+    // The first bare token is citty's subcommand slot: hoist it, or leave an unknown one for citty
+    // to reject exactly as it would have.
+    if (!known.has(arg) || i === 0) break
+    return [arg, ...rawArgs.slice(0, i), ...rawArgs.slice(i + 1)]
+  }
+  return rawArgs
+}
+
 /** Positional operands (bundle slugs), whatever citty did not bind to a named flag. */
 export function positionals(args: Record<string, unknown>): string[] {
   return Array.isArray(args._) ? args._.map(v => String(v).trim()).filter(Boolean) : []
@@ -66,14 +92,19 @@ export function startInteractive(opts: CommonFlags): void {
   if (!opts.json && !opts.yes) intro(`@patrity/skills ${CLI_VERSION}`)
 }
 
-/** Human-readable outcome for a command that applied a plan; silent under `--json`. */
-export function reportPlan(opts: CommonFlags, plan: SetupPlan, done: string): void {
+/** Human-readable outcome for a command that built a plan; silent under `--json`. */
+export function reportPlan(opts: CommonFlags, result: RunResult, done: string): void {
   if (opts.json) return
-  if (opts.yes) {
-    console.log(summarize(plan))
+  if (!result.applied) {
+    // Only reachable interactively, by declining the confirmation.
+    outro('Nothing written.')
     return
   }
-  outro(plan.warnings.length ? `${done} — ${plan.warnings.length} warning(s).` : done)
+  if (opts.yes) {
+    console.log(summarize(result.plan))
+    return
+  }
+  outro(result.plan.warnings.length ? `${done} — ${result.plan.warnings.length} warning(s).` : done)
 }
 
 /** One clear line on stderr and exit 1 — never a dumped Error object or a stack trace. */

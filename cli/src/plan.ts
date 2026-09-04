@@ -66,17 +66,19 @@ export function varsFor(manifest: CliManifest, answers: Record<string, string>, 
 
 export async function buildPlan(input: {
   manifest: CliManifest
+  /** The base URL the manifest was fetched from — not what it advertises, which may be a mirror. */
+  registry: string
   project: ProjectState
   answers: Record<string, string>
   bundles: string[]
   bundleFiles: Record<string, BundleFiles>
   force?: boolean
 }): Promise<SetupPlan> {
-  const { manifest, project, answers, bundles, bundleFiles, force = false } = input
+  const { manifest, registry, project, answers, bundles, bundleFiles, force = false } = input
   const warnings: string[] = []
   const vars = varsFor(manifest, answers, project.name)
   const prev = project.lock
-  const lock = emptyLockfile({ registry: manifest.registry, schemaVersion: manifest.base?.version ?? 0, projectName: project.name, answers })
+  const lock = emptyLockfile({ registry, schemaVersion: manifest.base?.version ?? 0, projectName: project.name, answers })
   const files: FileOp[] = []
   let shared: Json = {}
   let local: Json = {}

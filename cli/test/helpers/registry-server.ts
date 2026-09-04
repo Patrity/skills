@@ -8,6 +8,9 @@ const encoder = new TextEncoder()
 /** Slugs the fixture manifest advertises; anything else is a 404 the client turns into a RegistryError. */
 const BUNDLES = new Set(['demo', 'second', 'third'])
 
+/** The origin the served manifest claims — never reachable, and never this server's own. */
+export const ADVERTISED_REGISTRY = 'http://advertised.invalid'
+
 /**
  * `second` and `third` ship nothing installable: a README (skipped like every bundle README) and a
  * one-line CLAUDE.md, so their only trace in a project is a marker block.
@@ -29,12 +32,12 @@ export interface FakeRegistry {
  * `/api/cli/manifest` and `/api/skills/<slug>/download`.
  */
 export async function startRegistry(): Promise<FakeRegistry> {
-  let url = ''
   const server = createServer((req, res) => {
     const path = (req.url ?? '').split('?')[0] ?? ''
     if (path === '/api/cli/manifest') {
-      // The manifest advertises its own origin, so a lockfile written from it points back here.
-      const body = JSON.stringify({ ...fixtureManifest(), registry: url })
+      // Deliberately not this server's own origin: the lockfile must record where the CLI actually
+      // fetched from, not the URL the manifest advertises.
+      const body = JSON.stringify({ ...fixtureManifest(), registry: ADVERTISED_REGISTRY })
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(body)
       return
@@ -57,7 +60,7 @@ export async function startRegistry(): Promise<FakeRegistry> {
     server.once('error', reject)
     server.listen(0, '127.0.0.1', resolve)
   })
-  url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+  const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
 
   return {
     url,
