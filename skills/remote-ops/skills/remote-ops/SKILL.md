@@ -52,7 +52,7 @@ The same trap applies to every nesting of this shape, not just Proxmox: `ssh …
 Base64 the payload so no shell on the path can reinterpret it. This is the reliable form:
 
 ```bash
-remote() { local b=$(printf '%s' "$1" | base64); \
+remote() { local b=$(printf '%s' "$1" | base64 | tr -d '\n'); \
   ssh root@<host> "pct exec <ctid> -- bash -lc 'echo $b | base64 -d | bash'"; }
 
 remote 'systemctl status <app> --no-pager'
@@ -60,7 +60,11 @@ remote 'docker exec -i <container> psql -U <user> -d <db> -c "select count(*) fr
 ```
 
 Single quotes, double quotes, `;`, `&&`, `$(…)` and SQL all survive the hop intact, because the
-outer shells only ever see one base64 word.
+outer shells only ever see one base64 word — and `tr -d '\n'` is what keeps it *one* word: GNU
+coreutils `base64` wraps its output at 76 columns, so any payload over 57 bytes (the second example
+here is 83) arrives as two lines, and the embedded newline reaches the remote shell as a broken
+command. macOS/BSD `base64` does not wrap, which is exactly why this bites only on Linux. Use
+`tr -d '\n'` rather than `-w0`, which is GNU-only.
 
 ## Verify the machine, always
 

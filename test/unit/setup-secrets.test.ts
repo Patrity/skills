@@ -34,6 +34,27 @@ describe('scanForSecrets', () => {
     expect(findings.map(f => [f.line, f.rule])).toEqual([[2, 'internal-hostname']])
   })
 
+  it('does not read a dotfile suffix as an internal hostname', () => {
+    const findings = scanForSecrets({
+      'hooks/protect-env.sh': enc('  .env|.env.local|.env.production|credentials.json|secrets.*)\n'),
+      'CLAUDE.md': enc('Edits to `.env.local` are refused.\n')
+    })
+    expect(findings).toEqual([])
+  })
+
+  it('still warns on a real internal hostname, bare or in a URL', () => {
+    const findings = scanForSecrets({
+      'a.md': enc('nas.local\n'),
+      'b.md': enc('http://nas.local:8080\n'),
+      'c.md': enc('box.nas.local\n')
+    })
+    expect(findings.map(f => [f.path, f.rule])).toEqual([
+      ['a.md', 'internal-hostname'],
+      ['b.md', 'internal-hostname'],
+      ['c.md', 'internal-hostname']
+    ])
+  })
+
   it('ignores prose mentions, placeholders and binary files', () => {
     expect(scanForSecrets({
       'README.md': enc('Store the password in the project skill, never here. Use {{pm}}.\nTOKEN=<your-token>\n'),
