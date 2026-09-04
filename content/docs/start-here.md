@@ -13,18 +13,20 @@ CLAUDE.md
 .claude/skills/…             skills from the bundles you ticked
 .claude/rules/…              rules, globs rewritten for your app directory
 .claude/hooks/…              hook scripts, executable
-.claude/settings.json        committed: hooks
-.claude/settings.local.json  per-machine: permission allowlists
+.claude/settings.json        committed: hooks — only if a bundle contributes some
+.claude/settings.local.json  per-machine: permission allowlists — same
 .claude/.env.example         only if a bundle you picked declares variables
 .claude/skills.lock.json     what is installed, at which sha, and your answers
-.gitignore                   one managed block
+.gitignore                   one managed block, only if there is anything to ignore
 ```
+
+The lines that say *only if* are exactly that: a zip of documentation bundles alone comes out as a `CLAUDE.md`, a lockfile and a couple of skill files.
 
 Unzip it into a new project folder. There is no wrapper directory: the paths are already relative to a project root. Nothing in the zip is merged with files you have, so if the folder already holds a `CLAUDE.md` or a `.claude/`, run the CLI there instead.
 
 **Copy share link** puts the whole form state in the URL hash, which is the only way this site remembers anything — send the link and someone else opens your exact answers. **Copy CLI command** copies the `pnpx @patrity/skills init --yes …` invocation that reproduces the same state.
 
-One catch with that command. It names the bundles you added, not the ones you removed, so a recommended bundle you unticked in the form comes back when the command runs. Take it out again with `remove`, or download the zip instead.
+One catch with that command. Untick something the preset recommends and the command drops `--profile` and spells your answers out instead, so the preset itself cannot put it back — but an answer still can. Saying you test in a browser selects `browser-testing` however you got there, and a bundle you kept may suggest one you dropped. When that happens, take it out again with `remove`, or download the zip instead.
 
 ## 2. Or run the CLI
 

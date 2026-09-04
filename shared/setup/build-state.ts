@@ -1,4 +1,4 @@
-import type { CliManifest } from '../types/setup'
+import type { CliManifest, Profile } from '../types/setup'
 import { applyProfile, defaultAnswers, preselectedBundles, resolveBundles } from './wizard'
 
 /**
@@ -46,7 +46,7 @@ const dec = (s: string) => {
 
 /**
  * `p=<profile>&n=<name>&a=<axis>:<value>,…&b=<slug>,…` — short enough to read in the address bar,
- * and every value URL-encoded so a path answer or a spaced project name survives the round trip.
+ * and every value URL-encoded so a path answer survives the round trip.
  */
 export function encodeBuildState(s: BuildState): string {
   const parts: string[] = []
@@ -113,11 +113,16 @@ export function decodeBuildState(hash: string, manifest: CliManifest): { state: 
       : (base ? preselectedBundles(base, answers, prof, manifest.skills) : []),
     manifest.skills
   ).bundles
+  // The name reaches the rendered preview as `# <name>`, and the MDC pipeline behind
+  // `/api/build/render` keeps raw HTML (minus scripts) — so a link-supplied name gets the same
+  // door as every other link-supplied value rather than being trusted for being "just a title".
   const rawName = params.get('n')
+  const name = rawName ? dec(rawName) : ''
+  if (rawName && !PROJECT_NAME_RE.test(name)) warnings.push('projectName: value contains unsupported characters')
   return {
     state: {
       profile,
-      projectName: rawName ? dec(rawName) : DEFAULT_PROJECT_NAME,
+      projectName: rawName && PROJECT_NAME_RE.test(name) ? name : DEFAULT_PROJECT_NAME,
       answers,
       bundles
     },
@@ -125,18 +130,32 @@ export function decodeBuildState(hash: string, manifest: CliManifest): { state: 
   }
 }
 
+/** What `init` would pre-tick for these answers under this profile, closed over `dependsOn`. */
+function preselectionFor(s: BuildState, manifest: CliManifest, prof: Profile | undefined): string[] {
+  const base = manifest.base
+  return base ? resolveBundles(preselectedBundles(base, s.answers, prof, manifest.skills), manifest.skills).bundles : []
+}
+
 /**
  * The CLI invocation that reproduces this state, with nothing the wizard would infer anyway.
  * Every interpolated value is shell-quoted: this string is written to the clipboard for the user
  * to paste into a shell, and an answer can come from a link someone else wrote.
+ *
+ * `--profile` is only ever emitted when the state keeps everything the profile would pre-tick.
+ * Unticking one of them means the profile no longer describes this state, so it is dropped and the
+ * answers are spelled out against the schema defaults instead — otherwise the pasted command would
+ * silently reinstall the bundle the user just removed. An option's own `selects` (and a bundle's
+ * `suggests`) can still pull one back; only `remove` or the zip avoids that.
  */
 export function cliCommand(s: BuildState, manifest: CliManifest): string {
   const base = manifest.base
-  const prof = s.profile ? manifest.profiles.find(p => p.name === s.profile) : undefined
+  const named = s.profile ? manifest.profiles.find(p => p.name === s.profile) : undefined
+  const keepsProfile = preselectionFor(s, manifest, named).every(b => s.bundles.includes(b))
+  const prof = keepsProfile ? named : undefined
   const implied = base ? applyProfile(base, prof, defaultAnswers(base)) : {}
   const parts = ['pnpx @patrity/skills init --yes']
   if (prof) parts.push(`--profile ${shellQuote(prof.name)}`)
-  const preselected = base ? resolveBundles(preselectedBundles(base, s.answers, prof, manifest.skills), manifest.skills).bundles : []
+  const preselected = preselectionFor(s, manifest, prof)
   const extra = s.bundles.filter(b => !preselected.includes(b))
   if (extra.length) parts.push(`--with ${shellQuote(extra.join(','))}`)
   for (const [k, v] of Object.entries(s.answers)) {

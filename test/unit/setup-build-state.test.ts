@@ -11,13 +11,22 @@ describe('build state codec', () => {
     // both can round-trip to itself.
     const s = {
       profile: 'demo',
-      projectName: 'my app',
+      projectName: 'my-app',
       answers: { pm: 'pnpm', layout: 'monorepo', appDir: 'apps/x/app', browser: 'none' },
       bundles: ['demo', 'second', 'third']
     }
     const hash = encodeBuildState(s)
-    expect(hash).toBe('p=demo&n=my%20app&a=pm:pnpm,layout:monorepo,appDir:apps%2Fx%2Fapp,browser:none&b=demo,second,third')
+    expect(hash).toBe('p=demo&n=my-app&a=pm:pnpm,layout:monorepo,appDir:apps%2Fx%2Fapp,browser:none&b=demo,second,third')
     expect(decodeBuildState(hash, manifest)).toEqual({ state: s, warnings: [] })
+  })
+
+  it('drops a project name that is not name-shaped, markup included', () => {
+    // The name is rendered as `# <name>`, and the preview pipeline keeps raw HTML minus scripts:
+    // an `<iframe>` or a tracking pixel in a shared link must never reach it.
+    const hostile = '<img src=x onerror=alert(1)>'
+    const { state, warnings } = decodeBuildState(`n=${encodeURIComponent(hostile)}`, manifest)
+    expect(state.projectName).toBe('my-project')
+    expect(warnings).toEqual(['projectName: value contains unsupported characters'])
   })
 
   it('omits the profile when there is none and reads the hash with its leading #', () => {
@@ -63,6 +72,20 @@ describe('build state codec', () => {
       .toBe('pnpx @patrity/skills init --yes --with third --answer pm=npm')
     expect(cliCommand({ ...defaults, profile: 'demo', answers: { ...defaults.answers, browser: 'none' } }, manifest))
       .toBe('pnpx @patrity/skills init --yes --profile demo')
+  })
+
+  it('drops the profile when the state unticked something the profile pre-ticks', () => {
+    // Profile demo pre-ticks `demo` (and `second`, which demo suggests). This state keeps neither,
+    // so `--profile demo` would reinstall exactly what the user removed: the answers are spelled
+    // out against the schema defaults and the remaining bundles named instead.
+    const s = {
+      profile: 'demo',
+      projectName: 'x',
+      answers: { pm: 'npm', layout: 'single', appDir: 'apps/web/app', browser: 'none' },
+      bundles: ['second', 'third']
+    }
+    expect(cliCommand(s, manifest))
+      .toBe('pnpx @patrity/skills init --yes --with second,third --answer pm=npm --answer browser=none')
   })
 
   it('leaves shell-safe values unquoted and single-quotes everything else', () => {
