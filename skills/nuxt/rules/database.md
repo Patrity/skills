@@ -16,7 +16,8 @@ server/db/
 └── index.ts      # the client singleton
 ```
 
-- The client is a lazy singleton built from `useRuntimeConfig()` (see `backend.md`). Handlers call `getDb()`; nothing imports the driver directly.
+- Inside the app the client is a lazy singleton built from `useRuntimeConfig()` (see `backend.md`): handlers call `getDb()` and never touch the driver.
+- Give that factory an **optional explicit connection string** — `getDb(url?)`, falling back to runtime config — so a script or a test can build its own client from its own env-loaded config. `useRuntimeConfig()` does not exist outside the server runtime (see `cli.md`); without the escape hatch a backfill script has to duplicate the connection setup.
 - Types are inferred from the schema, never re-declared:
 
 ```ts

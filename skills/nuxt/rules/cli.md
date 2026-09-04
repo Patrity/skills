@@ -14,11 +14,12 @@ One-off and maintenance scripts live under `scripts/` and run through the TypeSc
 
 Add a `package.json` script for anything run more than once, so the invocation is discoverable and CI can call it the same way.
 
-## Keep scripts importable
+## What a script may import
 
-- Scripts import from `server/` and `shared/` like any other module — do not fork logic into the script. A script that reimplements a query drifts from the app the week after it is written.
+- A script runs **outside the Nitro runtime**, so Nitro auto-imports do not exist: `useRuntimeConfig()`, `defineEventHandler` and `#imports` are undefined. Importing a `server/` module that uses any of them fails at import time, transitively.
+- Import pure modules freely — `shared/` types and utils, the Drizzle schema, anything that depends only on its own imports. Do not reimplement a query in the script; lift the logic into a pure module both the app and the script can import.
+- Build the clients a script needs (database, SDK) from its own env-loaded config and pass them into that shared logic — see the explicit-connection-string factory in `database.md`. Never reach for the server's runtime-config singleton.
 - Keep the module side-effect free: define the work in a function, call it behind an entry-point guard, and export it so a test can drive it.
-- Pure logic that a script needs belongs in a module the app can also import, not in the script file.
 
 ## Environment
 

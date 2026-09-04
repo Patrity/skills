@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
 ## Secrets and config
 
-- `useRuntimeConfig(event)` only — `process.env` is empty at runtime on most deploy targets, and reading it hides the key from the config schema.
+- `useRuntimeConfig(event)` only — `process.env` is not populated on edge/worker runtimes and bypasses the typed config schema; `runtimeConfig` works on every target.
 - Validate required config once in a startup plugin so a missing value fails at boot, not on the first user request.
 - Anything created from runtime config (db client, auth instance, SDK client) is a **lazy singleton**, never a module-level constant:
 

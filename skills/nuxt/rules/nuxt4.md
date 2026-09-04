@@ -60,7 +60,7 @@ Name files as if the directory prefix is already there: `chat/Input.vue`, not `c
 
 ## Config and secrets
 
-- Read configuration through `useRuntimeConfig()`, never `process.env` in app or handler code (`process.env` is empty at runtime in most deployment targets).
+- Read configuration through `useRuntimeConfig()`, never `process.env` in app or handler code: `process.env` is not populated on edge/worker runtimes and bypasses the typed config schema; `runtimeConfig` works on every target.
 - Server-only values are top-level in `runtimeConfig`; only what is safe in the browser goes under `public`.
 - Every key is overridable by env at runtime as `NUXT_<KEY>` / `NUXT_PUBLIC_<KEY>` — name keys with that in mind.
 - Build-time-only tools (a `drizzle.config.ts`, a script) may read `process.env` — they run outside the Nitro runtime.
