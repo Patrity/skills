@@ -1,0 +1,114 @@
+version: 1
+axes:
+  - id: pm
+    question: Which package manager does this project use?
+    description: Sets the commands Claude runs and the lockfile rule.
+    default: pnpm
+    options:
+      - { id: pnpm, label: pnpm, fragment: pm/pnpm.md }
+      - { id: npm, label: npm, fragment: pm/npm.md }
+      - { id: yarn, label: yarn, fragment: pm/yarn.md }
+      - { id: bun, label: bun, fragment: pm/bun.md }
+
+  - id: layout
+    question: How is the repo laid out?
+    description: Every rule glob is rewritten for the app directory you pick.
+    default: single
+    options:
+      - { id: single, label: Single app (code under app/, server/, …) }
+      - { id: monorepo, label: Monorepo (the app lives in a sub-package), fragment: layout/monorepo.md }
+
+  - id: appDir
+    question: Where does the app's srcDir live, relative to the repo root?
+    when: { axis: layout, option: monorepo }
+    input: { placeholder: apps/web/app, default: apps/web/app }
+
+  - id: workflow
+    question: How much process should Claude follow?
+    default: full
+    options:
+      - { id: full, label: "Full: brainstorm → spec → plan → TDD → two-stage review", fragment: workflow/full.md }
+      - { id: lightweight, label: "Lightweight: spec + TDD, no handovers", fragment: workflow/lightweight.md }
+      - { id: none, label: None }
+
+  - id: docs
+    question: How should project docs be kept?
+    default: mechanical
+    options:
+      - { id: mechanical, label: "Three-tier docs with a wiki-parity test", fragment: docs/mechanical.md, selects: [docs-discipline] }
+      - { id: reminder, label: "Three-tier docs, reminder only", fragment: docs/reminder.md }
+      - { id: none, label: None }
+
+  - id: memory
+    question: Use the MyMind memory server?
+    default: on
+    options:
+      - { id: on, label: Yes, fragment: memory/on.md }
+      - { id: off, label: No }
+
+  - id: commits
+    question: May Claude commit without asking?
+    default: proactive
+    options:
+      - { id: proactive, label: "Yes — commit proactively, one concern per commit", fragment: git/commits-proactive.md }
+      - { id: ask, label: "No — ask before every commit", fragment: git/commits-ask.md }
+
+  - id: pushes
+    question: May Claude push without asking?
+    default: ask
+    options:
+      - { id: ask, label: "No — always ask before pushing", fragment: git/pushes-ask.md }
+      - { id: proactive, label: "Yes — push when the work is verified", fragment: git/pushes-proactive.md }
+
+  - id: browser
+    question: How is UI work validated?
+    default: playwright-cli
+    options:
+      - id: playwright-cli
+        label: playwright-cli in a real browser
+        fragment: testing/playwright-cli.md
+        selects: [browser-testing]
+        scaffolds:
+          - { template: browser-testing-project.md, to: ".claude/skills/{{projectName}}-browser-testing/SKILL.md" }
+      - { id: none, label: No browser validation }
+
+  - id: auth
+    question: Does the app have a login?
+    when: { axis: browser, option: playwright-cli }
+    default: "no"
+    options:
+      - { id: "no", label: No }
+      - id: "yes"
+        label: Yes — register a dev test account and store it in the project skill
+        fragment: testing/auth.md
+        scaffolds:
+          - { template: browser-testing-auth-section.md, to: ".claude/skills/{{projectName}}-browser-testing/SKILL.md", mode: append }
+
+  - id: enforcement
+    question: How should the rules be enforced?
+    default: prose
+    options:
+      - { id: prose, label: Reminders in CLAUDE.md and rules }
+      - { id: hooks, label: "Fail-closed hooks (protect .env, lint gate, insight capture)", fragment: enforcement/hooks.md, selects: [quality-hooks] }
+
+  - id: deploy
+    question: Where does this deploy?
+    default: vercel
+    options:
+      - { id: vercel, label: Vercel, fragment: deploy/vercel.md }
+      - { id: railway, label: Railway (persistent process), fragment: deploy/railway.md }
+      - { id: homelab, label: Homelab (Proxmox + Docker), fragment: deploy/homelab.md }
+      - { id: static, label: Static hosting, fragment: deploy/static.md }
+      - { id: none, label: Not deployed }
+
+  - id: domain
+    question: Is there a non-engineering domain Claude must not guess about?
+    default: "off"
+    options:
+      - { id: "off", label: No }
+      - { id: "on", label: Yes, fragment: domain/on.md }
+
+  - id: domainName
+    question: Name the domain (e.g. construction EVM, personal finance, security consulting)
+    when: { axis: domain, option: "on" }
+    input: { placeholder: the domain, default: the domain }

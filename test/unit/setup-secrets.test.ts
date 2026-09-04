@@ -29,6 +29,11 @@ describe('scanForSecrets', () => {
     expect(findings[0]!.excerpt.length).toBeLessThanOrEqual(80)
   })
 
+  it('does not flag a filename that merely contains an internal TLD label', () => {
+    const findings = scanForSecrets({ 'x.md': enc('settings.local.json\nnas.local\n') })
+    expect(findings.map(f => [f.line, f.rule])).toEqual([[2, 'internal-hostname']])
+  })
+
   it('ignores prose mentions, placeholders and binary files', () => {
     expect(scanForSecrets({
       'README.md': enc('Store the password in the project skill, never here. Use {{pm}}.\nTOKEN=<your-token>\n'),

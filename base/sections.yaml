@@ -1,0 +1,14 @@
+sections:
+  - { id: intro, title: "" }
+  - { id: read-first, title: "Read first" }
+  - { id: stack, title: "Stack" }
+  - { id: commands, title: "Commands" }
+  - { id: workflow, title: "Workflow" }
+  - { id: testing, title: "Testing" }
+  - { id: docs, title: "Docs" }
+  - { id: git, title: "Git" }
+  - { id: deploy, title: "Deploy" }
+  - { id: constraints, title: "Constraints that bit before" }
+  - { id: memory, title: "Memory" }
+  - { id: skills-and-rules, title: "Skills and rules" }
+  - { id: self-improvement, title: "Self-improvement" }

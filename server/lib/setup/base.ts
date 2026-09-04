@@ -10,7 +10,8 @@ const optionSchema = z.object({
   label: z.string().min(1),
   description: z.string().optional(),
   fragment: z.string().regex(/^[a-z0-9-]+\/[a-z0-9-]+\.md$/).optional(),
-  selects: z.array(z.string()).optional()
+  selects: z.array(z.string()).optional(),
+  scaffolds: z.array(z.object({ template: z.string(), to: z.string().min(1), mode: z.enum(['create', 'append']).optional() })).optional()
 })
 
 const axisSchema = z.object({
@@ -106,6 +107,11 @@ export function parseBaseSchema(files: Record<string, Uint8Array>): { schema: Ba
           for (const option of axis.options!) {
             if (option.fragment && !(option.fragment in fragments)) {
               errors.push(`${tag}: option "${option.id}" fragment "${option.fragment}" does not exist`)
+            }
+            for (const s of option.scaffolds ?? []) {
+              if (!(s.template in templates)) {
+                errors.push(`${tag}: option "${option.id}" scaffold template "${s.template}" does not exist`)
+              }
             }
           }
         }

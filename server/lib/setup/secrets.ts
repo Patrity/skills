@@ -12,7 +12,7 @@ const RULES: { rule: string, severity: 'fail' | 'warn', re: RegExp }[] = [
   { rule: 'connection-string', severity: 'fail', re: /\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp):\/\/[^:\s/]+:[^@\s]+@/i },
   { rule: 'credential-assignment', severity: 'fail', re: /\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*["']?[A-Za-z0-9_-]{12,}/i },
   { rule: 'private-ip', severity: 'warn', re: /\b(?:192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b/ },
-  { rule: 'internal-hostname', severity: 'warn', re: /\b[a-z0-9-]+\.(?:local|lan|home|internal)\b/i }
+  { rule: 'internal-hostname', severity: 'warn', re: /\b[a-z0-9-]+\.(?:local|lan|home|internal)\b(?!\.\w)/i }
 ]
 
 const decoder = new TextDecoder()

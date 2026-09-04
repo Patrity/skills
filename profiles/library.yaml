@@ -1,0 +1,4 @@
+name: library
+description: A package or library — lightweight process, hooks, no browser validation.
+answers: { pm: pnpm, layout: single, workflow: lightweight, docs: reminder, memory: "on", commits: proactive, pushes: ask, browser: none, enforcement: hooks, deploy: none, domain: "off" }
+bundles: [quality-hooks]

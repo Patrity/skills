@@ -78,6 +78,22 @@ axes:
   it('reports missing files', () => {
     expect(parseBaseSchema({}).errors).toEqual(['base/questions.yaml is missing', 'base/sections.yaml is missing'])
   })
+
+  it('validates scaffold templates', () => {
+    const files = { ...baseFiles }
+    files['questions.yaml'] = enc(`version: 1
+axes:
+  - id: browser
+    question: Q
+    default: cli
+    options:
+      - { id: cli, label: CLI, scaffolds: [{ template: browser-testing-project.md, to: ".claude/skills/{{projectName}}-browser-testing/SKILL.md" }] }
+      - { id: broken, label: B, scaffolds: [{ template: nope.md, to: x.md, mode: append }] }
+`)
+    const { schema, errors } = parseBaseSchema(files)
+    expect(schema).toBeNull()
+    expect(errors).toEqual(['axis "browser": option "broken" scaffold template "nope.md" does not exist'])
+  })
 })
 
 describe('validateBaseAgainstSlugs', () => {

@@ -13,6 +13,8 @@ export interface BaseOption {
   fragment?: string
   /** Bundle slugs this option auto-selects in the wizard. */
   selects?: string[]
+  /** Files the wizard writes into the project when this option is chosen. */
+  scaffolds?: { template: string, to: string, mode?: 'create' | 'append' }[]
 }
 
 export interface BaseAxis {

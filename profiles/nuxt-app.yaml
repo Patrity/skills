@@ -1,0 +1,4 @@
+name: nuxt-app
+description: Nuxt 4 + Nuxt UI app with the full workflow, mechanical docs, hooks and browser validation.
+answers: { pm: pnpm, layout: single, workflow: full, docs: mechanical, memory: "on", commits: proactive, pushes: ask, browser: playwright-cli, auth: "no", enforcement: hooks, deploy: vercel, domain: "off" }
+bundles: [nuxt, nuxt-ui, browser-testing, quality-hooks, docs-discipline]
