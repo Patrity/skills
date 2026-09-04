@@ -46,3 +46,17 @@ jobs:
         run: pnpm build
         env:
           SKILLS_SOURCE: fs
+
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @patrity/skills lint
+      - run: pnpm --filter @patrity/skills typecheck
+      - run: pnpm --filter @patrity/skills test
+      - run: pnpm --filter @patrity/skills build
+      - run: node cli/dist/index.js --version

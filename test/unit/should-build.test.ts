@@ -44,6 +44,9 @@ describe('scripts/should-build.sh', () => {
   it('skips when only agent config, repo CLAUDE.md or workflows changed', () => {
     expect(run(repoWith([['app/a.ts'], ['CLAUDE.md', '.claude/rules/x.md', '.github/workflows/ci.yml']]))).toBe(0)
   })
+  it('skips when only cli/** changed (the CLI is published separately)', () => {
+    expect(run(repoWith([['app/a.ts'], ['cli/src/index.ts']]))).toBe(0)
+  })
   it('builds when content/docs changed (app content, not bundle content)', () => {
     expect(run(repoWith([['app/a.ts'], ['content/docs/getting-started.md']]))).toBe(1)
   })

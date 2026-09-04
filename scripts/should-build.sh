@@ -2,9 +2,10 @@
 # Vercel "Ignored Build Step". Exit 0 = SKIP the build, exit 1 = BUILD.
 #
 # Bundle content under skills/** is read from GitHub at runtime and docs/** never ships,
-# so commits touching only those (plus the root README, CLAUDE.md, .claude/** and .github/**,
-# none of which ship) don't need a deploy. content/docs/** is app content and is deliberately
-# NOT excluded.
+# so commits touching only those (plus the root README, CLAUDE.md, .claude/**, .github/** and
+# cli/**, none of which ship as part of the site) don't need a deploy. cli/** is the
+# @patrity/skills CLI package, published separately (not part of this Nuxt app). content/docs/**
+# is app content and is deliberately NOT excluded.
 #
 # The base is VERCEL_GIT_PREVIOUS_SHA (the last deployed commit) so a push carrying an app
 # commit followed by a skills-only commit still builds. HEAD^ is the fallback when the
@@ -29,7 +30,7 @@ if [ "$(git rev-parse "${base}^{commit}")" = "$(git rev-parse HEAD)" ]; then
   exit 1
 fi
 
-if git diff --quiet "$base" HEAD -- . ':(exclude)skills/**' ':(exclude)docs/**' ':(exclude)README.md' ':(exclude)CLAUDE.md' ':(exclude).claude/**' ':(exclude).github/**'; then
+if git diff --quiet "$base" HEAD -- . ':(exclude)skills/**' ':(exclude)docs/**' ':(exclude)README.md' ':(exclude)CLAUDE.md' ':(exclude).claude/**' ':(exclude).github/**' ':(exclude)cli/**'; then
   echo "should-build: only skills/docs changed since $base, skipping build"
   exit 0
 fi

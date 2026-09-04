@@ -1,0 +1,32 @@
+{
+  "name": "@patrity/skills",
+  "version": "0.1.0",
+  "description": "Assemble an opinionated Claude Code setup (.claude/ + CLAUDE.md) from skills.patrity.com bundles.",
+  "type": "module",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/Patrity/skills.git", "directory": "cli" },
+  "homepage": "https://skills.patrity.com/docs/cli",
+  "bin": { "skills": "./dist/index.js" },
+  "files": ["dist", "README.md"],
+  "engines": { "node": ">=22" },
+  "publishConfig": { "access": "public" },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "citty": "^0.2.2",
+    "fflate": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "~4.1.11"
+  }
+}

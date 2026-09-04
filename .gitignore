@@ -13,3 +13,4 @@ logs
 .claude/settings.local.json
 .claude/worktrees
 .superpowers
+cli/dist
