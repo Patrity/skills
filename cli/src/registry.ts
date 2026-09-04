@@ -37,15 +37,28 @@ export function createRegistryClient(registry: string, opts: { fetchImpl?: typeo
   return {
     registry: base,
     async manifest({ allowErrors = false } = {}) {
-      const manifest = await (await get('/api/cli/manifest')).json() as CliManifest
+      const url = `${base}/api/cli/manifest`
+      const res = await get('/api/cli/manifest')
+      let manifest: CliManifest
+      try {
+        manifest = await res.json() as CliManifest
+      } catch (err) {
+        throw new RegistryError(`registry returned an unreadable manifest from ${url}: ${(err as Error).message}`, url)
+      }
       if (!allowErrors && manifest.errors.length) {
-        throw new RegistryError(`registry base schema has errors: ${manifest.errors.join('; ')}`, `${base}/api/cli/manifest`)
+        throw new RegistryError(`registry base schema has errors: ${manifest.errors.join('; ')}`, url)
       }
       return manifest
     },
     async download(slug) {
+      const url = `${base}/api/skills/${encodeURIComponent(slug)}/download`
       const bytes = new Uint8Array(await (await get(`/api/skills/${encodeURIComponent(slug)}/download`)).arrayBuffer())
-      const entries = unzipSync(bytes, { filter: f => !f.name.endsWith('/') })
+      let entries: ReturnType<typeof unzipSync>
+      try {
+        entries = unzipSync(bytes, { filter: f => !f.name.endsWith('/') })
+      } catch (err) {
+        throw new RegistryError(`registry returned an unreadable bundle zip for "${slug}" from ${url}: ${(err as Error).message}`, url)
+      }
       const files: BundleFiles = {}
       const prefix = `${slug}/`
       for (const [name, data] of Object.entries(entries)) {

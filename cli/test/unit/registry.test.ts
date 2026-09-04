@@ -41,4 +41,16 @@ describe('createRegistryClient', () => {
     await expect(client.download('demo')).rejects.toMatchObject({ name: 'RegistryError', status: 503, url: 'http://registry.test/api/skills/demo/download' })
     expect(await client.download('demo').catch(e => e instanceof RegistryError)).toBe(true)
   })
+
+  it('turns a malformed manifest body into a RegistryError naming the url', async () => {
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response('not json')) })
+    await expect(client.manifest()).rejects.toMatchObject({ name: 'RegistryError', url: 'http://registry.test/api/cli/manifest' })
+    await expect(client.manifest()).rejects.toThrow(/http:\/\/registry\.test\/api\/cli\/manifest/)
+  })
+
+  it('turns a corrupt bundle zip into a RegistryError naming the slug and url', async () => {
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response(new Uint8Array([1, 2, 3, 4]))) })
+    await expect(client.download('demo')).rejects.toMatchObject({ name: 'RegistryError', url: 'http://registry.test/api/skills/demo/download' })
+    await expect(client.download('demo')).rejects.toThrow(/"demo".*http:\/\/registry\.test\/api\/skills\/demo\/download/)
+  })
 })
