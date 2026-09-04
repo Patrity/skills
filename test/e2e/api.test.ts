@@ -6,6 +6,7 @@ import type { SkillDetailResponse, SkillFileResponse, SkillsListResponse } from 
 import type { DocResponse } from '../../shared/types/docs'
 import type { BaseResponse, CliManifest, ProfilesResponse } from '../../shared/types/setup'
 import { planFresh } from '../../shared/setup/plan'
+import { defaultAnswers } from '../../shared/setup/wizard'
 import { serializeLockfile } from '../../shared/setup/lock'
 import { setupZipEntries } from '../../server/lib/setup/setup-zip'
 
@@ -245,7 +246,10 @@ describe('POST /api/build', () => {
     // The in-process plan needs the bundle files: rebuild them from the download zip.
     const bundleZip = unzipSync(new Uint8Array(await (await fetch('/api/skills/demo/download')).arrayBuffer()))
     const bundleFiles = Object.fromEntries(Object.entries(bundleZip).map(([k, v]) => [k.replace(/^demo\//, ''), v]))
-    const plan = planFresh({ manifest, projectName: 'e2e-app', answers: body.answers, bundles: ['demo'], bundleFiles: { demo: bundleFiles }, registry: manifest.registry })
+    // The endpoint fills gaps with the base defaults (as the CLI does), so the in-process
+    // comparison plan needs the same merge to stay identical.
+    const answers = manifest.base ? { ...defaultAnswers(manifest.base), ...body.answers } : body.answers
+    const plan = planFresh({ manifest, projectName: 'e2e-app', answers, bundles: ['demo'], bundleFiles: { demo: bundleFiles }, registry: manifest.registry })
     expect(new TextDecoder().decode(zip['CLAUDE.md']!)).toBe(plan.claudeMd.content)
     expect(new TextDecoder().decode(zip['.claude/skills.lock.json']!)).toBe(serializeLockfile(plan.lock))
     expect(Object.keys(zip).sort()).toEqual(setupZipEntries(plan).map(e => e.path))
@@ -257,6 +261,22 @@ describe('POST /api/build', () => {
     expect((await bad.json()).statusMessage).toBe('unknown bundle: ghost')
     const big = await fetch('/api/build', { method: 'POST', body: JSON.stringify({ ...body, answers: { pad: 'x'.repeat(20000) } }), headers: { 'content-type': 'application/json' } })
     expect(big.status).toBe(413)
+  })
+  it('fills unanswered axes with their base default, like the CLI does', async () => {
+    const partial = { projectName: 'partial', answers: { pm: 'pnpm' }, bundles: [] }
+    const res = await fetch('/api/build', { method: 'POST', body: JSON.stringify(partial), headers: { 'content-type': 'application/json' } })
+    expect(res.status).toBe(200)
+    const zip = unzipSync(new Uint8Array(await res.arrayBuffer()))
+    const manifest = await $fetch<CliManifest>('/api/cli/manifest')
+    // What the CLI's `init` would start from: base defaults, with the given answers layered on top.
+    const answers = { ...defaultAnswers(manifest.base!), ...partial.answers }
+    const plan = planFresh({ manifest, projectName: partial.projectName, answers, bundles: [], bundleFiles: {}, registry: manifest.registry })
+    expect(new TextDecoder().decode(zip['CLAUDE.md']!)).toBe(plan.claudeMd.content)
+    expect(new TextDecoder().decode(zip['.claude/skills.lock.json']!)).toBe(serializeLockfile(plan.lock))
+    // Every axis that has a default ends up recorded, not just the one the request answered.
+    expect(Object.keys(plan.lock.answers).sort()).toEqual(manifest.base!.axes.map(a => a.id).sort())
+    const layout = manifest.base!.axes.find(a => a.id === 'layout')!
+    expect(plan.lock.answers.layout).toBe(layout.default)
   })
 })
 

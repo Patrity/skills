@@ -1,5 +1,5 @@
 import { planFresh } from '~~/shared/setup/plan'
-import { resolveBundles } from '~~/shared/setup/wizard'
+import { defaultAnswers, resolveBundles } from '~~/shared/setup/wizard'
 import { toCliManifest } from '~~/server/lib/setup/manifest'
 import { validateBuildInput } from '~~/server/lib/setup/build-input'
 import { buildSetupZip } from '~~/server/lib/setup/setup-zip'
@@ -25,7 +25,10 @@ export default defineEventHandler(async (event): Promise<Buffer> => {
   if (manifest.errors.length) throw createError({ statusCode: 503, statusMessage: 'the base schema has errors; the builder is disabled' })
   const checked = validateBuildInput(json, manifest)
   if (!checked.ok) throw createError({ statusCode: checked.status, statusMessage: checked.message })
-  const { projectName, answers } = checked.value
+  const { projectName } = checked.value
+  // The CLI's `init` starts from the base defaults and layers profile/flags on top; matching that
+  // here means an unanswered axis still gets its base fragment instead of silently dropping it.
+  const answers = manifest.base ? { ...defaultAnswers(manifest.base), ...checked.value.answers } : checked.value.answers
   const bundles = resolveBundles(checked.value.bundles, manifest.skills).bundles
 
   const bundleFiles: Record<string, BundleFiles> = {}
