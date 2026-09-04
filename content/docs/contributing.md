@@ -45,20 +45,44 @@ tool write `.claude/.env.example`.
 set -a; . "$CLAUDE_PROJECT_DIR/.claude/.env"; set +a
 ```
 
-```python
-from pathlib import Path
-from dotenv import dotenv_values  # python-dotenv
-
-config = dotenv_values(Path(__file__).resolve().parents[2] / '.env')
-```
-
 ```js
 process.loadEnvFile('.claude/.env')
 ```
 
-The Python path walks up from `.claude/skills/<name>/script.py` to `.claude/`, so a skill nested one
-level deeper needs `parents[3]`. Take an explicit path argument if the script can be run from
-anywhere.
+Python has no `.env` reader in its standard library, and a skill that adds `python-dotenv` for a
+dozen lines hands every user of it a pip install. Parse the file:
+
+```python
+import os
+from pathlib import Path
+
+def load_claude_env(path=Path(__file__).resolve().parents[2] / '.env'):
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        name, sep, value = line.partition('=')
+        if not sep:
+            continue
+        value = value.strip()
+        if len(value) > 1 and value[0] == value[-1] and value[0] in '"\'':
+            value = value[1:-1]
+        os.environ.setdefault(name.strip(), value)
+```
+
+`setdefault`, not assignment, so a value already exported in the shell wins. Where a skill has
+dependencies anyway, `python-dotenv` reads the same file:
+
+```python
+from dotenv import dotenv_values
+
+config = dotenv_values(Path(__file__).resolve().parents[2] / '.env')
+```
+
+Either way the path walks up from `.claude/skills/<name>/script.py` to `.claude/`, so a script one
+level deeper needs `parents[3]`. Take an explicit path argument if it can be run from anywhere.
 
 **Cache under your own skill directory, and declare it.** A skill that downloads or generates
 anything writes it beside its own `SKILL.md`, so removing the skill removes the cache. Put the path

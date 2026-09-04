@@ -85,7 +85,7 @@ group per bundle, alphabetically, from the `env` entries in the READMEs:
 # Copy this file to .claude/.env and fill in the values. .claude/.env is gitignored; skills read it, never the repo root .env.
 
 # skills: readonly-db
-# Read-only Postgres connection string for the db:q runner. (required)
+# Read-only Postgres connection string for the db:q runner. Point it at a replica or a dedicated read-only role. (required)
 DATABASE_URL_RO=postgres://<app>_claude_ro:<password>@<host>/<database>
 ```
 

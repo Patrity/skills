@@ -7,7 +7,7 @@ export default defineEventHandler(async (event): Promise<DocResponse> => {
   if (!entry) throw createError({ statusCode: 404, statusMessage: 'Doc not found' })
 
   // nuxt.config bundles content/docs as the `docs` server asset; keys are the file names
-  // exactly as they sit on disk (verified: getKeys() → ['getting-started.md', …]).
+  // exactly as they sit on disk (verified: getKeys() → ['start-here.md', …]).
   const md = await useStorage('assets:docs').getItem<string>(entry.file)
   if (typeof md !== 'string') {
     // The nav entry exists, so a missing asset is our bug, not a bad URL. 5xx keeps the

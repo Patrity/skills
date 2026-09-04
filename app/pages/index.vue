@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import type { BaseResponse } from '~~/shared/types/setup'
+
 // Never render an empty page over an upstream failure: a cacheable 200 would pin the
-// blank state for the ISR window, whereas a 5xx keeps the stale copy served.
-const { data, error } = await useSkillsList()
-if (error.value) {
+// blank state for the ISR window, whereas a 5xx keeps the stale copy served. Both routes
+// read the same snapshot, so they fail together — but they are separate ISR entries, so
+// treat either failure the same way.
+// Both calls are made before the await so they share one round trip: the bundle list already
+// carries the bundle count, and /api/base is the cheap half of the manifest (no profiles, no
+// repeat of the skills array) and carries the axis count.
+const [{ data, error }, { data: base, error: baseError }] = await Promise.all([
+  useSkillsList(),
+  useFetch<BaseResponse>('/api/base', { key: 'home:base' })
+])
+const listError = computed(() => error.value ?? baseError.value)
+if (listError.value) {
   throw createError({
-    statusCode: error.value.statusCode ?? 500,
+    statusCode: listError.value.statusCode ?? 500,
     statusMessage: 'Skills are temporarily unavailable',
     fatal: true
   })
@@ -12,6 +23,19 @@ if (error.value) {
 const { repo } = useGithubUrls()
 const bundles = computed(() => data.value?.skills ?? [])
 const featured = computed(() => bundles.value.slice(0, 6))
+
+// A broken base schema comes back as a 200 with `base: null`, so the count can be missing
+// while the bundles are fine; the section hides rather than claiming "zero questions".
+const axisCount = computed(() => base.value?.base?.axes.length ?? 0)
+
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty']
+/** Spelled out up to twenty, digits above that. */
+const spell = (n: number) => WORDS[n] ?? String(n)
+const count = (n: number, noun: string) => `${spell(n)} ${noun}${n === 1 ? '' : 's'}`
+const boxTitle = computed(() => {
+  const questions = count(axisCount.value, 'question')
+  return `${questions.charAt(0).toUpperCase()}${questions.slice(1)}, ${count(bundles.value.length, 'bundle')}`
+})
 
 const description = 'Answer a few questions and download a CLAUDE.md and a .claude/ directory: rules that carry the direction, skills that carry the how-to, hooks that fail closed. Compose it on the web or from the CLI, or take any single bundle on its own.'
 
@@ -89,9 +113,9 @@ useSeoMeta({
       />
 
       <UPageSection
-        v-if="bundles.length"
+        v-if="bundles.length && axisCount"
         headline="What's in the box"
-        title="Fourteen questions, nine bundles"
+        :title="boxTitle"
         description="The questions cover the package manager, the repo layout, how much process a change goes through, how UI work is validated, how docs are kept, whether Claude may commit and push on its own, where the project deploys, whether the memory server is wired up, whether rules are reminders or fail-closed hooks, and whether there is a non-engineering domain it must not guess about. Follow-ups appear only when they apply."
       >
         <div class="flex flex-wrap justify-center gap-2">

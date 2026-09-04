@@ -22,10 +22,10 @@ Releases are tagged `cli-vX.Y.Z` and published to [npmjs.com/package/@patrity/sk
 | --- | --- |
 | `init` (default) | The wizard. Asks the base questions with defaults pre-selected, then offers profiles and the bundle list grouped by tag, shows a dry-run summary of every file it would create or change, and applies it once you confirm. |
 | `add <slug…>` | Installs bundles into a project that has already been initialised, pulling in anything they declare in `dependsOn`. |
-| `remove <slug…>` | Removes a bundle's marker blocks and the files it owns. Files it did not create are left alone. |
-| `update [slug…]` | Re-renders every installed bundle from the current registry and reports what changed. Naming slugs only narrows which must already be installed — the plan is always a full re-render, so upstream fragment and schema changes reach every bundle. |
+| `remove <slug…>` (`rm`) | Removes a bundle's marker blocks and the files it owns. Files it did not create are left alone. |
+| `update [slug…]` (`up`) | Re-renders every installed bundle from the current registry and reports what changed. Naming slugs only narrows which must already be installed — the plan is always a full re-render, so upstream fragment and schema changes reach every bundle. |
 | `diff` | Compares local files against the lockfile hashes (your hand edits) and the registry snapshot sha in the lockfile against the current one (upstream drift). |
-| `list` | Prints the installed bundles, the answers on record, and whether the installed snapshot is behind the registry. |
+| `list` (`ls`) | Prints the installed bundles, the answers on record, and whether the installed snapshot is behind the registry. |
 
 Flags accepted everywhere: `--dir <path>` (work in another directory), `--registry <url>`, `--yes`, `--force`, `--json`. `init` additionally takes `--profile <name>`, `--with <a,b>` and `--answer <axis>=<option>`.
 
@@ -80,7 +80,7 @@ A bundle that declares variables also contributes a group to `.claude/.env.examp
 
 ```text
 # skills: readonly-db
-# Read-only Postgres connection string for the db:q runner. (required)
+# Read-only Postgres connection string for the db:q runner. Point it at a replica or a dedicated read-only role. (required)
 DATABASE_URL_RO=postgres://<app>_claude_ro:<password>@<host>/<database>
 ```
 
@@ -94,7 +94,7 @@ The zip from [the builder](/build) holds what `init` writes into an empty direct
 pnpx @patrity/skills diff
 ```
 
-No local drift: same files, same hashes on record. From there `add`, `remove` and `update` work exactly as they would on a project you had run `init` in, because they only ever read `.claude/skills.lock.json`.
+No local drift: same files, same hashes on record. From there `add`, `remove` and `update` work exactly as they would on a project you had run `init` in. The lockfile is the only state they carry over from the previous run. They still read the project's own files every time, to work out which ones you have edited since install and which would collide.
 
 Re-running `init` works too, and is how you change an answer you got wrong in the browser.
 
