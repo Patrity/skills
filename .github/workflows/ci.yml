@@ -57,6 +57,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @patrity/skills lint
       - run: pnpm --filter @patrity/skills typecheck
-      - run: pnpm --filter @patrity/skills test
+      # Build before test: test/integration/binary.test.ts spawns dist/index.js — what npm ships —
+      # and skips itself when it is missing.
       - run: pnpm --filter @patrity/skills build
+      - run: pnpm --filter @patrity/skills test
       - run: node cli/dist/index.js --version
