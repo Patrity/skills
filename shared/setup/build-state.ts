@@ -20,6 +20,21 @@ export const DEFAULT_PROJECT_NAME = 'my-project'
  */
 export const PROJECT_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/
 
+/**
+ * What a free-text answer may contain. Text-axis answers reach a rendered CLAUDE.md, a scaffold
+ * path and the CLI command a user pastes into a shell, and a share link is attacker-controlled
+ * input — so the link decoder only accepts path-shaped text and drops the rest.
+ */
+export const TEXT_ANSWER_RE = /^[A-Za-z0-9._\-/@:+ ]{0,128}$/
+
+/** Characters a shell reads literally, so a value made only of these needs no quoting. */
+const SHELL_SAFE_RE = /^[A-Za-z0-9._\-/=:@+,]+$/
+
+/** POSIX single-quoting: everything inside is literal, and `'` is closed, escaped and reopened. */
+function shellQuote(value: string): string {
+  return SHELL_SAFE_RE.test(value) ? value : `'${value.split('\'').join('\'\\\'\'')}'`
+}
+
 const enc = (s: string) => encodeURIComponent(s)
 const dec = (s: string) => {
   try {
@@ -79,16 +94,25 @@ export function decodeBuildState(hash: string, manifest: CliManifest): { state: 
       warnings.push(`${id}: "${value}" is not an option`)
       continue
     }
+    // A select answer is one of the schema's own option ids; a text one is whatever the link says.
+    if (!axis.options && !TEXT_ANSWER_RE.test(value)) {
+      warnings.push(`${id}: value contains unsupported characters`)
+      continue
+    }
     answers = { ...answers, [id]: value }
   }
   const wanted = (params.get('b') ?? '').split(',').filter(Boolean).map(dec)
   const known = new Set(manifest.skills.map(s => s.slug))
   for (const slug of wanted) if (!known.has(slug)) warnings.push(`unknown bundle "${slug}"`)
   // No `b=` means "whatever the wizard would pre-tick"; an empty `b=` means the user unticked
-  // everything, which `filter` preserves.
-  const bundles = params.has('b')
-    ? wanted.filter(s => known.has(s))
-    : (base ? preselectedBundles(base, answers, prof, manifest.skills) : [])
+  // everything, which `filter` preserves. Either way the list is closed over `dependsOn`, so the
+  // form can never show a locked-but-unticked row for a bundle the plan installs anyway.
+  const bundles = resolveBundles(
+    params.has('b')
+      ? wanted.filter(s => known.has(s))
+      : (base ? preselectedBundles(base, answers, prof, manifest.skills) : []),
+    manifest.skills
+  ).bundles
   const rawName = params.get('n')
   return {
     state: {
@@ -101,18 +125,22 @@ export function decodeBuildState(hash: string, manifest: CliManifest): { state: 
   }
 }
 
-/** The CLI invocation that reproduces this state, with nothing the wizard would infer anyway. */
+/**
+ * The CLI invocation that reproduces this state, with nothing the wizard would infer anyway.
+ * Every interpolated value is shell-quoted: this string is written to the clipboard for the user
+ * to paste into a shell, and an answer can come from a link someone else wrote.
+ */
 export function cliCommand(s: BuildState, manifest: CliManifest): string {
   const base = manifest.base
   const prof = s.profile ? manifest.profiles.find(p => p.name === s.profile) : undefined
   const implied = base ? applyProfile(base, prof, defaultAnswers(base)) : {}
   const parts = ['pnpx @patrity/skills init --yes']
-  if (prof) parts.push(`--profile ${prof.name}`)
+  if (prof) parts.push(`--profile ${shellQuote(prof.name)}`)
   const preselected = base ? resolveBundles(preselectedBundles(base, s.answers, prof, manifest.skills), manifest.skills).bundles : []
   const extra = s.bundles.filter(b => !preselected.includes(b))
-  if (extra.length) parts.push(`--with ${extra.join(',')}`)
+  if (extra.length) parts.push(`--with ${shellQuote(extra.join(','))}`)
   for (const [k, v] of Object.entries(s.answers)) {
-    if (implied[k] !== v) parts.push(`--answer ${k}=${v.includes(' ') ? `"${v}"` : v}`)
+    if (implied[k] !== v) parts.push(`--answer ${shellQuote(k)}=${shellQuote(v)}`)
   }
   return parts.join(' ')
 }

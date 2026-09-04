@@ -60,6 +60,26 @@ describe('planFresh', () => {
     expect(serializeLockfile(parseLockfile(serializeLockfile(plan.lock)))).toBe(serializeLockfile(plan.lock))
   })
 
+  it('scaffolds a rendered path inside the project and skips one that climbs out', async () => {
+    // The web builder feeds text-axis answers straight from a share link into `{{appDir}}`, which
+    // a scaffold's `to` interpolates — so the rendered path has to be checked, not just the literal.
+    const scaffold = async (appDir: string) => {
+      const { manifest } = await load()
+      const monorepo = manifest.base!.axes.find(a => a.id === 'layout')!.options!.find(o => o.id === 'monorepo')!
+      monorepo.scaffolds = [{ template: 'browser-testing-project.md', to: '{{appDir}}/notes.md' }]
+      return planFresh({ manifest, projectName: 'p', answers: { pm: 'pnpm', layout: 'monorepo', appDir }, bundles: [], bundleFiles: {}, registry: 'r' })
+    }
+
+    const ok = await scaffold('apps/web')
+    expect(ok.files.find(f => f.owner === 'scaffold')?.path).toBe('apps/web/notes.md')
+    expect(Object.keys(ok.lock.scaffolds)).toEqual(['apps/web/notes.md'])
+
+    const escaping = await scaffold('../..')
+    expect(escaping.warnings).toContain('scaffold browser-testing-project.md: unsafe path ../../notes.md, skipped')
+    expect(escaping.files.some(f => f.owner === 'scaffold')).toBe(false)
+    expect(escaping.lock.scaffolds).toEqual({})
+  })
+
   it('warns instead of throwing on a malformed settings.json and an unsafe path', async () => {
     const { manifest, files } = await load()
     const enc = new TextEncoder()

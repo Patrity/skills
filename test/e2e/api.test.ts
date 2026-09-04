@@ -165,6 +165,7 @@ describe('meta routes', () => {
     const xml = await $fetch<string>('/sitemap.xml')
     expect(xml).toContain('<loc>http://localhost:3000/skill/demo</loc>')
     expect(xml).toContain('<loc>http://localhost:3000/skills</loc>')
+    expect(xml).toContain('<loc>http://localhost:3000/build</loc>')
   })
 })
 

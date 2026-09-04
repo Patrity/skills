@@ -8,6 +8,7 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://example.test/</loc></url>
   <url><loc>https://example.test/skills</loc></url>
+  <url><loc>https://example.test/build</loc></url>
   <url><loc>https://example.test/docs</loc></url>
   <url><loc>https://example.test/docs/getting-started</loc></url>
   <url><loc>https://example.test/docs/frontmatter</loc></url>
@@ -76,9 +77,16 @@ describe('buildWarmUrls', () => {
     expect(urls).toContain('/api/cli/manifest')
   })
 
-  it('always warms the /build page and its payload, even though nothing in the sitemap links to it', () => {
+  it('warms the /build page and its payload', () => {
     expect(urls).toContain('/build')
     expect(urls).toContain('/build/_payload.json')
+  })
+
+  it('still warms /build when the sitemap does not list it', () => {
+    const without = buildWarmUrls(sitemap.replace('  <url><loc>https://example.test/build</loc></url>\n', ''), [])
+    expect(without).not.toContain('https://example.test/build')
+    expect(without).toContain('/build')
+    expect(without).toContain('/build/_payload.json')
   })
 
   it('warms the payload behind every sitemap page too, not just the bundle files', () => {

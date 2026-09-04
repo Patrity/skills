@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   const paths = [
     '/',
     '/skills',
+    '/build',
     '/docs',
     ...docsNav.map(d => `/docs/${d.slug}`),
     ...skills.filter(s => isPublicSkill(s, meta)).map(s => `/skill/${s.slug}`)

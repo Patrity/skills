@@ -176,6 +176,12 @@ export function renderFresh(input: FreshInput): {
         continue
       }
       const to = renderPlaceholders(s.to, vars).text
+      // The rendered path carries text-axis answers, which on the web come from whoever wrote the
+      // link — so it gets the same containment check as a bundle's own file names.
+      if (!isSafeBundlePath(to)) {
+        warnings.push(`scaffold ${s.template}: unsafe path ${to}, skipped`)
+        continue
+      }
       const text = renderPlaceholders(template, vars).text
       scaffolded.set(to, s.mode === 'append' && scaffolded.has(to) ? `${scaffolded.get(to)!.replace(/\n*$/, '\n')}${text}` : text)
     }
