@@ -2,8 +2,7 @@ import type { CliManifest, SectionDef } from '../../shared/types/setup'
 import { composeClaudeMd, type Contribution } from '../../shared/setup/render'
 import { findMarkerBlocks } from '../../shared/setup/markers'
 import { sectionIdForHeading } from '../../shared/setup/sections'
-import { byKey, hashForSource, planFresh, settingsFileFor, sourceIds, varsFor, type FileOp, type SetupPlan } from '../../shared/setup/plan'
-import { contributionsFor } from './contributions'
+import { byKey, hashForSource, renderFresh, settingsFileFor, sourceIds, varsFor, type FileOp, type SetupPlan } from '../../shared/setup/plan'
 import { sha256, type LockSettings } from './lockfile'
 import type { BundleFiles } from './registry'
 import type { ProjectState } from './project'
@@ -14,7 +13,7 @@ export type { FileOp, SetupPlan }
 
 /**
  * A setup for a project that may already have one. Everything a fresh project gets is rendered once
- * by `planFresh` (shared with the web builder); this adds what only a real project on disk has: the
+ * by `renderFresh` (shared with the web builder); this adds what only a real project on disk has: the
  * classification of each file against disk and the previous lock, removals, hand-edited marker
  * blocks and settings entries, and the .gitignore line.
  */
@@ -29,9 +28,12 @@ export async function buildPlan(input: {
   force?: boolean
 }): Promise<SetupPlan> {
   const { manifest, registry, project, answers, bundles, bundleFiles, force = false } = input
-  const fresh = planFresh({ manifest, projectName: project.name, answers, bundles, bundleFiles, registry })
+  // One render, shared with the web builder. `shared`/`local` are the settings halves the selected
+  // bundles contribute and `contributions` the CLAUDE.md snippets — the same values `planFresh`
+  // used, so the overlay below can never disagree with what it rendered.
+  const { plan: fresh, shared, local, contributions, contributionWarnings } = renderFresh({ manifest, projectName: project.name, answers, bundles, bundleFiles, registry })
+  // Render warnings first; the contribution ones go in after the removals, where they always were.
   const warnings = [...fresh.warnings]
-  const vars = varsFor(manifest, answers, project.name)
   const prev = project.lock
   // `fresh.lock` already records every rendered file; only classification changes an entry below.
   const lock = fresh.lock
@@ -77,9 +79,9 @@ export async function buildPlan(input: {
     }
   }
 
-  // CLAUDE.md. `planFresh` composed these onto an empty document and its warnings are already in
-  // `warnings`; the overlay needs the list itself to fold a hand-edited block back in.
-  const { contributions } = contributionsFor({ manifest, answers, bundles, bundleFiles, vars })
+  // CLAUDE.md, recomposed onto the project's own file: the contributions are the rendered ones,
+  // with a hand-edited block folded back in below.
+  warnings.push(...contributionWarnings)
   const sections = manifest.base?.sections
   const handEdited: string[] = []
   const contributing = new Set(contributions.map(c => c.sourceId))
@@ -114,11 +116,6 @@ export async function buildPlan(input: {
     lock.blocks[id] = kept ?? hashForSource(composedBlocks, id)
   }
 
-  // The two settings halves the selected bundles contribute, read back from the files `planFresh`
-  // would write for a fresh project. The round trip is exact — they were JSON to begin with — and
-  // keeps the bundle merge in one place instead of repeating it here.
-  const shared = fresh.settings ? JSON.parse(fresh.settings.content) as Json : {}
-  const local = fresh.settingsLocal ? JSON.parse(fresh.settingsLocal.content) as Json : {}
   // Every contribution the previous lock recorded comes out before the new ones go in — of dropped
   // bundles (so their fail-closed hooks stop firing once their scripts are gone) and of kept ones
   // (so a changed hook or permission replaces the installed entry instead of accumulating).

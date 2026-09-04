@@ -1,5 +1,5 @@
 import type { BundleFiles, CliManifest } from '../types/setup'
-import { composeClaudeMd } from './render'
+import { composeClaudeMd, type Contribution } from './render'
 import { findMarkerBlocks, type MarkerBlock } from './markers'
 import { placeholderVars, renderPlaceholders, type PlaceholderVars } from './placeholders'
 import { isSafeBundlePath } from './paths'
@@ -62,13 +62,7 @@ export function varsFor(manifest: CliManifest, answers: Record<string, string>, 
   return vars as PlaceholderVars & Record<string, string>
 }
 
-/**
- * Everything a setup renders for a project that has nothing yet: bundle files under `.claude/`,
- * scaffolds, the composed CLAUDE.md and the two settings files, with a complete lockfile.
- * Synchronous and pure — no disk, no previous state — so it runs unchanged in the browser. The CLI
- * overlays an existing project on top of this (classification, removals, hand edits) in `buildPlan`.
- */
-export function planFresh(input: {
+export interface FreshInput {
   manifest: CliManifest
   projectName: string
   answers: Record<string, string>
@@ -76,7 +70,25 @@ export function planFresh(input: {
   bundleFiles: Record<string, BundleFiles>
   /** The base URL the manifest was fetched from — not what it advertises, which may be a mirror. */
   registry: string
-}): SetupPlan {
+}
+
+/**
+ * Internal to this module and the CLI's `buildPlan`: what `planFresh` renders, plus the
+ * intermediates an existing-project overlay would otherwise have to recompute — the two merged
+ * settings halves (before any merge with what the project already has) and the CLAUDE.md
+ * contributions. There is one `contributionsFor` call, here, so both callers can never disagree.
+ *
+ * `plan.warnings` holds the render warnings only; the contribution warnings come back beside them
+ * so each caller can place them where it always has (`planFresh` right after the render warnings,
+ * `buildPlan` after its removal warnings).
+ */
+export function renderFresh(input: FreshInput): {
+  plan: SetupPlan
+  shared: Json
+  local: Json
+  contributions: Contribution[]
+  contributionWarnings: string[]
+} {
   const { manifest, projectName, answers, bundles, bundleFiles, registry } = input
   const warnings: string[] = []
   const vars = varsFor(manifest, answers, projectName)
@@ -158,14 +170,13 @@ export function planFresh(input: {
   }
 
   // CLAUDE.md
-  const { contributions, warnings: cw } = contributionsFor({ manifest, answers, bundles, bundleFiles, vars })
-  warnings.push(...cw)
+  const { contributions, warnings: contributionWarnings } = contributionsFor({ manifest, answers, bundles, bundleFiles, vars })
   const sections = manifest.base?.sections
   const claudeMd = composeClaudeMd(null, { title: projectName, sections, contributions })
   const composedBlocks = findMarkerBlocks(claudeMd)
   for (const id of sourceIds(composedBlocks)) lock.blocks[id] = hashForSource(composedBlocks, id)
 
-  return {
+  const plan: SetupPlan = {
     files,
     removals: [],
     claudeMd: { content: claudeMd, changed: true, handEdited: [] },
@@ -175,6 +186,18 @@ export function planFresh(input: {
     lock,
     warnings
   }
+  return { plan, shared, local, contributions, contributionWarnings }
+}
+
+/**
+ * Everything a setup renders for a project that has nothing yet: bundle files under `.claude/`,
+ * scaffolds, the composed CLAUDE.md and the two settings files, with a complete lockfile.
+ * Synchronous and pure — no disk, no previous state — so it runs unchanged in the browser. The CLI
+ * overlays an existing project on top of this (classification, removals, hand edits) in `buildPlan`.
+ */
+export function planFresh(input: FreshInput): SetupPlan {
+  const { plan, contributionWarnings } = renderFresh(input)
+  return { ...plan, warnings: [...plan.warnings, ...contributionWarnings] }
 }
 
 /** A settings file the plan may write: `null` only when there is nothing there and nothing to add. */
