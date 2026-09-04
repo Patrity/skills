@@ -21,6 +21,10 @@ export interface SkillFrontmatter {
   author: string
   authorUrl?: string
   requires?: string[]
+  /** Bundle slugs that must be installed with this one. */
+  dependsOn?: string[]
+  /** Bundle slugs the wizard pre-ticks alongside this one. */
+  suggests?: string[]
 }
 
 export interface TreeNode {
