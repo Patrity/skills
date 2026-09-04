@@ -1,4 +1,4 @@
-import type { BaseAxis, BaseSchema, CliManifest } from '../../shared/types/setup'
+import type { BaseAxis, BaseSchema, CliManifest, SectionDef } from '../../shared/types/setup'
 import { splitSnippet } from '../../shared/setup/sections'
 import { renderPlaceholders, type PlaceholderVars } from '../../shared/setup/placeholders'
 import type { Contribution } from '../../shared/setup/render'
@@ -11,17 +11,25 @@ export function activeAxes(schema: BaseSchema, answers: Record<string, string>):
   return schema.axes.filter(a => !a.when || answers[a.when.axis] === a.when.option)
 }
 
-function render(text: string, vars: Record<string, string>, label: string, warnings: string[]): string {
-  const { text: out, unknown } = renderPlaceholders(text, vars as PlaceholderVars)
-  for (const key of unknown) warnings.push(`${label}: unknown placeholder {{${key}}}`)
+interface Collector {
+  vars: Record<string, string>
+  /** The base's section list; canonical when the manifest has no base. */
+  sections?: SectionDef[]
+  out: Contribution[]
+  warnings: string[]
+}
+
+function render(ctx: Collector, text: string, label: string): string {
+  const { text: out, unknown } = renderPlaceholders(text, ctx.vars as PlaceholderVars)
+  for (const key of unknown) ctx.warnings.push(`${label}: unknown placeholder {{${key}}}`)
   return out
 }
 
-function addSnippet(md: string, sourceId: string, vars: Record<string, string>, label: string, out: Contribution[], warnings: string[]): void {
-  const { byId, errors } = splitSnippet(md)
-  for (const e of errors) warnings.push(`${label}: ${e}`)
+function addSnippet(ctx: Collector, md: string, sourceId: string, label: string): void {
+  const { byId, errors } = splitSnippet(md, ctx.sections)
+  for (const e of errors) ctx.warnings.push(`${label}: ${e}`)
   for (const [sectionId, markdown] of Object.entries(byId)) {
-    out.push({ sourceId, sectionId, markdown: render(markdown, vars, label, warnings) })
+    ctx.out.push({ sourceId, sectionId, markdown: render(ctx, markdown, label) })
   }
 }
 
@@ -33,31 +41,30 @@ export function contributionsFor(input: {
   bundleFiles: Record<string, BundleFiles>
   vars: PlaceholderVars & Record<string, string>
 }): { contributions: Contribution[], warnings: string[] } {
-  const out: Contribution[] = []
-  const warnings: string[] = []
   const base = input.manifest.base
+  const ctx: Collector = { vars: input.vars, sections: base?.sections, out: [], warnings: [] }
   if (base) {
     for (const name of Object.keys(base.always).sort()) {
-      addSnippet(base.always[name]!, `base:always/${name.replace(/\.md$/, '')}`, input.vars, `base/always/${name}`, out, warnings)
+      addSnippet(ctx, base.always[name]!, `base:always/${name.replace(/\.md$/, '')}`, `base/always/${name}`)
     }
     for (const axis of activeAxes(base, input.answers)) {
       const option = axis.options?.find(o => o.id === input.answers[axis.id])
       if (!option?.fragment) continue
       const md = base.fragments[option.fragment]
       if (md === undefined) {
-        warnings.push(`axis ${axis.id}: fragment ${option.fragment} missing from manifest`)
+        ctx.warnings.push(`axis ${axis.id}: fragment ${option.fragment} missing from manifest`)
         continue
       }
-      addSnippet(md, `base:${axis.id}=${option.id}`, input.vars, `base/fragments/${option.fragment}`, out, warnings)
+      addSnippet(ctx, md, `base:${axis.id}=${option.id}`, `base/fragments/${option.fragment}`)
     }
   }
   for (const slug of [...input.bundles].sort()) {
     const files = input.bundleFiles[slug] ?? {}
     const key = Object.keys(files).find(p => p.toLowerCase() === 'claude.md')
     if (!key) continue
-    addSnippet(decoder.decode(files[key]!), `bundle:${slug}`, input.vars, `bundle:${slug} CLAUDE.md`, out, warnings)
+    addSnippet(ctx, decoder.decode(files[key]!), `bundle:${slug}`, `bundle:${slug} CLAUDE.md`)
   }
-  return { contributions: out, warnings }
+  return { contributions: ctx.out, warnings: ctx.warnings }
 }
 
 /** Files the chosen base options ask the wizard to scaffold into the project. */

@@ -1,11 +1,11 @@
-import type { CliManifest } from '../../shared/types/setup'
+import type { CliManifest, SectionDef } from '../../shared/types/setup'
 import { composeClaudeMd, type Contribution } from '../../shared/setup/render'
-import { findMarkerBlocks } from '../../shared/setup/markers'
+import { findMarkerBlocks, type MarkerBlock } from '../../shared/setup/markers'
 import { sectionIdForHeading } from '../../shared/setup/sections'
 import { placeholderVars, renderPlaceholders, type PlaceholderVars } from '../../shared/setup/placeholders'
 import { activeAxes, contributionsFor, scaffoldsFor } from './contributions'
 import { emptyLockfile, sha256, type Lockfile } from './lockfile'
-import type { BundleFiles } from './registry'
+import { isSafeBundlePath, type BundleFiles } from './registry'
 import type { ProjectState } from './project'
 import { ensureGitignoreLine, formatJson, mergeSettings, splitBundleSettings, type Json } from './settings'
 
@@ -41,6 +41,18 @@ function isBinary(bytes: Uint8Array): boolean {
     if (bytes[i] === 0) return true
   }
   return false
+}
+
+/**
+ * One source contributes one block per section, so its lock entry hashes every block it owns,
+ * joined in document order. Used identically when recording and when detecting a hand edit.
+ */
+function hashForSource(blocks: MarkerBlock[], sourceId: string): string {
+  return sha256(blocks.filter(b => b.sourceId === sourceId).map(b => b.content).join('\n'))
+}
+
+function sourceIds(blocks: MarkerBlock[]): string[] {
+  return [...new Set(blocks.map(b => b.sourceId))]
 }
 
 /** Text-axis answers double as placeholders ({{appDir}}, {{domainName}} …). */
@@ -79,6 +91,18 @@ export async function buildPlan(input: {
     return 'update'
   }
 
+  /** Render a bundle's settings file; a malformed one is reported and skipped, not thrown. */
+  const readSettings = (raw: Uint8Array, label: string): Json | null => {
+    const { text, unknown } = renderPlaceholders(decoder.decode(raw), vars)
+    for (const k of unknown) warnings.push(`${label}: unknown placeholder {{${k}}}`)
+    try {
+      return JSON.parse(text) as Json
+    } catch {
+      warnings.push(`${label}: not valid JSON, skipped`)
+      return null
+    }
+  }
+
   for (const slug of [...bundles].sort()) {
     const bundle = bundleFiles[slug] ?? {}
     const prevFiles = prev?.bundles[slug]?.files ?? {}
@@ -88,14 +112,18 @@ export async function buildPlan(input: {
     for (const [rel, raw] of Object.entries(bundle).sort(byKey)) {
       const lower = rel.toLowerCase()
       if (lower === 'settings.json') {
-        settingsJson = JSON.parse(renderPlaceholders(decoder.decode(raw), vars).text) as Json
+        settingsJson = readSettings(raw, `${slug}/settings.json`)
         continue
       }
       if (lower === 'settings.local.json') {
-        settingsLocalJson = JSON.parse(decoder.decode(raw)) as Json
+        settingsLocalJson = readSettings(raw, `${slug}/settings.local.json`)
         continue
       }
       if (SKIP.has(lower)) continue
+      if (!isSafeBundlePath(rel)) {
+        warnings.push(`${slug}/${rel}: unsafe path, skipped`)
+        continue
+      }
       const path = `.claude/${rel}`
       let bytes = raw
       if (!isBinary(raw)) {
@@ -105,7 +133,10 @@ export async function buildPlan(input: {
       }
       const action = await classify(path, bytes, prevFiles[path])
       files.push({ path, bytes, owner: `bundle:${slug}`, action, ...(rel.startsWith('hooks/') ? { mode: 0o755 } : {}) })
-      lock.bundles[slug]!.files[path] = action === 'protected' || action === 'conflict' ? (prevFiles[path] ?? sha256(bytes)) : sha256(bytes)
+      // A conflicting path is someone else's file: never claim it in the lock.
+      if (action !== 'conflict') {
+        lock.bundles[slug]!.files[path] = action === 'protected' ? (prevFiles[path] ?? sha256(bytes)) : sha256(bytes)
+      }
     }
     const split = splitBundleSettings(settingsJson, settingsLocalJson)
     shared = mergeSettings(shared, split.shared)
@@ -128,17 +159,25 @@ export async function buildPlan(input: {
   }
   for (const [path, text] of scaffolded) {
     const bytes = encoder.encode(text)
-    const action = await classify(path, bytes, prev?.scaffolds[path])
+    const classified = await classify(path, bytes, prev?.scaffolds[path])
     // A scaffold is a starting point the user edits: never overwrite an existing one unless forced.
-    files.push({ path, bytes, owner: 'scaffold', action: action === 'update' && !force ? 'protected' : action })
-    lock.scaffolds[path] = prev?.scaffolds[path] ?? sha256(bytes)
+    const action = classified === 'update' && !force ? 'protected' : classified
+    files.push({ path, bytes, owner: 'scaffold', action })
+    if (action !== 'conflict') {
+      lock.scaffolds[path] = action === 'protected' ? (prev?.scaffolds[path] ?? sha256(bytes)) : sha256(bytes)
+    }
   }
 
   // Bundles present in the previous lock but no longer selected → removals (only if untouched).
   const removals: string[] = []
+  const seen = new Set(files.map(f => f.path))
   for (const [slug, entry] of Object.entries(prev?.bundles ?? {}).sort(byKey)) {
     if (bundles.includes(slug)) continue
     for (const [path, hash] of Object.entries(entry.files).sort(byKey)) {
+      // A path a still-selected bundle installs is not a leftover, and two dropped bundles may
+      // have shipped the same file.
+      if (seen.has(path)) continue
+      seen.add(path)
       const current = await project.files(path)
       if (current === null) continue
       if (sha256(current) === hash) removals.push(path)
@@ -149,11 +188,12 @@ export async function buildPlan(input: {
   // CLAUDE.md
   const { contributions, warnings: cw } = contributionsFor({ manifest, answers, bundles, bundleFiles, vars })
   warnings.push(...cw)
+  const sections = manifest.base?.sections
   const handEdited: string[] = []
   const existingBlocks = project.claudeMd ? findMarkerBlocks(project.claudeMd) : []
-  for (const block of existingBlocks) {
-    const recorded = prev?.blocks[block.sourceId]
-    if (recorded && recorded !== sha256(block.content)) handEdited.push(block.sourceId)
+  for (const id of sourceIds(existingBlocks)) {
+    const recorded = prev?.blocks[id]
+    if (recorded && recorded !== hashForSource(existingBlocks, id)) handEdited.push(id)
   }
   let effective: Contribution[] = contributions
   if (handEdited.length && !force) {
@@ -161,12 +201,17 @@ export async function buildPlan(input: {
     effective = contributions.filter(c => !handEdited.includes(c.sourceId))
     for (const id of handEdited) {
       for (const block of existingBlocks.filter(b => b.sourceId === id)) {
-        effective.push({ sourceId: id, sectionId: sectionOfBlock(project.claudeMd!, block.start), markdown: block.content })
+        effective.push({ sourceId: id, sectionId: sectionOfBlock(project.claudeMd!, block.start, sections), markdown: block.content })
       }
     }
   }
-  const claudeMd = composeClaudeMd(project.claudeMd, { title: project.name, contributions: effective })
-  for (const block of findMarkerBlocks(claudeMd)) lock.blocks[block.sourceId] = sha256(block.content)
+  const claudeMd = composeClaudeMd(project.claudeMd, { title: project.name, sections, contributions: effective })
+  const composedBlocks = findMarkerBlocks(claudeMd)
+  for (const id of sourceIds(composedBlocks)) {
+    // A protected block keeps its previously recorded hash, so it stays protected next run.
+    const kept = !force && handEdited.includes(id) ? prev?.blocks[id] : undefined
+    lock.blocks[id] = kept ?? hashForSource(composedBlocks, id)
+  }
 
   const settingsContent = Object.keys(shared).length ? formatJson(mergeSettings(project.settings, shared)) : null
   const localContent = Object.keys(local).length ? formatJson(mergeSettings(project.settingsLocal, local)) : null
@@ -185,11 +230,11 @@ export async function buildPlan(input: {
 }
 
 /** The canonical section id of the `## …` heading above a given line, or skills-and-rules. */
-function sectionOfBlock(md: string, line: number): string {
+function sectionOfBlock(md: string, line: number, sections?: SectionDef[]): string {
   const lines = md.split('\n')
   for (let i = line; i >= 0; i--) {
     const h = /^##\s+(.+?)\s*$/.exec(lines[i]!)
-    if (h) return sectionIdForHeading(h[1]!) ?? 'skills-and-rules'
+    if (h) return sectionIdForHeading(h[1]!, sections) ?? 'skills-and-rules'
   }
   return 'skills-and-rules'
 }

@@ -1,8 +1,20 @@
+import { posix as pathPosix } from 'node:path'
 import { unzipSync } from 'fflate'
 import type { CliManifest } from '../../shared/types/setup'
 import { CLI_VERSION } from './version'
 
 export type BundleFiles = Record<string, Uint8Array>
+
+/**
+ * A bundle entry may only name a file inside the bundle: no absolute path, no `..` segment, no
+ * backslash, and nothing whose normalized form climbs out. Everything downstream joins these onto
+ * the project directory, so an escaping name would write outside it.
+ */
+export function isSafeBundlePath(rel: string): boolean {
+  if (rel === '' || rel.startsWith('/') || /^[A-Za-z]:/.test(rel) || rel.includes('\\')) return false
+  if (rel.split('/').includes('..')) return false
+  return !pathPosix.normalize(`x/${rel}`).startsWith('..')
+}
 
 export class RegistryError extends Error {
   name = 'RegistryError'
@@ -63,7 +75,9 @@ export function createRegistryClient(registry: string, opts: { fetchImpl?: typeo
       const prefix = `${slug}/`
       for (const [name, data] of Object.entries(entries)) {
         if (!name.startsWith(prefix)) continue
-        files[name.slice(prefix.length)] = data
+        const rel = name.slice(prefix.length)
+        if (!isSafeBundlePath(rel)) continue // a zip entry must not escape the bundle root
+        files[rel] = data
       }
       return files
     }

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { zipSync } from 'fflate'
 import { createRegistryClient, RegistryError } from '../../src/registry'
 import { fixtureManifest, zipFixtureBundle } from '../helpers/fixtures'
 
@@ -34,6 +35,17 @@ describe('createRegistryClient', () => {
     const files = await client.download('demo')
     expect(Object.keys(files).sort()).toEqual(['CLAUDE.md', 'README.md', 'hooks/pre-commit.sh', 'rules/demo.md', 'settings.json', 'skills/demo-skill/SKILL.md'])
     expect(new TextDecoder().decode(files['rules/demo.md'])).toContain('{{appDir}}')
+  })
+
+  it('drops zip entries whose name escapes the bundle root', async () => {
+    const enc = new TextEncoder()
+    const zip = zipSync({
+      'demo/rules/ok.md': enc.encode('ok'),
+      'demo/../../.ssh/authorized_keys': enc.encode('pwned'),
+      'demo/../evil.md': enc.encode('pwned')
+    })
+    const client = createRegistryClient('http://registry.test', { fetchImpl: fakeFetch(() => new Response(zip)) })
+    expect(Object.keys(await client.download('demo'))).toEqual(['rules/ok.md'])
   })
 
   it('turns non-2xx into RegistryError with status and url', async () => {
