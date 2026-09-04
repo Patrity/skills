@@ -1,0 +1,18 @@
+version: 1
+axes:
+  - id: pm
+    question: Which package manager?
+    default: pnpm
+    options:
+      - { id: pnpm, label: pnpm, fragment: pm/pnpm.md }
+      - { id: npm, label: npm, fragment: pm/npm.md }
+  - id: layout
+    question: How is the repo laid out?
+    default: single
+    options:
+      - { id: single, label: Single app }
+      - { id: monorepo, label: Monorepo, fragment: layout/monorepo.md, selects: [demo] }
+  - id: appDir
+    question: Where does the app live?
+    when: { axis: layout, option: monorepo }
+    input: { placeholder: apps/web/app, default: apps/web/app }

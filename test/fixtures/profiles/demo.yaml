@@ -1,0 +1,4 @@
+name: demo
+description: Fixture profile.
+answers: { pm: pnpm, layout: single }
+bundles: [demo]
