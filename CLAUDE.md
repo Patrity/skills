@@ -43,6 +43,8 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 - Env changes need a redeploy: `vercel redeploy <latest-production-url> --scope patritys-projects`.
 - CLI `@patrity/skills` (workspace `cli/`) is published from `.github/workflows/release-cli.yml` on `cli-v*` tags (repo secret `NPM_TOKEN`); first release `cli-v0.1.0` on 2026-09-04, next tag `cli-v0.2.0`. Bump `cli/package.json` and add the `cli/README.md` changelog entry before tagging — the workflow refuses a mismatched tag. Smoke: `pnpm dlx @patrity/skills init --yes --profile nuxt-app --json` in a scratch dir.
 - A push that adds API routes AND touches `skills/**` makes the `revalidate` workflow's warm step 404 on the new routes (it runs before Vercel finishes deploying); the deploy-triggered `warm` workflow fixes it. Expected, not a regression.
+- The Runtime Cache manifest record is not versioned by build: when a deploy changes the parse shape (new frontmatter keys), the record the previous build wrote is reused until the tag is purged. After such a deploy run `vercel cache invalidate --tag skills --scope patritys-projects` (SWR: the next hit is STALE, then fresh). Follow-up: key the record by build id.
+- Vercel clones shallowly, so `VERCEL_GIT_PREVIOUS_SHA` may be absent from the clone on a multi-commit push; `scripts/should-build.sh` fetches it by sha and builds when it cannot be established (it once fell back to `HEAD^` and skipped a real deploy).
 - The e2e harness (`test/e2e/api.test.ts` `setup({ env })`) pins `NUXT_SKILLS_SOURCE`, `NUXT_SKILLS_DIR` and `NUXT_REVALIDATE_SECRET` for the test server, so a local `.env` cannot break `pnpm test`; keep that `env:` spread.
 
 ## Self-improvement
