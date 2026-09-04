@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "timeout": 5, "command": "s=\"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-env.sh\"; if [ -f \"$s\" ]; then exec \"$s\"; fi; git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e HEAD:.claude/hooks/protect-env.sh 2>/dev/null && exit 2; exit 0" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "timeout": 60, "command": "s=\"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-check.sh\"; if [ -f \"$s\" ]; then exec \"$s\"; fi; git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e HEAD:.claude/hooks/lint-check.sh 2>/dev/null && exit 2; exit 0" }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          { "type": "prompt", "prompt": "Before context is compacted: if this session surfaced a reusable pattern, gotcha or convention that is not yet written down, save it now as a path-scoped rule under .claude/rules/ (direction + constraint, pointing at a skill for the how-to) or as a skill. Respond with {\"ok\": true} when done or {\"ok\": false, \"reason\": \"…\"} if nothing new was learned." }
+        ]
+      }
+    ]
+  }
+}

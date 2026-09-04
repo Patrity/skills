@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Machine-checkable registry of the systems this project has, and the wiki page that",
+    "documents each one. The parity test reads ONLY this file plus the contents of",
+    "docs/wiki/, so a status recorded in prose does not count.",
+    "WHEN A SYSTEM SHIPS: flip its status to 'shipped' and update its page IN THE SAME",
+    "CHANGE. When a page is added, register it here or the test fails.",
+    "status ladder: planned -> building -> shipped."
+  ],
+  "systems": [
+    {
+      "id": "auth",
+      "page": "auth.md",
+      "status": "shipped"
+    },
+    {
+      "id": "billing",
+      "page": "billing.md",
+      "status": "building"
+    },
+    {
+      "id": "notifications",
+      "page": "systems/notifications.md",
+      "status": "planned"
+    }
+  ]
+}
