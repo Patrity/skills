@@ -26,9 +26,13 @@ function repoWith(commits: string[][]): string {
 }
 
 /** VERCEL_GIT_PREVIOUS_SHA is deliberately cleared unless a case sets it. */
-function run(cwd: string, env: Record<string, string> = {}) {
+function runResult(cwd: string, env: Record<string, string> = {}) {
   const { VERCEL_GIT_PREVIOUS_SHA: _ignored, ...rest } = process.env
-  return spawnSync('bash', [script], { cwd, encoding: 'utf8', env: { ...rest, ...env } }).status
+  return spawnSync('bash', [script], { cwd, encoding: 'utf8', env: { ...rest, ...env } })
+}
+
+function run(cwd: string, env: Record<string, string> = {}) {
+  return runResult(cwd, env).status
 }
 
 describe('scripts/should-build.sh', () => {
@@ -67,14 +71,32 @@ describe('scripts/should-build.sh', () => {
       expect(run(threeCommits())).toBe(0)
     })
 
-    it('falls back to HEAD^ when the variable points at an unknown commit', () => {
-      expect(run(threeCommits(), { VERCEL_GIT_PREVIOUS_SHA: '0'.repeat(40) })).toBe(0)
+    it('builds (does not fall back to HEAD^) when the variable points at an unknown commit and there is no fetchable origin', () => {
+      const cwd = threeCommits()
+      const missing = '0'.repeat(40)
+      const result = runResult(cwd, { VERCEL_GIT_PREVIOUS_SHA: missing })
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain(`previous deployed commit ${missing} is not available, building`)
     })
 
     it('builds on a redeploy of the already-deployed commit (e.g. after env changes)', () => {
       const cwd = threeCommits()
       const head = git(cwd, 'rev-parse', 'HEAD').trim()
       expect(run(cwd, { VERCEL_GIT_PREVIOUS_SHA: head })).toBe(1)
+    })
+
+    it('fetches the previous sha from origin when missing from a shallow clone, then diffs against it', () => {
+      // Simulate Vercel's shallow clone: a full "origin" repo with an app commit (c1, the
+      // previously deployed sha) followed by another app commit (c2) and a docs-only tip (c3).
+      // A shallow clone only carrying c2..c3 is missing c1 locally but has `origin` configured,
+      // so the script should fetch it and correctly see the app change in c2 and build --
+      // rather than falling back to HEAD^ (c2) and comparing against a docs-only diff.
+      const full = repoWith([['app/a.ts'], ['app/b.ts'], ['app/c.ts'], ['CLAUDE.md']])
+      const base = git(full, 'rev-parse', 'HEAD~2').trim()
+      const shallow = mkdtempSync(join(tmpdir(), 'should-build-shallow-'))
+      execFileSync('git', ['clone', '--quiet', '--depth', '2', '--no-local', `file://${full}`, shallow], { stdio: 'pipe' })
+
+      expect(run(shallow, { VERCEL_GIT_PREVIOUS_SHA: base })).toBe(1)
     })
   })
 })

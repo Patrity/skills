@@ -8,13 +8,25 @@
 # is app content and is deliberately NOT excluded.
 #
 # The base is VERCEL_GIT_PREVIOUS_SHA (the last deployed commit) so a push carrying an app
-# commit followed by a skills-only commit still builds. HEAD^ is the fallback when the
-# variable is absent (first deploy) or points at a commit we don't have. A redeploy of the
-# same commit always builds (see below).
+# commit followed by a skills-only commit still builds. Vercel clones shallowly, so that commit
+# can be missing from the local clone; if so we try a targeted `git fetch --depth=1 origin <sha>`
+# (works against GitHub) before giving up. If the previous sha is set but still can't be obtained
+# after that, we do NOT fall back to HEAD^ -- diffing against the wrong base can miss an app
+# change several commits back, so we build instead. HEAD^ is only used as the base when
+# VERCEL_GIT_PREVIOUS_SHA is genuinely unset (first deploy). A redeploy of the same commit always
+# builds (see below).
 set -uo pipefail
 
 base="${VERCEL_GIT_PREVIOUS_SHA:-}"
-if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+if [ -n "$base" ]; then
+  if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+    git fetch --quiet --depth=1 origin "$base" 2>/dev/null
+    if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+      echo "should-build: previous deployed commit $base is not available, building"
+      exit 1
+    fi
+  fi
+else
   base='HEAD^'
 fi
 
