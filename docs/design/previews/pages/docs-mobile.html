@@ -1,0 +1,124 @@
+<!-- @dsCard group="Pages" -->
+<meta charset="utf-8">
+<title>Docs · 375</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<link rel="stylesheet" href="../_shared/page.css">
+<body class="light m">
+<i data-include="icons.svg"></i>
+
+<div class="page">
+  <header class="bar sm">
+    <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+    <div class="tools">
+      <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+      <button type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+  </header>
+
+  <div class="wrap docs">
+    <!-- The grouped nav becomes a closed disclosure above the reading column. -->
+    <div class="disc">
+      <div class="sum"><svg class="chev"><use href="#i-chevron-right"/></svg><svg class="ico"><use href="#i-book"/></svg> Docs · Start here <span class="count">1 of 9</span></div>
+    </div>
+
+    <div class="read">
+      <h1>Start here</h1>
+      <article class="prose">
+        <p>The setup is a <code>CLAUDE.md</code> assembled from your answers plus a <code>.claude/</code> directory of skills, rules and hooks. Two paths write it, and they write the same files. If you only want one piece of it, skip to step 5.</p>
+
+        <h2>1. Build it on the web</h2>
+        <p>Open <a href="/build">the builder</a>. Pick a preset (<code>nuxt-app</code>, <code>library</code>, <code>docs-only</code>, or Custom), name the project, and work down the questions. The right pane shows the composed <code>CLAUDE.md</code> while you answer; the Files tab lists everything the zip will hold.</p>
+        <p><b>Download setup</b> gives you a zip of exactly that:</p>
+
+        <div class="block" style="margin-bottom:1.25rem">
+          <header><span class="name">acme-web.zip</span><button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button></header>
+          <ol class="code">
+            <li><span class="ln"><span class="c-h">CLAUDE.md</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/skills/…</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/rules/…</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/hooks/…</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/settings.json</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/settings.local.json</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/.env.example</span></span></li>
+            <li><span class="ln"><span class="c-h">.claude/skills.lock.json</span></span></li>
+            <li><span class="ln"><span class="c-h">.gitignore</span></span></li>
+          </ol>
+        </div>
+
+        <p>Unzip it into a new project folder. There is no wrapper directory: the paths are already relative to a project root. Nothing in the zip is merged with files you have, so if the folder already holds a <code>CLAUDE.md</code> or a <code>.claude/</code>, run the CLI there instead.</p>
+
+        <h2>2. Or run the CLI</h2>
+        <div class="block" style="margin-bottom:1.25rem">
+          <header><span class="name">bash</span><button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button></header>
+          <ol class="code">
+            <li><span class="ln"><span class="body">pnpx @patrity/skills</span></span></li>
+          </ol>
+        </div>
+        <p>With no subcommand it runs <code>init</code>, the same wizard in a terminal. Node 22 or newer; <code>npx</code> and <code>bunx</code> work too. It prints the plan before it writes anything, and if you decline you get <code>Nothing written.</code> and an untouched directory.</p>
+
+        <h2>3. Fill in <code>.claude/.env</code></h2>
+        <p>If the run wrote <code>.claude/.env.example</code>, copy it and fill in the values.</p>
+
+        <div class="callout glass-card">
+          <svg class="ico"><use href="#i-info"/></svg>
+          <div>
+            <h3>Your .env is never touched</h3>
+            <p>The tool writes <code>.claude/.env.example</code> and rewrites it on every run. It never creates, reads or deletes <code>.claude/.env</code>.</p>
+          </div>
+        </div>
+
+        <h2>4. Commit <code>CLAUDE.md</code> and <code>.claude/</code></h2>
+        <p>Commit both, including <code>.claude/skills.lock.json</code>. The lockfile is the only state the CLI keeps: which bundles are installed, at which registry sha, and the answers you gave.</p>
+
+        <h2>5. Or take a single bundle</h2>
+        <p>None of this is all-or-nothing. Every skill, rule and hook here is also published as a bundle you can download on its own. See <a href="/docs/single-bundle">Single bundle</a>.</p>
+      </article>
+
+      <div class="docfoot">
+        <a href="https://github.com/Patrity/skills/blob/main/content/docs/start-here.md">Edit on GitHub <svg class="ico"><use href="#i-external"/></svg></a>
+        <a href="/docs/philosophy">Next: Philosophy <svg class="ico"><use href="#i-arrow-right"/></svg></a>
+      </div>
+
+      <div class="author glass-card">
+        <span class="badge-mark"><span class="mark"><i data-include="mark.svg"></i></span></span>
+        <div>
+          <p class="micro">Written by</p>
+          <p class="name">Tony Costanzo <span class="sep">·</span> TechHive Labs</p>
+          <p>I run Claude Code on billion-dollar construction data by day and a rack of GPUs at night, and I write down what breaks. This setup is the part that kept working.</p>
+          <div class="links">
+            <a class="lnk" href="https://www.techhivelabs.net/blog">Lab notes <svg class="ico"><use href="#i-external"/></svg></a>
+            <a class="lnk" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> @Patrity</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ft">
+    <div class="layer hive-texture"></div>
+    <div class="cols">
+      <div class="col">
+        <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+        <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with.</p>
+      </div>
+      <div class="col">
+        <span class="micro">Elsewhere</span>
+        <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+        <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+        <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+        <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+        <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+        <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+      </div>
+      <div class="col">
+        <span class="micro">Registry</span>
+        <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+        <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+        <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+      </div>
+    </div>
+    <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+  </footer>
+</div>

@@ -1,0 +1,134 @@
+<!-- @dsCard group="Pages" -->
+<meta charset="utf-8">
+<title>Builder · 375</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<link rel="stylesheet" href="../_shared/page.css">
+<body class="light m">
+<i data-include="icons.svg"></i>
+
+<div class="page">
+  <header class="bar sm">
+    <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+    <div class="tools">
+      <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+      <button type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+  </header>
+
+  <section class="phead">
+    <div class="layer hive-texture"></div>
+    <div class="wrap inner">
+      <span class="micro">14 questions · 9 bundles</span>
+      <h1>Answer the questions. <span class="accent">Take the zip.</span></h1>
+      <p class="sub">Nothing is stored here. The whole form lives in the URL hash, so the share link is the only memory this site has.</p>
+    </div>
+  </section>
+
+  <div class="wrap panes">
+    <div class="form">
+      <div>
+        <h2 class="gh">Start from a preset</h2>
+        <div class="tiles">
+          <div class="tile on"><b>nuxt-app</b><span>Nuxt 4 app, full workflow, hooks, browser validation.</span></div>
+          <div class="tile"><b>library</b><span>A package, lightweight process, no browser.</span></div>
+          <div class="tile"><b>docs-only</b><span>Docs discipline and memory, nothing else.</span></div>
+        </div>
+        <p class="help" style="margin-top:.5rem">a preset answers every question; changing one answer keeps the rest</p>
+      </div>
+
+      <div class="field">
+        <span class="lbl">What is this project called?</span>
+        <span class="help">names the CLAUDE.md heading and the project browser-testing skill</span>
+        <div class="ctl"><span class="val">acme-web</span></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Which package manager does this project use?</span>
+        <span class="help">sets the commands Claude runs and the lockfile rule</span>
+        <div class="ctl"><span class="val">pnpm</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">How is the repo laid out?</span>
+        <span class="help">every rule glob is rewritten for the app directory you pick</span>
+        <div class="ctl"><span class="val">Single app</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">How much process should Claude follow?</span>
+        <div class="ctl is-focus"><span class="val">Full: brainstorm → spec → plan → TDD</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">How is UI work validated?</span>
+        <div class="ctl"><span class="val">playwright-cli in a real browser</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">May Claude push without asking?</span>
+        <span class="help">the answer that has saved me the most</span>
+        <div class="ctl"><span class="val">No, always ask before pushing</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+
+      <div>
+        <h2 class="gh">Bundles</h2>
+        <div class="stackgap">
+          <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Browser Testing
+            <span class="lock" title="Required by: How is UI work validated? → playwright-cli in a real browser"><svg class="ico"><use href="#i-lock"/></svg></span></label>
+          <label class="check"><span class="box"></span> Doc Fetcher</label>
+          <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Docs Discipline
+            <span class="lock" title="Required by: How should project docs be kept? → Three-tier docs with a wiki-parity test"><svg class="ico"><use href="#i-lock"/></svg></span></label>
+          <label class="check"><span class="box"></span> Iterative Spec Design</label>
+          <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Nuxt</label>
+          <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Nuxt UI</label>
+          <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Quality Hooks
+            <span class="lock" title="Required by: How should the rules be enforced? → Fail-closed hooks"><svg class="ico"><use href="#i-lock"/></svg></span></label>
+          <label class="check"><span class="box"></span> Read-only DB Access</label>
+          <label class="check"><span class="box"></span> Remote Ops Quoting</label>
+        </div>
+        <p class="help" style="margin-top:.5rem">a padlock means an answer above chose this one; change the answer to free it</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ft">
+    <div class="layer hive-texture"></div>
+    <div class="cols">
+      <div class="col">
+        <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+        <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with.</p>
+      </div>
+      <div class="col">
+        <span class="micro">Elsewhere</span>
+        <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+        <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+        <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+        <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+        <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+        <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+      </div>
+      <div class="col">
+        <span class="micro">Registry</span>
+        <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+        <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+        <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+      </div>
+    </div>
+    <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+  </footer>
+</div>
+
+<!-- The preview is a bottom sheet on a phone: collapsed to one bar with the download on it. -->
+<div class="sheet">
+  <div class="grab"></div>
+  <div class="line">
+    <span class="what">CLAUDE.md · 31 files</span>
+    <span class="seg"><span class="on">CLAUDE.md</span><span>Files</span></span>
+  </div>
+  <div class="cta">
+    <a class="btn btn-solid glow" href="#"><svg class="ico"><use href="#i-download"/></svg> Download setup</a>
+    <a class="btn btn-outline" href="#" aria-label="Open the preview"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-chevron-down"/></svg></a>
+  </div>
+</div>

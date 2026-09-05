@@ -1,0 +1,306 @@
+<!-- @dsCard group="Pages" -->
+<meta charset="utf-8">
+<title>Home · 375 · dark</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<link rel="stylesheet" href="../_shared/page.css">
+<body class="dark m">
+<i data-include="icons.svg"></i>
+
+<div class="page">
+  <header class="bar sm">
+    <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+    <div class="tools">
+      <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+      <button type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+  </header>
+
+  <!-- 1 · Hero. -->
+  <section class="hero">
+    <div class="layer hive-texture"></div>
+    <div class="wrap inner">
+      <div>
+        <span class="pill"><span class="dot"></span> 9 bundles · 14 questions</span>
+        <h1>Claude Code, set up<br>
+          the way I <span class="accent">actually</span><br>
+          run it.</h1>
+        <p class="tilde"><span class="prompt">~/</span> CLAUDE.md · rules · skills · hooks</p>
+        <div class="actions">
+          <a class="btn btn-solid btn-lg glow" href="/build">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></a>
+          <div class="install">
+            <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+            <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="term glass-card">
+        <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="path">~/acme-web</span></div>
+<pre><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init --yes \
+    --profile nuxt-app</span>
+.claude/rules/browser-testing.md
+.claude/rules/docs.md
+.claude/rules/nuxt4.md
+.claude/skills/nuxt-docs/fetch.py
+<span class="dim">.. 24 more</span>
+CLAUDE.md
+.claude/settings.json
+.gitignore
+<span class="ok">Setup written.</span> <span class="caret"></span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · What you get. -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="micro">What the run writes</span>
+        <h2>Three things land in the repo.</h2>
+        <p>Thirty-one files for the <code class="mono">nuxt-app</code> profile, and no wrapper directory to dig them out of.</p>
+      </div>
+      <div class="plate">
+        <div class="layer hive-texture"></div>
+        <div class="grid">
+          <article class="glass-card glow">
+            <p class="micro">One file</p>
+            <h3>CLAUDE.md</h3>
+            <p>Composed from the answers you gave and the bundles you picked. Your own paragraphs stay where you put them.</p>
+<pre><b># acme-web</b>
+<b>## Git</b>
+&lt;!-- skills:base:pushes=ask --&gt;
+- Never push without explicit
+  approval, even after a commit
+  was approved.</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One directory</p>
+            <h3>.claude/</h3>
+            <p>Rules scoped to paths, skills with their scripts, hooks, and the settings that wire them up.</p>
+<pre><b>.claude/</b>
+  rules/web-nuxt.md
+  skills/nuxt-docs/SKILL.md
+  hooks/protect-env.sh
+  settings.json
+  skills.lock.json</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One record</p>
+            <h3>Lockfile</h3>
+            <p>Every file the tool wrote, hashed. That is how the next run can take a bundle back out without touching your edits.</p>
+<pre>{
+  "version": 1,
+  "projectName": "acme-web",
+  "answers": { "pm": "pnpm" },
+  "bundles": {
+    "nuxt": { "sha": "8f3c1d" }</pre>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · The opinions. -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="micro">The opinions</span>
+        <h2>Five opinions, and the bundle that holds each one up.</h2>
+        <p>They are mine and they are separable. Disagree with one, skip its bundle or its answer, and nothing else breaks.</p>
+      </div>
+      <div class="ops">
+        <article class="op">
+          <span class="n">01</span>
+          <div>
+            <h3>Rules carry the direction, skills carry the how-to</h3>
+            <p>A rule is a glob and a constraint that loads on its own. A skill is the procedure, and it has to be invoked. Splitting them is what keeps CLAUDE.md short enough that Claude still reads it. <a href="/skill/nuxt">/skill/nuxt</a></p>
+          </div>
+        </article>
+        <article class="op">
+          <span class="n">02</span>
+          <div>
+            <h3>Hooks fail closed</h3>
+            <p>A line in CLAUDE.md is a suggestion. A PreToolUse hook is not. Delete a tracked hook script and the wiring exits 2 rather than waving the edit through. <a href="/skill/quality-hooks">/skill/quality-hooks</a></p>
+          </div>
+        </article>
+        <article class="op">
+          <span class="n">03</span>
+          <div>
+            <h3>Docs come in three tiers, and one of them is tested</h3>
+            <p>The wiki is the tier that rots. A registry names every system, and the test fails on a page nobody registered, so drift shows up red in the commit that caused it. <a href="/skill/docs-discipline">/skill/docs-discipline</a></p>
+          </div>
+        </article>
+        <article class="op">
+          <span class="n">04</span>
+          <div>
+            <h3>UI work is proven in a real browser</h3>
+            <p>Typecheck, lint and unit tests all pass on a component that never mounted. Snapshot, act on refs, assert with eval, read a screenshot. Then call it done. <a href="/skill/browser-testing">/skill/browser-testing</a></p>
+          </div>
+        </article>
+        <article class="op">
+          <span class="n">05</span>
+          <div>
+            <h3>Memory and process are opt-in</h3>
+            <p>The two habits most likely to be wrong for your project are questions, not defaults. <code class="mono">full</code> process is brainstorm, spec, plan, TDD, then a two-stage review; <code class="mono">none</code> is also on the list. <a href="/skill/iterative-spec-design">/skill/iterative-spec-design</a></p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Bundles, in install order. -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="micro">Nine bundles</span>
+        <h2>Nine bundles, in the order they install.</h2>
+        <p>Every one of them is also a zip you can take on its own.</p>
+      </div>
+      <div class="rows">
+        <a class="brow glass-card" href="/skill/browser-testing">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Browser Testing</h3>
+            <p>Prove UI changes in a real browser with playwright-cli .. install-if-missing, snapshot→ref→act workflow, test-account convention and evidence discipline.</p>
+            <div class="meta"><span class="chip">testing</span><span class="chip">e2e</span><span class="chip">playwright</span><span class="chip">browser</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/doc-fetcher">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Doc Fetcher</h3>
+            <p>A generator for per-library documentation skills .. configure a template and Claude Code fetches a library's real docs from GitHub instead of recalling them.</p>
+            <div class="meta"><span class="chip">docs</span><span class="chip">generator</span><span class="chip">python</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/docs-discipline">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Docs Discipline</h3>
+            <p>The three-tier docs model (handovers, living wiki, frozen specs) with a handover skill and a mechanical wiki-parity test.</p>
+            <div class="meta"><span class="chip">docs</span><span class="chip">handovers</span><span class="chip">wiki</span><span class="chip">process</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/iterative-spec-design">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Iterative Spec Design</h3>
+            <p>Design a system section by section with an approval checkpoint after each one, so a wrong assumption is caught in section two instead of in the finished spec.</p>
+            <div class="meta"><span class="chip">process</span><span class="chip">planning</span><span class="chip">specs</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/nuxt">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Nuxt</h3>
+            <p>Nuxt 4 framework docs fetcher and the rule that makes Claude Code check it before guessing a composable.</p>
+            <div class="meta"><span class="chip">nuxt</span><span class="chip">vue</span><span class="chip">docs</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/nuxt-ui">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Nuxt UI</h3>
+            <p>Nuxt UI v4 component docs and template fetchers plus the rule that makes Claude Code check them before touching a .vue file.</p>
+            <div class="meta"><span class="chip">nuxt-ui</span><span class="chip">vue</span><span class="chip">ui</span><span class="chip">docs</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/quality-hooks">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Quality Hooks</h3>
+            <p>Fail-closed Claude Code hooks: protect .env and credential files, lint after every edit, and flag an unwritten convention before context is compacted.</p>
+            <div class="meta"><span class="chip">hooks</span><span class="chip">quality</span><span class="chip">safety</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/readonly-db">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Read-only DB Access</h3>
+            <p>A dedicated read-only role, a one-statement runner wrapped in BEGIN READ ONLY, and the rule that keeps destructive SQL out of Claude's hands.</p>
+            <div class="meta"><span class="chip">database</span><span class="chip">postgres</span><span class="chip">safety</span></div>
+          </div>
+        </a>
+        <a class="brow glass-card" href="/skill/remote-ops">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Remote Ops Quoting</h3>
+            <p>The ssh argument-flattening trap that silently runs your command on the wrong machine, the two forms that work, and the base64 hop for anything with nested quotes or SQL.</p>
+            <div class="meta"><span class="chip">ops</span><span class="chip">ssh</span><span class="chip">proxmox</span><span class="chip">shell</span></div>
+          </div>
+        </a>
+      </div>
+      <div class="sec-foot">
+        <a class="btn btn-outline glow" href="/skills">Open one and read the files <svg class="ico"><use href="#i-arrow-right"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · From the lab. -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="micro">From the lab</span>
+        <h2>What broke recently.</h2>
+      </div>
+      <div class="posts">
+        <a class="post glass-card glow" href="https://www.techhivelabs.net/blog/automated-bim-takeoff">
+          <span class="when">August 19, 2026 · 10 min read</span>
+          <h3>I Gave an AI Agent the Keys to Navisworks, and Five Trades of Takeoff Took Four Days</h3>
+          <p>Automated BIM takeoff platforms assume your model followed the rules. Real models never do. So an AI agent drove Navisworks headless.. and five trades of takeoff took four days.</p>
+        </a>
+        <a class="post glass-card glow" href="https://www.techhivelabs.net/blog/game-server-scaling">
+          <span class="when">July 25, 2026 · 12 min read</span>
+          <h3>I Built a Bot Army to Attack My Own Game Server, and 45 of Them Took It Down</h3>
+          <p>My movement bots said the server could hold hundreds. Then I taught them to swing a sword and the whole thing fell over at 45.. which is how I ended up shopping for CPUs instead of RAM.</p>
+        </a>
+      </div>
+      <div class="sec-foot">
+        <a class="btn btn-outline-green glow" href="https://www.techhivelabs.net/blog">Read the lab notes <svg class="ico"><use href="#i-external"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Close. -->
+  <section class="section close">
+    <div class="wrap">
+      <h2>Take the whole thing, or take one bundle and ignore me on the rest.</h2>
+      <div class="install">
+        <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+        <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
+      </div>
+      <p class="byline">
+        <a href="https://www.techhivelabs.net">Tony Costanzo</a> ·
+        <a href="https://www.techhivelabs.net">TechHive Labs</a> ·
+        <a rel="me" href="https://x.com/Patrity">@Patrity</a>
+      </p>
+    </div>
+  </section>
+
+  <footer class="ft">
+    <div class="layer hive-texture"></div>
+    <div class="cols">
+      <div class="col">
+        <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+        <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with.</p>
+      </div>
+      <div class="col">
+        <span class="micro">Elsewhere</span>
+        <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+        <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+        <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+        <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+        <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+        <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+      </div>
+      <div class="col">
+        <span class="micro">Registry</span>
+        <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+        <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+        <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+      </div>
+    </div>
+    <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+  </footer>
+</div>
