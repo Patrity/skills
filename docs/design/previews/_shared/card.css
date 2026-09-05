@@ -1,5 +1,5 @@
 /*
-  Chrome for the preview cards only — the frame, the labels and the shared spacing that make the
+  Chrome for the preview cards only .. the frame, the labels and the shared spacing that make the
   sixteen cards read as one system. Nothing here ships: `tokens.css` is the design system.
 */
 .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }

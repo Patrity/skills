@@ -39,16 +39,16 @@
         <ol class="code">
           <li><span class="ln"><span class="c-h"># acme-web</span></span></li>
           <li><span class="ln"> </span></li>
-          <li><span class="ln"><span class="c-h">## Commands</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body">Always <span class="c-l">`pnpm`</span> — never npm or yarn. If the project ever has a <span class="c-l">`package-lock.json`</span> use npm; a <span class="c-l">`yarn.lock`</span> means yarn.</span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body"><span class="c-l">`pnpm dev`</span>, <span class="c-l">`pnpm test`</span>, <span class="c-l">`pnpm typecheck`</span>, <span class="c-l">`pnpm lint`</span>, <span class="c-l">`pnpm build`</span> — run typecheck and build often, not just at the end.</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"> </span></li>
           <li><span class="ln"><span class="c-h">## Git</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body">Do not commit without explicit approval; propose the commit message and wait.</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pushes=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Never push without explicit approval, even after a commit was approved.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pushes=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Skills and rules</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:always/skills-philosophy <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Rules (<span class="c-l">`.claude/rules/*.md`</span>, path-scoped) state direction, when, and constraints; skills (<span class="c-l">`.claude/skills/*/SKILL.md`</span>) hold the how-to. A rule points at the skill; neither repeats the other.</span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Invoke a skill whenever there is even a small chance it applies; read its current version rather than working from memory of it.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:always/skills-philosophy <span class="d">--&gt;</span></span></span></li>
         </ol>
       </div>
       <p class="note">Twelve real lines out of a composed CLAUDE.md. Anything you write outside a marker block is left alone on the next run.</p>
@@ -67,16 +67,16 @@
         <ol class="code">
           <li><span class="ln"><span class="c-h"># acme-web</span></span></li>
           <li><span class="ln"> </span></li>
-          <li><span class="ln"><span class="c-h">## Commands</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body">Always <span class="c-l">`pnpm`</span> — never npm or yarn. If the project ever has a <span class="c-l">`package-lock.json`</span> use npm; a <span class="c-l">`yarn.lock`</span> means yarn.</span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body"><span class="c-l">`pnpm dev`</span>, <span class="c-l">`pnpm test`</span>, <span class="c-l">`pnpm typecheck`</span>, <span class="c-l">`pnpm lint`</span>, <span class="c-l">`pnpm build`</span> — run typecheck and build often, not just at the end.</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"> </span></li>
           <li><span class="ln"><span class="c-h">## Git</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
-          <li><span class="ln"><span class="c-b">- </span><span class="body">Do not commit without explicit approval; propose the commit message and wait.</span></span></li>
-          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pushes=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Never push without explicit approval, even after a commit was approved.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pushes=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Skills and rules</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:always/skills-philosophy <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Rules (<span class="c-l">`.claude/rules/*.md`</span>, path-scoped) state direction, when, and constraints; skills (<span class="c-l">`.claude/skills/*/SKILL.md`</span>) hold the how-to. A rule points at the skill; neither repeats the other.</span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Invoke a skill whenever there is even a small chance it applies; read its current version rather than working from memory of it.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:always/skills-philosophy <span class="d">--&gt;</span></span></span></li>
         </ol>
       </div>
       <p class="note">Twelve real lines out of a composed CLAUDE.md. Anything you write outside a marker block is left alone on the next run.</p>
