@@ -1,0 +1,70 @@
+<!-- @dsCard group="Foundations" -->
+<meta charset="utf-8">
+<title>Type scale</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .spec { display: grid; gap: .125rem; }
+  .spec .size { font-family: var(--font-mono); font-size: .6875rem; color: var(--ui-text-dimmed); }
+  .d96 { font-size: 96px } .d72 { font-size: 72px } .d56 { font-size: 56px } .d40 { font-size: 40px } .d28 { font-size: 28px }
+  .hero { font-size: 64px; margin: 0; }
+  .body { max-width: 34em; margin: 0; color: var(--ui-text-muted); }
+  .prompt { color: var(--color-green-500); }
+</style>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Display · Teko 600 · line-height .9</p>
+        <h2 class="card-h">Type</h2>
+        <p class="note">Teko carries every headline, every number and the wordmark. Body copy stays on the system sans, the way the portfolio does it. Mono is JetBrains Mono, and it only ever holds things you could type.</p>
+      </div>
+      <div class="group">
+        <div class="spec"><span class="size">96 / display</span><span class="teko d96">Skills</span></div>
+        <div class="spec"><span class="size">72 / page title</span><span class="teko d72">Bundles</span></div>
+        <div class="spec"><span class="size">56 / section</span><span class="teko d56">What you get</span></div>
+        <div class="spec"><span class="size">40 / subsection</span><span class="teko d40">The opinions</span></div>
+        <div class="spec"><span class="size">28 / card title</span><span class="teko d28">Quality hooks</span></div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">Headline with the accent word</p>
+        <h1 class="teko hero">One setup.<br>Nine bundles.<br><span class="accent">Take what you want.</span></h1>
+        <p class="mono"><span class="prompt">~/</span> claude code · one setup · take what you want</p>
+      </div>
+      <div class="group">
+        <p class="micro">Body · 16 / 1.6</p>
+        <p class="body">I keep one Claude Code setup and reuse it on every project. This is that setup, split into bundles so you can take the parts you agree with and leave the rest.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Display · Teko 600 · line-height .9</p>
+        <h2 class="card-h">Type</h2>
+        <p class="note">Teko carries every headline, every number and the wordmark. Body copy stays on the system sans, the way the portfolio does it. Mono is JetBrains Mono, and it only ever holds things you could type.</p>
+      </div>
+      <div class="group">
+        <div class="spec"><span class="size">96 / display</span><span class="teko d96">Skills</span></div>
+        <div class="spec"><span class="size">72 / page title</span><span class="teko d72">Bundles</span></div>
+        <div class="spec"><span class="size">56 / section</span><span class="teko d56">What you get</span></div>
+        <div class="spec"><span class="size">40 / subsection</span><span class="teko d40">The opinions</span></div>
+        <div class="spec"><span class="size">28 / card title</span><span class="teko d28">Quality hooks</span></div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">Headline with the accent word</p>
+        <p class="teko hero">One setup.<br>Nine bundles.<br><span class="accent">Take what you want.</span></p>
+        <p class="mono"><span class="prompt">~/</span> claude code · one setup · take what you want</p>
+      </div>
+      <div class="group">
+        <p class="micro">Body · 16 / 1.6</p>
+        <p class="body">I keep one Claude Code setup and reuse it on every project. This is that setup, split into bundles so you can take the parts you agree with and leave the rest.</p>
+      </div>
+    </div>
+  </section>
+</div>

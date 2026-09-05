@@ -1,0 +1,105 @@
+<!-- @dsCard group="Foundations" -->
+<meta charset="utf-8">
+<title>Motifs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .tex { position: relative; border: 1px solid var(--ui-border); border-radius: .75rem; overflow: hidden; background: var(--ui-bg); }
+  .tex .layer { position: absolute; inset: 0; }
+  .tex .cap { position: relative; padding: 10px 12px; }
+  .h40 { opacity: .4 }
+  .plate { position: relative; padding: 24px; min-height: 128px; }
+  .plate .glass-card { position: relative; padding: 20px; max-width: 22rem; }
+  .marks { display: flex; align-items: flex-end; gap: 1.25rem; }
+  .m24 { width: 24px; height: 24px } .m40 { width: 40px; height: 40px } .m64 { width: 64px; height: 64px }
+  .lockup { display: flex; align-items: center; gap: .625rem; }
+  .lockup .word { font-family: var(--font-teko); font-weight: 600; font-size: 40px; line-height: .9; letter-spacing: -.01em; }
+  .prompt { color: var(--color-green-500); }
+</style>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Hive · glass · micro-label · the mark</p>
+        <h2 class="card-h">Motifs</h2>
+        <p class="note">The honeycomb is the same lattice the portfolio draws on canvas: pointy-top hexagons, 120 apart. Here it is a static tile, at the two strengths the site uses.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Hive texture · 4% under the footer</p>
+        <div class="tex"><div class="layer hive-texture"></div><div class="cap"><span class="mono">opacity .04</span></div></div>
+        <p class="micro">Hive texture · 40% behind a page header</p>
+        <div class="tex"><div class="layer hive-texture h40"></div><div class="cap"><span class="mono">opacity .4</span></div></div>
+      </div>
+      <div class="group">
+        <p class="micro">Glass on the texture</p>
+        <div class="tex plate">
+          <div class="layer hive-texture h40"></div>
+          <div class="glass-card">
+            <p class="micro">CLAUDE.md</p>
+            <p class="teko" style="font-size:28px;margin:.25rem 0 .5rem">One file, composed</p>
+            <p class="note">Every bundle writes into marker blocks, so your own paragraphs survive the next run.</p>
+          </div>
+        </div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">The mark · 24 / 40 / 64</p>
+        <div class="marks">
+          <div class="mark m24"><i data-include="mark.svg"></i></div>
+          <div class="mark m40"><i data-include="mark.svg"></i></div>
+          <div class="mark m64"><i data-include="mark.svg"></i></div>
+        </div>
+        <div class="lockup">
+          <div class="mark m40"><i data-include="mark.svg"></i></div>
+          <span class="word">Skills</span>
+          <span class="micro">by TechHive Labs</span>
+        </div>
+        <p class="mono"><span class="prompt">~/</span> the slash in the hexagon is the same slash as the prompt</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Hive · glass · micro-label · the mark</p>
+        <h2 class="card-h">Motifs</h2>
+        <p class="note">The honeycomb is the same lattice the portfolio draws on canvas: pointy-top hexagons, 120 apart. Here it is a static tile, at the two strengths the site uses.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Hive texture · 4% under the footer</p>
+        <div class="tex"><div class="layer hive-texture"></div><div class="cap"><span class="mono">opacity .04</span></div></div>
+        <p class="micro">Hive texture · 40% behind a page header</p>
+        <div class="tex"><div class="layer hive-texture h40"></div><div class="cap"><span class="mono">opacity .4</span></div></div>
+      </div>
+      <div class="group">
+        <p class="micro">Glass on the texture</p>
+        <div class="tex plate">
+          <div class="layer hive-texture h40"></div>
+          <div class="glass-card">
+            <p class="micro">CLAUDE.md</p>
+            <p class="teko" style="font-size:28px;margin:.25rem 0 .5rem">One file, composed</p>
+            <p class="note">Every bundle writes into marker blocks, so your own paragraphs survive the next run.</p>
+          </div>
+        </div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">The mark · 24 / 40 / 64</p>
+        <div class="marks">
+          <div class="mark m24"><i data-include="mark.svg"></i></div>
+          <div class="mark m40"><i data-include="mark.svg"></i></div>
+          <div class="mark m64"><i data-include="mark.svg"></i></div>
+        </div>
+        <div class="lockup">
+          <div class="mark m40"><i data-include="mark.svg"></i></div>
+          <span class="word">Skills</span>
+          <span class="micro">by TechHive Labs</span>
+        </div>
+        <p class="mono"><span class="prompt">~/</span> the slash in the hexagon is the same slash as the prompt</p>
+      </div>
+    </div>
+  </section>
+</div>

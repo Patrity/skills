@@ -1,0 +1,126 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Bundle row</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .brow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 1rem; align-items: start; padding: 20px; transition: border-color .2s, box-shadow .2s; }
+  .brow .mark { width: 34px; height: 34px; margin-top: 2px; }
+  .brow h3 { font-family: var(--font-teko); font-weight: 600; font-size: 28px; line-height: .9; letter-spacing: -.01em; margin: 0 0 .375rem; }
+  .brow p { margin: 0 0 .625rem; font-size: .875rem; line-height: 1.55; color: var(--ui-text-muted); }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; }
+  .meta .sep { width: 1px; height: 14px; background: var(--ui-border); margin: 0 .25rem; }
+  .badge { display: inline-flex; align-items: center; gap: .25rem; font-size: .6875rem; color: var(--ui-text-dimmed); }
+  .badge .ico { width: 13px; height: 13px; color: var(--color-green-500); }
+  .acts { display: flex; align-items: center; gap: .25rem; }
+  .act { display: inline-flex; padding: .4375rem; border-radius: .375rem; border: 1px solid var(--ui-border); color: var(--ui-text-muted); background: var(--ui-bg-elevated); }
+  .act:hover, .act.is-hover { color: var(--color-green-400); border-color: color-mix(in srgb, var(--color-green-500) 45%, transparent); }
+  .is-hover.brow { border-color: color-mix(in srgb, var(--color-green-500) 30%, transparent); box-shadow: 0 0 30px rgba(70,194,17,.12); }
+  .is-hover.brow h3 { color: var(--color-green-400); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/skills · one bundle, one row</p>
+        <h2 class="card-h">Bundle row</h2>
+        <p class="note">The whole row is the link. The three actions on the right stop it, so copying the command never navigates away.</p>
+      </div>
+      <div class="group">
+        <article class="brow glass-card">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Nuxt</h3>
+            <p>Nuxt 4 framework docs fetcher and the rule that makes Claude Code check it before guessing a composable.</p>
+            <div class="meta">
+              <span class="chip">nuxt</span><span class="chip">vue</span><span class="chip">docs</span>
+              <span class="sep"></span>
+              <span class="badge"><svg class="ico"><use href="#i-book"/></svg> 1 skill</span>
+              <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> 6 rules</span>
+              <span class="badge"><svg class="ico"><use href="#i-file"/></svg> CLAUDE.md</span>
+            </div>
+          </div>
+          <div class="acts">
+            <span class="act" title="pnpx @patrity/skills add nuxt"><svg class="ico"><use href="#i-copy"/></svg></span>
+            <span class="act" title="Source"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+            <span class="act" title="Download"><svg class="ico"><use href="#i-download"/></svg></span>
+          </div>
+        </article>
+        <article class="brow glass-card is-hover">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Quality Hooks</h3>
+            <p>Fail-closed Claude Code hooks: protect .env and credential files, lint after every edit, and flag an unwritten convention before context is compacted.</p>
+            <div class="meta">
+              <span class="chip">hooks</span><span class="chip">quality</span><span class="chip">safety</span>
+              <span class="sep"></span>
+              <span class="badge"><svg class="ico"><use href="#i-zap"/></svg> 2 hooks</span>
+              <span class="badge"><svg class="ico"><use href="#i-sliders"/></svg> settings</span>
+              <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> 1 rule</span>
+            </div>
+          </div>
+          <div class="acts">
+            <span class="act is-hover" title="pnpx @patrity/skills add quality-hooks"><svg class="ico"><use href="#i-copy"/></svg></span>
+            <span class="act" title="Source"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+            <span class="act" title="Download"><svg class="ico"><use href="#i-download"/></svg></span>
+          </div>
+        </article>
+        <p class="note">Second row shown in its hover state: green name, green hairline, the one glow the system allows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/skills · one bundle, one row</p>
+        <h2 class="card-h">Bundle row</h2>
+        <p class="note">The whole row is the link. The three actions on the right stop it, so copying the command never navigates away.</p>
+      </div>
+      <div class="group">
+        <article class="brow glass-card">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Nuxt</h3>
+            <p>Nuxt 4 framework docs fetcher and the rule that makes Claude Code check it before guessing a composable.</p>
+            <div class="meta">
+              <span class="chip">nuxt</span><span class="chip">vue</span><span class="chip">docs</span>
+              <span class="sep"></span>
+              <span class="badge"><svg class="ico"><use href="#i-book"/></svg> 1 skill</span>
+              <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> 6 rules</span>
+              <span class="badge"><svg class="ico"><use href="#i-file"/></svg> CLAUDE.md</span>
+            </div>
+          </div>
+          <div class="acts">
+            <span class="act" title="pnpx @patrity/skills add nuxt"><svg class="ico"><use href="#i-copy"/></svg></span>
+            <span class="act" title="Source"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+            <span class="act" title="Download"><svg class="ico"><use href="#i-download"/></svg></span>
+          </div>
+        </article>
+        <article class="brow glass-card is-hover">
+          <span class="mark"><i data-include="mark.svg"></i></span>
+          <div>
+            <h3>Quality Hooks</h3>
+            <p>Fail-closed Claude Code hooks: protect .env and credential files, lint after every edit, and flag an unwritten convention before context is compacted.</p>
+            <div class="meta">
+              <span class="chip">hooks</span><span class="chip">quality</span><span class="chip">safety</span>
+              <span class="sep"></span>
+              <span class="badge"><svg class="ico"><use href="#i-zap"/></svg> 2 hooks</span>
+              <span class="badge"><svg class="ico"><use href="#i-sliders"/></svg> settings</span>
+              <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> 1 rule</span>
+            </div>
+          </div>
+          <div class="acts">
+            <span class="act is-hover" title="pnpx @patrity/skills add quality-hooks"><svg class="ico"><use href="#i-copy"/></svg></span>
+            <span class="act" title="Source"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+            <span class="act" title="Download"><svg class="ico"><use href="#i-download"/></svg></span>
+          </div>
+        </article>
+        <p class="note">Second row shown in its hover state: green name, green hairline, the one glow the system allows.</p>
+      </div>
+    </div>
+  </section>
+</div>

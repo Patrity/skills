@@ -1,0 +1,87 @@
+<!-- @dsCard group="Foundations" -->
+<meta charset="utf-8">
+<title>Colour</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .ramp { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .ramp li { display: grid; grid-template-columns: 72px 34px 88px 1fr; align-items: center; gap: .75rem; }
+  .ramp i { height: 26px; border-radius: 5px; border: 1px solid var(--ui-border); }
+  .ramp b { font-family: var(--font-teko); font-weight: 600; font-size: 1.25rem; line-height: 1; }
+  .ramp code { font-family: var(--font-mono); font-size: .75rem; color: var(--ui-text-muted); }
+  .ramp.surf li { grid-template-columns: 72px 154px 1fr; }
+  .ramp em { font-style: normal; font-size: .6875rem; text-transform: uppercase; letter-spacing: .18em; color: var(--color-green-400); }
+</style>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Green ramp · light ground</p>
+        <h2 class="card-h">Colour</h2>
+        <p class="note">One custom ramp, copied from techhivelabs.net. Everything else is neutral, through the same six surface variables in both modes.</p>
+      </div>
+      <ul class="ramp">
+        <li><i style="background:var(--color-green-50)"></i><b>50</b><code>#f0fae8</code><em></em></li>
+        <li><i style="background:var(--color-green-100)"></i><b>100</b><code>#dff4cf</code><em></em></li>
+        <li><i style="background:var(--color-green-200)"></i><b>200</b><code>#c4e9a7</code><em></em></li>
+        <li><i style="background:var(--color-green-300)"></i><b>300</b><code>#96d76c</code><em></em></li>
+        <li><i style="background:var(--color-green-400)"></i><b>400</b><code>#46c211</code><em>accent</em></li>
+        <li><i style="background:var(--color-green-500)"></i><b>500</b><code>#39a10e</code><em>primary</em></li>
+        <li><i style="background:var(--color-green-600)"></i><b>600</b><code>#2e850b</code><em></em></li>
+        <li><i style="background:var(--color-green-700)"></i><b>700</b><code>#256a09</code><em></em></li>
+        <li><i style="background:var(--color-green-800)"></i><b>800</b><code>#1d520a</code><em></em></li>
+        <li><i style="background:var(--color-green-900)"></i><b>900</b><code>#174209</code><em></em></li>
+        <li><i style="background:var(--color-green-950)"></i><b>950</b><code>#0c2604</code><em></em></li>
+      </ul>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">Surfaces · light</p>
+        <ul class="ramp surf">
+          <li><i style="background:var(--ui-bg)"></i><code>--ui-bg</code><code>#fafaf9</code></li>
+          <li><i style="background:var(--ui-bg-elevated)"></i><code>--ui-bg-elevated</code><code>#ffffff</code></li>
+          <li><i style="background:var(--ui-border)"></i><code>--ui-border</code><code>rgba(0,0,0,.08)</code></li>
+          <li><i style="background:var(--ui-text)"></i><code>--ui-text</code><code>#171717</code></li>
+          <li><i style="background:var(--ui-text-muted)"></i><code>--ui-text-muted</code><code>#525252</code></li>
+          <li><i style="background:var(--ui-text-dimmed)"></i><code>--ui-text-dimmed</code><code>#737373</code></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Green ramp · dark ground</p>
+        <h2 class="card-h">Colour</h2>
+        <p class="note">Dark is the home ground, the way the portfolio is built. 400 is the accent word and the mark's slash; 500 is the solid button and every green border.</p>
+      </div>
+      <ul class="ramp">
+        <li><i style="background:var(--color-green-50)"></i><b>50</b><code>#f0fae8</code><em></em></li>
+        <li><i style="background:var(--color-green-100)"></i><b>100</b><code>#dff4cf</code><em></em></li>
+        <li><i style="background:var(--color-green-200)"></i><b>200</b><code>#c4e9a7</code><em></em></li>
+        <li><i style="background:var(--color-green-300)"></i><b>300</b><code>#96d76c</code><em></em></li>
+        <li><i style="background:var(--color-green-400)"></i><b>400</b><code>#46c211</code><em>accent</em></li>
+        <li><i style="background:var(--color-green-500)"></i><b>500</b><code>#39a10e</code><em>primary</em></li>
+        <li><i style="background:var(--color-green-600)"></i><b>600</b><code>#2e850b</code><em></em></li>
+        <li><i style="background:var(--color-green-700)"></i><b>700</b><code>#256a09</code><em></em></li>
+        <li><i style="background:var(--color-green-800)"></i><b>800</b><code>#1d520a</code><em></em></li>
+        <li><i style="background:var(--color-green-900)"></i><b>900</b><code>#174209</code><em></em></li>
+        <li><i style="background:var(--color-green-950)"></i><b>950</b><code>#0c2604</code><em></em></li>
+      </ul>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">Surfaces · dark</p>
+        <ul class="ramp surf">
+          <li><i style="background:var(--ui-bg)"></i><code>--ui-bg</code><code>#0c0c0b</code></li>
+          <li><i style="background:var(--ui-bg-elevated)"></i><code>--ui-bg-elevated</code><code>#161615</code></li>
+          <li><i style="background:var(--ui-border)"></i><code>--ui-border</code><code>rgba(255,255,255,.08)</code></li>
+          <li><i style="background:var(--ui-text)"></i><code>--ui-text</code><code>#fafafa</code></li>
+          <li><i style="background:var(--ui-text-muted)"></i><code>--ui-text-muted</code><code>#a3a3a3</code></li>
+          <li><i style="background:var(--ui-text-dimmed)"></i><code>--ui-text-dimmed</code><code>#737373</code></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>

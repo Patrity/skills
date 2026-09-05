@@ -1,0 +1,97 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Install box</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .install { max-width: 30rem; }
+  .install .prompt { color: var(--color-green-500); user-select: none; }
+  .install .cmd { color: var(--ui-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .5rem; margin: -.25rem -.375rem -.25rem 0;
+          border-radius: .375rem; border: 0; background: none; cursor: pointer; color: var(--ui-text-dimmed); font: inherit; font-size: .75rem; }
+  .copy:hover, .copy.is-hover { color: var(--color-green-400); background: color-mix(in srgb, var(--color-green-500) 10%, transparent); }
+  .copy.is-done { color: var(--color-green-400); }
+  .install.is-hover { border-color: color-mix(in srgb, var(--color-green-500) 40%, transparent); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">The one command</p>
+        <h2 class="card-h">Install box</h2>
+        <p class="note">The same box in the hero, on every bundle page and at the bottom of the home page. Click anywhere on it and the command is on your clipboard.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Rest · hero</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy" type="button"><svg class="ico"><use href="#i-copy"/></svg> Copy</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Hover</p>
+        <div class="install is-hover">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy is-hover" type="button"><svg class="ico"><use href="#i-copy"/></svg> Copy</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Copied</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy is-done" type="button"><svg class="ico"><use href="#i-check"/></svg> Copied</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Bundle variant · /skill/nuxt</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills add nuxt</span></span>
+          <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
+        </div>
+        <p class="note">On a bundle page the label drops and the glyph carries it, so the box stays the width of the command.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">The one command</p>
+        <h2 class="card-h">Install box</h2>
+        <p class="note">The same box in the hero, on every bundle page and at the bottom of the home page. Click anywhere on it and the command is on your clipboard.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Rest · hero</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy" type="button"><svg class="ico"><use href="#i-copy"/></svg> Copy</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Hover</p>
+        <div class="install is-hover">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy is-hover" type="button"><svg class="ico"><use href="#i-copy"/></svg> Copy</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Copied</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy is-done" type="button"><svg class="ico"><use href="#i-check"/></svg> Copied</button>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Bundle variant · /skill/nuxt</p>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills add nuxt</span></span>
+          <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
+        </div>
+        <p class="note">On a bundle page the label drops and the glyph carries it, so the box stays the width of the command.</p>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,27 @@
+/*
+  Chrome for the preview cards only — the frame, the labels and the shared spacing that make the
+  sixteen cards read as one system. Nothing here ships: `tokens.css` is the design system.
+*/
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.modes > section, .frame { padding: 32px; background: var(--ui-bg); color: var(--ui-text); }
+.modes > section + section { border-left: 1px solid var(--ui-border); }
+.frame + .frame { border-top: 1px solid var(--ui-border); }
+@media (max-width: 860px) { .modes { grid-template-columns: 1fr } .modes > section + section { border-left: 0; border-top: 1px solid var(--ui-border) } }
+
+.card-h { font-family: var(--font-teko); font-weight: 600; font-size: 2rem; line-height: .9; letter-spacing: -.01em; margin: 0; }
+.stack { display: grid; gap: 2rem; }
+.group { display: grid; gap: .75rem; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.note { margin: 0; font-size: .8125rem; line-height: 1.5; color: var(--ui-text-muted); }
+.rule { height: 1px; border: 0; margin: 0; background: var(--ui-border); }
+
+/* Fixed-width viewports for the shell cards. */
+.viewport { border: 1px solid var(--ui-border); border-radius: .75rem; overflow: hidden; background: var(--ui-bg); }
+.w1440 { width: 1440px; max-width: 100%; }
+.w375 { width: 375px; max-width: 100%; }
+
+/* The mark include ships at 40px; every use sizes it here. */
+.mark svg { display: block; width: 100%; height: 100%; }
+.mark { color: var(--ui-text); }
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.ico-solid { fill: currentColor; stroke: none; }

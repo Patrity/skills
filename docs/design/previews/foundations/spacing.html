@@ -1,0 +1,93 @@
+<!-- @dsCard group="Foundations" -->
+<meta charset="utf-8">
+<title>Spacing and radii</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .band { height: 80px; border-radius: 4px; background: repeating-linear-gradient(45deg, transparent 0 6px, var(--ui-border) 6px 7px); }
+  .band span { display: block; padding: 4px 8px; font-family: var(--font-mono); font-size: .6875rem; color: var(--ui-text-dimmed); }
+  .content { border: 1px solid var(--ui-border); border-radius: .75rem; background: var(--ui-bg-elevated); padding: 24px; }
+  .bar { height: 30px; border-radius: .25rem; display: flex; align-items: center; padding: 0 .5rem; font-family: var(--font-mono); font-size: .6875rem;
+         background: color-mix(in srgb, var(--color-green-500) 14%, transparent); border: 1px solid var(--color-green-500); }
+  .w7 { width: 100% } .w5 { width: 80% }
+  .pads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+  .pad { border: 1px solid var(--ui-border); border-radius: .75rem; background: var(--ui-bg-elevated); }
+  .pad > div { border: 1px dashed var(--color-green-500); border-radius: .375rem; height: 54px; display: flex; align-items: center; justify-content: center;
+               font-family: var(--font-mono); font-size: .6875rem; color: var(--ui-text-muted); }
+  .p16 { padding: 16px } .p20 { padding: 20px } .p24 { padding: 24px }
+  .radii { display: flex; gap: .75rem; }
+  .radii div { width: 148px; height: 68px; border: 1px solid var(--ui-border); background: var(--ui-bg-elevated); display: flex; align-items: flex-end;
+               justify-content: center; padding-bottom: 6px; font-family: var(--font-mono); font-size: .6875rem; color: var(--ui-text-muted); }
+  .r8 { border-radius: 8px } .r12 { border-radius: 12px }
+</style>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Rhythm · widths · radii</p>
+        <h2 class="card-h">Spacing</h2>
+        <p class="note">Sections breathe on one number, 80px. Reading columns cap at 1024, the hero at 1280. Two radii, nothing in between.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Section rhythm · py-20 = 80px</p>
+        <div class="band"><span>80</span></div>
+        <div class="content"><p class="teko" style="font-size:28px;margin:0">Section content</p></div>
+        <div class="band"><span>80</span></div>
+      </div>
+      <div class="group">
+        <p class="micro">Content widths</p>
+        <div class="bar w7">max-w-7xl · 1280 · hero</div>
+        <div class="bar w5">max-w-5xl · 1024 · sections</div>
+        <p class="note">Page padding stays px-6 sm:px-10 lg:px-8 outside both.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Card padding</p>
+        <div class="pads">
+          <div class="pad p16"><div>16</div></div>
+          <div class="pad p20"><div>20</div></div>
+          <div class="pad p24"><div>24</div></div>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Radii</p>
+        <div class="radii"><div class="r8">8 · rounded-lg</div><div class="r12">12 · rounded-xl</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Rhythm · widths · radii</p>
+        <h2 class="card-h">Spacing</h2>
+        <p class="note">Sections breathe on one number, 80px. Reading columns cap at 1024, the hero at 1280. Two radii, nothing in between.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Section rhythm · py-20 = 80px</p>
+        <div class="band"><span>80</span></div>
+        <div class="content"><p class="teko" style="font-size:28px;margin:0">Section content</p></div>
+        <div class="band"><span>80</span></div>
+      </div>
+      <div class="group">
+        <p class="micro">Content widths</p>
+        <div class="bar w7">max-w-7xl · 1280 · hero</div>
+        <div class="bar w5">max-w-5xl · 1024 · sections</div>
+        <p class="note">Page padding stays px-6 sm:px-10 lg:px-8 outside both.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Card padding</p>
+        <div class="pads">
+          <div class="pad p16"><div>16</div></div>
+          <div class="pad p20"><div>20</div></div>
+          <div class="pad p24"><div>24</div></div>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Radii</p>
+        <div class="radii"><div class="r8">8 · rounded-lg</div><div class="r12">12 · rounded-xl</div></div>
+      </div>
+    </div>
+  </section>
+</div>

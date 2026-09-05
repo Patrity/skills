@@ -1,0 +1,119 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Form controls</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .field { display: grid; gap: .375rem; max-width: 26rem; }
+  .lbl { font-family: var(--font-teko); font-weight: 600; font-size: 22px; line-height: 1; letter-spacing: -.01em; }
+  .help { font-family: var(--font-mono); font-size: .6875rem; color: var(--ui-text-dimmed); }
+  .ctl { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .75rem;
+         border: 1px solid var(--ui-border); border-radius: .5rem; background: var(--ui-bg-elevated); font-size: .875rem; }
+  .ctl.is-focus { border-color: var(--color-green-500); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-green-500) 18%, transparent); }
+  .ctl .val { font-family: var(--font-mono); font-size: .8125rem; }
+  .ctl .ph { font-family: var(--font-mono); font-size: .8125rem; color: var(--ui-text-dimmed); }
+  .check { display: flex; align-items: center; gap: .625rem; padding: .5rem .75rem; border: 1px solid var(--ui-border);
+           border-radius: .5rem; background: var(--ui-bg-elevated); font-size: .875rem; max-width: 26rem; }
+  .box { width: 18px; height: 18px; border-radius: .25rem; border: 1px solid var(--ui-border); flex: none; display: inline-flex; align-items: center; justify-content: center; }
+  .box.on { background: var(--color-green-500); border-color: var(--color-green-500); color: #fff; }
+  .box.on .ico { width: 13px; height: 13px; stroke-width: 3; }
+  .check .lock { margin-left: auto; color: var(--ui-text-dimmed); }
+  .check .lock .ico { width: 14px; height: 14px; }
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; max-width: 30rem; }
+  .tile { padding: 12px; border-radius: .75rem; border: 1px solid var(--ui-border); background: var(--ui-bg-elevated); }
+  .tile.on { border-color: var(--color-green-500); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-green-500) 14%, transparent); }
+  .tile b { display: block; font-family: var(--font-mono); font-size: .75rem; font-weight: 500; }
+  .tile span { display: block; margin-top: .25rem; font-size: .6875rem; line-height: 1.4; color: var(--ui-text-muted); }
+  .seg { display: inline-flex; padding: 2px; border: 1px solid var(--ui-border); border-radius: .5rem; background: var(--ui-bg-elevated); }
+  .seg span { padding: .3125rem .75rem; border-radius: .375rem; font-size: .8125rem; color: var(--ui-text-muted); }
+  .seg span.on { background: var(--color-green-500); color: #fff; font-weight: 600; }
+  .sw { display: inline-flex; align-items: center; gap: .5rem; font-size: .875rem; }
+  .sw i { width: 36px; height: 20px; border-radius: 9999px; background: var(--ui-border); position: relative; flex: none; }
+  .sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .sw.on i { background: var(--color-green-500); }
+  .sw.on i::after { transform: translateX(16px); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/build · the target look for Nuxt UI</p>
+        <h2 class="card-h">Form controls</h2>
+        <p class="note">Teko carries the question, mono carries the answer and the helper line. Green appears on focus and on what you chose, nowhere else.</p>
+      </div>
+      <div class="field">
+        <span class="lbl">Which package manager does this project use?</span>
+        <span class="help">sets the commands Claude runs and the lockfile rule</span>
+        <div class="ctl"><span class="val">pnpm</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Where does the app's srcDir live?</span>
+        <span class="help">relative to the repo root</span>
+        <div class="ctl is-focus"><span class="ph">apps/web/app</span></div>
+      </div>
+      <div class="group">
+        <p class="micro">Bundles · checked and locked</p>
+        <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Nuxt</label>
+        <label class="check"><span class="box"></span> Read-only DB Access</label>
+        <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Browser Testing
+          <span class="lock" title="Required by: UI work validated with playwright-cli"><svg class="ico"><use href="#i-lock"/></svg></span></label>
+        <p class="note">A locked row was chosen by an answer above. The padlock says so on hover instead of hiding the row.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Presets</p>
+        <div class="tiles">
+          <div class="tile on"><b>nuxt-app</b><span>Nuxt 4 app, full workflow, hooks, browser validation.</span></div>
+          <div class="tile"><b>library</b><span>A package, lightweight process, no browser.</span></div>
+          <div class="tile"><b>docs-only</b><span>Docs discipline and memory, nothing else.</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="seg"><span class="on">CLAUDE.md</span><span>Files</span></span>
+        <span class="sw on"><i></i> Rendered</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/build · the target look for Nuxt UI</p>
+        <h2 class="card-h">Form controls</h2>
+        <p class="note">Teko carries the question, mono carries the answer and the helper line. Green appears on focus and on what you chose, nowhere else.</p>
+      </div>
+      <div class="field">
+        <span class="lbl">Which package manager does this project use?</span>
+        <span class="help">sets the commands Claude runs and the lockfile rule</span>
+        <div class="ctl"><span class="val">pnpm</span><svg class="ico"><use href="#i-chevron-down"/></svg></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Where does the app's srcDir live?</span>
+        <span class="help">relative to the repo root</span>
+        <div class="ctl is-focus"><span class="ph">apps/web/app</span></div>
+      </div>
+      <div class="group">
+        <p class="micro">Bundles · checked and locked</p>
+        <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Nuxt</label>
+        <label class="check"><span class="box"></span> Read-only DB Access</label>
+        <label class="check"><span class="box on"><svg class="ico"><use href="#i-check"/></svg></span> Browser Testing
+          <span class="lock" title="Required by: UI work validated with playwright-cli"><svg class="ico"><use href="#i-lock"/></svg></span></label>
+        <p class="note">A locked row was chosen by an answer above. The padlock says so on hover instead of hiding the row.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Presets</p>
+        <div class="tiles">
+          <div class="tile on"><b>nuxt-app</b><span>Nuxt 4 app, full workflow, hooks, browser validation.</span></div>
+          <div class="tile"><b>library</b><span>A package, lightweight process, no browser.</span></div>
+          <div class="tile"><b>docs-only</b><span>Docs discipline and memory, nothing else.</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="seg"><span class="on">CLAUDE.md</span><span>Files</span></span>
+        <span class="sw on"><i></i> Rendered</span>
+      </div>
+    </div>
+  </section>
+</div>

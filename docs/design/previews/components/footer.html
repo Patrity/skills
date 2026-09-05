@@ -1,0 +1,151 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Footer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .ft { position: relative; border-top: 1px solid var(--ui-border); overflow: hidden; }
+  .ft .layer { position: absolute; inset: 0; }
+  .cols { position: relative; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem; max-width: 1280px; margin: 0 auto; padding: 40px 24px 28px; }
+  .brand { display: flex; align-items: center; gap: .625rem; text-decoration: none; color: var(--ui-text); }
+  .brand .mark { width: 28px; height: 28px; }
+  .brand .word { font-family: var(--font-teko); font-weight: 600; font-size: 30px; line-height: .9; letter-spacing: -.01em; }
+  .col p.lead { margin: .75rem 0 0; max-width: 24rem; font-size: .875rem; line-height: 1.6; color: var(--ui-text-muted); }
+  .col .micro { display: block; margin: 0 0 .75rem; }
+  .col a.item { display: flex; align-items: center; gap: .5rem; padding: .1875rem 0; text-decoration: none; font-size: .875rem; color: var(--ui-text-muted); }
+  .col a.item:hover { color: var(--color-green-400); }
+  .col a.item .ico { width: 14px; height: 14px; flex: none; }
+  .col a.item u { text-decoration: none; color: var(--ui-text-dimmed); }
+  .base { position: relative; max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+          padding: 14px 24px; border-top: 1px solid var(--ui-border); font-family: var(--font-mono); font-size: .75rem; color: var(--ui-text-dimmed); }
+  .base .prompt { color: var(--color-green-500); }
+  .w375 .cols { grid-template-columns: 1fr; gap: 1.75rem; padding: 28px 16px 20px; }
+  .w375 .base { padding: 14px 16px; flex-direction: column; align-items: flex-start; gap: .375rem; }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="frame light">
+  <p class="micro" style="margin:0 0 12px">Footer · 1440 · light</p>
+  <div class="viewport w1440">
+    <footer class="ft">
+      <div class="layer hive-texture"></div>
+      <div class="cols">
+        <div class="col">
+          <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span><span class="micro">by TechHive Labs</span></a>
+          <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with and leave the rest.</p>
+        </div>
+        <div class="col">
+          <span class="micro">Elsewhere</span>
+          <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+          <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+          <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+          <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+          <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+          <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+        </div>
+        <div class="col">
+          <span class="micro">Registry</span>
+          <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+          <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+          <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+        </div>
+      </div>
+      <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+    </footer>
+  </div>
+</div>
+
+<div class="frame dark">
+  <p class="micro" style="margin:0 0 12px">Footer · 1440 · dark</p>
+  <div class="viewport w1440">
+    <footer class="ft">
+      <div class="layer hive-texture"></div>
+      <div class="cols">
+        <div class="col">
+          <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span><span class="micro">by TechHive Labs</span></a>
+          <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with and leave the rest.</p>
+        </div>
+        <div class="col">
+          <span class="micro">Elsewhere</span>
+          <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+          <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+          <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+          <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+          <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+          <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+        </div>
+        <div class="col">
+          <span class="micro">Registry</span>
+          <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+          <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+          <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+        </div>
+      </div>
+      <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+    </footer>
+  </div>
+</div>
+
+<div class="modes">
+  <section class="light">
+    <p class="micro" style="margin:0 0 12px">375 · light</p>
+    <div class="viewport w375">
+      <footer class="ft">
+        <div class="layer hive-texture"></div>
+        <div class="cols">
+          <div class="col">
+            <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+            <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with.</p>
+          </div>
+          <div class="col">
+            <span class="micro">Elsewhere</span>
+            <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+            <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+            <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+            <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+            <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+            <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+          </div>
+          <div class="col">
+            <span class="micro">Registry</span>
+            <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+            <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+            <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+          </div>
+        </div>
+        <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+      </footer>
+    </div>
+  </section>
+  <section class="dark">
+    <p class="micro" style="margin:0 0 12px">375 · dark</p>
+    <div class="viewport w375">
+      <footer class="ft">
+        <div class="layer hive-texture"></div>
+        <div class="cols">
+          <div class="col">
+            <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+            <p class="lead">One Claude Code setup, kept in bundles so you can take the parts you agree with.</p>
+          </div>
+          <div class="col">
+            <span class="micro">Elsewhere</span>
+            <a class="item" href="https://www.techhivelabs.net/blog">Blog <u>· Lab Notes</u></a>
+            <a class="item" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> X <u>@Patrity</u></a>
+            <a class="item" rel="me" href="https://github.com/Patrity"><svg class="ico ico-solid"><use href="#i-github"/></svg> GitHub <u>Patrity</u></a>
+            <a class="item" rel="me" href="https://bsky.app/profile/patrity.com"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg> Bluesky</a>
+            <a class="item" rel="me" href="https://www.linkedin.com/in/tonycos/"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg> LinkedIn</a>
+            <a class="item" href="https://www.techhivelabs.net/rss.xml"><svg class="ico"><use href="#i-rss"/></svg> Blog RSS</a>
+          </div>
+          <div class="col">
+            <span class="micro">Registry</span>
+            <a class="item" href="https://www.npmjs.com/package/@patrity/skills"><svg class="ico ico-solid"><use href="#i-npm"/></svg> @patrity/skills</a>
+            <a class="item" href="https://github.com/Patrity/skills/blob/main/LICENSE">MIT</a>
+            <a class="item" href="https://github.com/Patrity/skills"><svg class="ico ico-solid"><use href="#i-github"/></svg> Source on GitHub</a>
+          </div>
+        </div>
+        <div class="base"><span><span class="prompt">~/</span> skills.patrity.com</span><span>© 2026 Tony Costanzo</span></div>
+      </footer>
+    </div>
+  </section>
+</div>

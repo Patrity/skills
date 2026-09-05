@@ -1,0 +1,85 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Code block</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  :root { --code-lit: var(--color-green-700); --code-marker: var(--color-green-600); }
+  .dark { --code-lit: var(--color-green-300); --code-marker: var(--color-green-400); }
+  .block { border: 1px solid var(--ui-border); border-radius: .75rem; overflow: hidden; background: var(--ui-bg-elevated); }
+  .block header { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+                  padding: .5rem .75rem; border-bottom: 1px solid var(--ui-border); }
+  .block header .name { font-family: var(--font-mono); font-size: .8125rem; color: var(--ui-text); }
+  .block header .copy { display: inline-flex; padding: .25rem; border: 0; background: none; cursor: pointer; color: var(--ui-text-dimmed); }
+  .code { list-style: none; counter-reset: ln; margin: 0; padding: .75rem 0; font-family: var(--font-mono); font-size: .8125rem; line-height: 1.7;
+          font-variant-ligatures: none; }
+  .code li { counter-increment: ln; display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); gap: .75rem; padding-right: .875rem; min-height: 1.7em; }
+  .code .ln { white-space: pre-wrap; }
+  .code li::before { content: counter(ln); text-align: right; color: var(--ui-text-dimmed); opacity: .5; }
+  .c-h { font-weight: 500; color: var(--ui-text); }
+  .c-m { color: var(--code-marker); }
+  .c-m .d { color: var(--ui-text-dimmed); }
+  .c-b { color: var(--ui-text-dimmed); }
+  .c-l { color: var(--code-lit); }
+  .code .body { color: var(--ui-text-muted); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Rendered by CodeMirror, coloured by the tokens</p>
+        <h2 class="card-h">Code block</h2>
+        <p class="note">Headings hold their weight, prose drops to muted, and the marker blocks are the only green, because they are the part the tool owns.</p>
+      </div>
+      <div class="block">
+        <header><span class="name">CLAUDE.md</span><button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button></header>
+        <ol class="code">
+          <li><span class="ln"><span class="c-h"># acme-web</span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Commands</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Always <span class="c-l">`pnpm`</span> — never npm or yarn. If the project ever has a <span class="c-l">`package-lock.json`</span> use npm; a <span class="c-l">`yarn.lock`</span> means yarn.</span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body"><span class="c-l">`pnpm dev`</span>, <span class="c-l">`pnpm test`</span>, <span class="c-l">`pnpm typecheck`</span>, <span class="c-l">`pnpm lint`</span>, <span class="c-l">`pnpm build`</span> — run typecheck and build often, not just at the end.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Git</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Do not commit without explicit approval; propose the commit message and wait.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+        </ol>
+      </div>
+      <p class="note">Twelve real lines out of a composed CLAUDE.md. Anything you write outside a marker block is left alone on the next run.</p>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Rendered by CodeMirror, coloured by the tokens</p>
+        <h2 class="card-h">Code block</h2>
+        <p class="note">Headings hold their weight, prose drops to muted, and the marker blocks are the only green, because they are the part the tool owns.</p>
+      </div>
+      <div class="block">
+        <header><span class="name">CLAUDE.md</span><button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button></header>
+        <ol class="code">
+          <li><span class="ln"><span class="c-h"># acme-web</span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Commands</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Always <span class="c-l">`pnpm`</span> — never npm or yarn. If the project ever has a <span class="c-l">`package-lock.json`</span> use npm; a <span class="c-l">`yarn.lock`</span> means yarn.</span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body"><span class="c-l">`pnpm dev`</span>, <span class="c-l">`pnpm test`</span>, <span class="c-l">`pnpm typecheck`</span>, <span class="c-l">`pnpm lint`</span>, <span class="c-l">`pnpm build`</span> — run typecheck and build often, not just at the end.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:pm=pnpm <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"> </span></li>
+          <li><span class="ln"><span class="c-h">## Git</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+          <li><span class="ln"><span class="c-b">- </span><span class="body">Do not commit without explicit approval; propose the commit message and wait.</span></span></li>
+          <li><span class="ln"><span class="c-m"><span class="d">&lt;!--</span> /skills:base:commits=ask <span class="d">--&gt;</span></span></span></li>
+        </ol>
+      </div>
+      <p class="note">Twelve real lines out of a composed CLAUDE.md. Anything you write outside a marker block is left alone on the next run.</p>
+    </div>
+  </section>
+</div>

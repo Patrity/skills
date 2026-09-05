@@ -1,0 +1,105 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Chips and badges</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .chips { display: flex; flex-wrap: wrap; gap: .375rem; }
+  .chip { display: inline-flex; align-items: center; gap: .375rem; line-height: 1.7; }
+  .chip u { text-decoration: none; color: var(--ui-text-dimmed); }
+  .chip-active u { color: var(--color-green-500); }
+  .badges { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .badge { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .5rem; border-radius: .375rem;
+           border: 1px solid var(--ui-border); background: var(--ui-bg-elevated); font-size: .75rem; color: var(--ui-text-muted); }
+  .badge .ico { width: 14px; height: 14px; color: var(--color-green-500); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Tag chips · content badges</p>
+        <h2 class="card-h">Chips</h2>
+        <p class="note">Tags are mono and tiny so they never compete with the bundle name. The count sits inside the chip; the active one is the only green thing in the row.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Tags on /skills · one active</p>
+        <div class="chips">
+          <span class="chip chip-active">docs <u>3</u></span>
+          <span class="chip">safety <u>2</u></span>
+          <span class="chip">vue <u>2</u></span>
+          <span class="chip">process <u>2</u></span>
+          <span class="chip">nuxt <u>1</u></span>
+          <span class="chip">hooks <u>1</u></span>
+          <span class="chip">testing <u>1</u></span>
+          <span class="chip">database <u>1</u></span>
+          <span class="chip">ops <u>1</u></span>
+          <span class="chip">python <u>1</u></span>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Tags on a bundle row · no counts</p>
+        <div class="chips">
+          <span class="chip">hooks</span><span class="chip">quality</span><span class="chip">safety</span>
+        </div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">What a bundle contributes</p>
+        <div class="badges">
+          <span class="badge"><svg class="ico"><use href="#i-book"/></svg> Skills</span>
+          <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> Rules</span>
+          <span class="badge"><svg class="ico"><use href="#i-zap"/></svg> Hooks</span>
+          <span class="badge"><svg class="ico"><use href="#i-sliders"/></svg> Settings</span>
+          <span class="badge"><svg class="ico"><use href="#i-file"/></svg> CLAUDE.md</span>
+        </div>
+        <p class="note">Five badges, one per thing a bundle can add to your project. A bundle shows only the ones it carries.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Tag chips · content badges</p>
+        <h2 class="card-h">Chips</h2>
+        <p class="note">Tags are mono and tiny so they never compete with the bundle name. The count sits inside the chip; the active one is the only green thing in the row.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Tags on /skills · one active</p>
+        <div class="chips">
+          <span class="chip chip-active">docs <u>3</u></span>
+          <span class="chip">safety <u>2</u></span>
+          <span class="chip">vue <u>2</u></span>
+          <span class="chip">process <u>2</u></span>
+          <span class="chip">nuxt <u>1</u></span>
+          <span class="chip">hooks <u>1</u></span>
+          <span class="chip">testing <u>1</u></span>
+          <span class="chip">database <u>1</u></span>
+          <span class="chip">ops <u>1</u></span>
+          <span class="chip">python <u>1</u></span>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Tags on a bundle row · no counts</p>
+        <div class="chips">
+          <span class="chip">hooks</span><span class="chip">quality</span><span class="chip">safety</span>
+        </div>
+      </div>
+      <hr class="rule">
+      <div class="group">
+        <p class="micro">What a bundle contributes</p>
+        <div class="badges">
+          <span class="badge"><svg class="ico"><use href="#i-book"/></svg> Skills</span>
+          <span class="badge"><svg class="ico"><use href="#i-scale"/></svg> Rules</span>
+          <span class="badge"><svg class="ico"><use href="#i-zap"/></svg> Hooks</span>
+          <span class="badge"><svg class="ico"><use href="#i-sliders"/></svg> Settings</span>
+          <span class="badge"><svg class="ico"><use href="#i-file"/></svg> CLAUDE.md</span>
+        </div>
+        <p class="note">Five badges, one per thing a bundle can add to your project. A bundle shows only the ones it carries.</p>
+      </div>
+    </div>
+  </section>
+</div>

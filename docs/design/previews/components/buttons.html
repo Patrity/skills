@@ -1,0 +1,98 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Buttons</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .btn { font-size: .9375rem; cursor: pointer; transition: box-shadow .2s, background .2s, border-color .2s; }
+  .btn-sm { padding: .375rem .75rem; font-size: .8125rem; border-radius: .375rem; }
+  .btn-lg { padding: .8125rem 1.375rem; font-size: 1rem; }
+  .btn-icon { padding: .5rem; border-radius: .5rem; }
+  .btn-icon .ico { width: 20px; height: 20px; }
+  .btn-ghost:hover { color: var(--color-green-400); }
+  .is-hover.btn-solid { background: var(--color-green-600); }
+  .is-hover.btn-outline { border-color: color-mix(in srgb, var(--color-green-500) 45%, transparent); }
+  .is-hover.btn-outline-green { background: color-mix(in srgb, var(--color-green-500) 10%, transparent); }
+  .is-hover.btn-ghost { color: var(--color-green-400); }
+  .is-hover.glow { box-shadow: 0 0 30px rgba(70,194,17,.12); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Solid · outline · green outline · ghost</p>
+        <h2 class="card-h">Buttons</h2>
+        <p class="note">Green solid is the one thing to do on a page. Everything else is an outline, and the icon buttons in the bar stay ghost until you point at them.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Variants</p>
+        <div class="row">
+          <a class="btn btn-solid glow" href="#">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></a>
+          <a class="btn btn-outline glow" href="#"><svg class="ico"><use href="#i-download"/></svg> Download zip</a>
+          <a class="btn btn-outline-green glow" href="#">Source on GitHub <svg class="ico"><use href="#i-external"/></svg></a>
+          <a class="btn btn-ghost btn-icon" href="#" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+          <a class="btn btn-ghost btn-icon" href="#" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Sizes</p>
+        <div class="row">
+          <a class="btn btn-solid btn-sm" href="#">sm · copy</a>
+          <a class="btn btn-solid" href="#">md · add nuxt</a>
+          <a class="btn btn-solid btn-lg" href="#">lg · Build it on the web</a>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Hover, rendered</p>
+        <div class="row">
+          <span class="btn btn-solid glow is-hover">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+          <span class="btn btn-outline glow is-hover"><svg class="ico"><use href="#i-download"/></svg> Download zip</span>
+          <span class="btn btn-outline-green glow is-hover">Source on GitHub <svg class="ico"><use href="#i-external"/></svg></span>
+          <span class="btn btn-ghost btn-icon is-hover"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+        </div>
+        <p class="note">Glow is the only shadow on the site: 0 0 30px rgba(70,194,17,.12), on hover, never at rest.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Solid · outline · green outline · ghost</p>
+        <h2 class="card-h">Buttons</h2>
+        <p class="note">Green solid is the one thing to do on a page. Everything else is an outline, and the icon buttons in the bar stay ghost until you point at them.</p>
+      </div>
+      <div class="group">
+        <p class="micro">Variants</p>
+        <div class="row">
+          <a class="btn btn-solid glow" href="#">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></a>
+          <a class="btn btn-outline glow" href="#"><svg class="ico"><use href="#i-download"/></svg> Download zip</a>
+          <a class="btn btn-outline-green glow" href="#">Source on GitHub <svg class="ico"><use href="#i-external"/></svg></a>
+          <a class="btn btn-ghost btn-icon" href="#" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+          <a class="btn btn-ghost btn-icon" href="#" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Sizes</p>
+        <div class="row">
+          <a class="btn btn-solid btn-sm" href="#">sm · copy</a>
+          <a class="btn btn-solid" href="#">md · add nuxt</a>
+          <a class="btn btn-solid btn-lg" href="#">lg · Build it on the web</a>
+        </div>
+      </div>
+      <div class="group">
+        <p class="micro">Hover, rendered</p>
+        <div class="row">
+          <span class="btn btn-solid glow is-hover">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+          <span class="btn btn-outline glow is-hover"><svg class="ico"><use href="#i-download"/></svg> Download zip</span>
+          <span class="btn btn-outline-green glow is-hover">Source on GitHub <svg class="ico"><use href="#i-external"/></svg></span>
+          <span class="btn btn-ghost btn-icon is-hover"><svg class="ico ico-solid"><use href="#i-github"/></svg></span>
+        </div>
+        <p class="note">Glow is the only shadow on the site: 0 0 30px rgba(70,194,17,.12), on hover, never at rest.</p>
+      </div>
+    </div>
+  </section>
+</div>

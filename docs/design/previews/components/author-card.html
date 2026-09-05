@@ -1,0 +1,67 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Author card</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .author { display: flex; gap: 1.25rem; align-items: flex-start; padding: 24px; max-width: 34rem; }
+  .author .badge-mark { width: 72px; height: 72px; flex: none; display: grid; place-items: center; border-radius: .75rem;
+                        border: 2px solid color-mix(in srgb, var(--color-green-500) 25%, transparent); }
+  .author .badge-mark .mark { width: 40px; height: 40px; }
+  .author .name { font-family: var(--font-teko); font-weight: 600; font-size: 28px; line-height: .9; letter-spacing: -.01em; margin: .25rem 0 .5rem; color: var(--ui-text); }
+  .author .name .sep { color: var(--ui-text-dimmed); }
+  .author p { margin: 0 0 .875rem; font-size: .875rem; line-height: 1.6; color: var(--ui-text-muted); }
+  .links { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .lnk { display: inline-flex; align-items: center; gap: .375rem; padding: .3125rem .625rem; border-radius: .375rem;
+         border: 1px solid var(--ui-border); font-size: .8125rem; color: var(--ui-text-muted); text-decoration: none; }
+  .lnk:hover { color: var(--color-green-400); border-color: color-mix(in srgb, var(--color-green-500) 45%, transparent); }
+  .lnk .ico { width: 15px; height: 15px; }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">End of every docs page and bundle README</p>
+        <h2 class="card-h">Author card</h2>
+        <p class="note">The mark stands in for a portrait, so the card works at the foot of a file listing without pulling an image over the wire.</p>
+      </div>
+      <div class="author glass-card">
+        <span class="badge-mark"><span class="mark"><i data-include="mark.svg"></i></span></span>
+        <div>
+          <p class="micro">Written by</p>
+          <p class="name">Tony Costanzo <span class="sep">·</span> TechHive Labs</p>
+          <p>I run Claude Code on billion-dollar construction data by day and a rack of GPUs at night, and I write down what breaks. This setup is the part that kept working.</p>
+          <div class="links">
+            <a class="lnk" href="https://www.techhivelabs.net/blog">Lab notes <svg class="ico"><use href="#i-external"/></svg></a>
+            <a class="lnk" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> @Patrity</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">End of every docs page and bundle README</p>
+        <h2 class="card-h">Author card</h2>
+        <p class="note">The mark stands in for a portrait, so the card works at the foot of a file listing without pulling an image over the wire.</p>
+      </div>
+      <div class="author glass-card">
+        <span class="badge-mark"><span class="mark"><i data-include="mark.svg"></i></span></span>
+        <div>
+          <p class="micro">Written by</p>
+          <p class="name">Tony Costanzo <span class="sep">·</span> TechHive Labs</p>
+          <p>I run Claude Code on billion-dollar construction data by day and a rack of GPUs at night, and I write down what breaks. This setup is the part that kept working.</p>
+          <div class="links">
+            <a class="lnk" href="https://www.techhivelabs.net/blog">Lab notes <svg class="ico"><use href="#i-external"/></svg></a>
+            <a class="lnk" rel="me" href="https://x.com/Patrity"><svg class="ico ico-solid"><use href="#i-x"/></svg> @Patrity</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

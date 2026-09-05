@@ -1,0 +1,80 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Callout</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .callout { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: .875rem; padding: 20px; max-width: 34rem;
+             border-left: 2px solid var(--color-green-500); }
+  .callout .ico { width: 20px; height: 20px; color: var(--color-green-500); margin-top: 1px; }
+  .callout h3 { font-family: var(--font-teko); font-weight: 600; font-size: 22px; line-height: 1; letter-spacing: -.01em; margin: 0 0 .375rem; }
+  .callout p { margin: 0; font-size: .9375rem; line-height: 1.6; color: var(--ui-text-muted); }
+  .callout code { font-family: var(--font-mono); font-size: .8125rem; color: var(--ui-text); }
+  .callout.warn { border-left-color: var(--color-green-700); }
+  .callout.warn .ico { color: var(--color-green-700); }
+  .dark .callout.warn { border-left-color: var(--color-green-300); }
+  .dark .callout.warn .ico { color: var(--color-green-300); }
+  .doc { max-width: 34rem; }
+  .doc h2 { font-family: var(--font-teko); font-weight: 600; font-size: 40px; line-height: .9; letter-spacing: -.01em; margin: 0 0 .5rem; }
+  .doc p { margin: 0 0 1rem; line-height: 1.7; color: var(--ui-text-muted); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/docs · in the reading column</p>
+        <h2 class="card-h">Callout</h2>
+        <p class="note">Glass, a green rule down the left edge and nothing else. It sits inside the 1024 reading column, at the same width as the prose.</p>
+      </div>
+      <div class="doc">
+        <h2>Secrets</h2>
+        <p>Bundles that need an environment variable declare it, and the tool collects every declaration into one example file.</p>
+        <div class="callout glass-card">
+          <svg class="ico"><use href="#i-info"/></svg>
+          <div>
+            <h3>Your .env is never touched</h3>
+            <p>The tool writes <code>.claude/.env.example</code> and rewrites it on every run. It never creates, reads or deletes <code>.claude/.env</code>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout glass-card warn">
+        <svg class="ico"><use href="#i-lock"/></svg>
+        <div>
+          <h3>Removing a bundle</h3>
+          <p>A bundle takes its own lines back out of <code>CLAUDE.md</code> on the next run. Anything you wrote outside the marker blocks stays where it is.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">/docs · in the reading column</p>
+        <h2 class="card-h">Callout</h2>
+        <p class="note">Glass, a green rule down the left edge and nothing else. It sits inside the 1024 reading column, at the same width as the prose.</p>
+      </div>
+      <div class="doc">
+        <h2>Secrets</h2>
+        <p>Bundles that need an environment variable declare it, and the tool collects every declaration into one example file.</p>
+        <div class="callout glass-card">
+          <svg class="ico"><use href="#i-info"/></svg>
+          <div>
+            <h3>Your .env is never touched</h3>
+            <p>The tool writes <code>.claude/.env.example</code> and rewrites it on every run. It never creates, reads or deletes <code>.claude/.env</code>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout glass-card warn">
+        <svg class="ico"><use href="#i-lock"/></svg>
+        <div>
+          <h3>Removing a bundle</h3>
+          <p>A bundle takes its own lines back out of <code>CLAUDE.md</code> on the next run. Anything you wrote outside the marker blocks stays where it is.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="208" viewBox="0 0 120 208">
+  <!--
+    Pointy-top hexagons, circumradius 60, on the portfolio's triangular lattice: rows 104 apart,
+    odd rows shifted 60 across, so every neighbour sits 120 away and the gaps read even.
+    The tile is 120x208 (one column, two rows); row B is drawn four times because a 120-tall
+    hexagon on a 208-tall tile always crosses an edge — the wrapped copies close the seams.
+  -->
+  <g fill="none" stroke="#39a10e" stroke-width="1">
+    <path d="M60,2 L112,32 L112,92 L60,122 L8,92 L8,32 Z"/>
+    <path d="M0,106 L52,136 L52,196 L0,226 L-52,196 L-52,136 Z"/>
+    <path d="M120,106 L172,136 L172,196 L120,226 L68,196 L68,136 Z"/>
+    <path d="M0,-102 L52,-72 L52,-12 L0,18 L-52,-12 L-52,-72 Z"/>
+    <path d="M120,-102 L172,-72 L172,-12 L120,18 L68,-12 L68,-72 Z"/>
+  </g>
+</svg>

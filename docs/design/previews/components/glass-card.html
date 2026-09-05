@@ -1,0 +1,115 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Glass card</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .plate { position: relative; border-radius: .75rem; overflow: hidden; padding: 24px; }
+  .plate .layer { position: absolute; inset: 0; opacity: .28; }
+  .grid { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 1rem; }
+  .grid > article { padding: 20px; }
+  .grid h3 { font-family: var(--font-teko); font-weight: 600; font-size: 28px; line-height: .9; letter-spacing: -.01em; margin: .375rem 0 .5rem; }
+  .grid p { margin: 0 0 .875rem; font-size: .875rem; line-height: 1.55; color: var(--ui-text-muted); }
+  .grid pre { margin: 0; font-family: var(--font-mono); font-size: .6875rem; line-height: 1.8; color: var(--ui-text-dimmed);
+              white-space: pre; overflow-x: auto; font-variant-ligatures: none; padding-top: .75rem; border-top: 1px solid var(--ui-border); }
+  .grid pre b { font-weight: 400; color: var(--color-green-500); }
+</style>
+
+<div class="modes">
+  <section class="light">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Home · what you get</p>
+        <h2 class="card-h">Glass card</h2>
+        <p class="note">Three cards, one per artefact the tool writes. Each ends in six real lines from that file, so nobody has to take my word for what lands in the repo.</p>
+      </div>
+      <div class="plate">
+        <div class="layer hive-texture"></div>
+        <div class="grid">
+          <article class="glass-card glow">
+            <p class="micro">One file</p>
+            <h3>CLAUDE.md</h3>
+            <p>Composed from the answers you gave and the bundles you picked. Your own paragraphs stay where you put them.</p>
+<pre><b># acme-web</b>
+<b>## Commands</b>
+&lt;!-- skills:base:pm=pnpm --&gt;
+- Always `pnpm` — never npm
+  or yarn.
+&lt;!-- /skills:base:pm=pnpm --&gt;</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One directory</p>
+            <h3>.claude/</h3>
+            <p>Rules scoped to paths, skills with their scripts, hooks, and the settings that wire them up.</p>
+<pre><b>.claude/</b>
+  rules/web-nuxt.md
+  skills/nuxt-docs/SKILL.md
+  hooks/protect-env.sh
+  settings.json
+  skills.lock.json</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One record</p>
+            <h3>Lockfile</h3>
+            <p>Every file the tool wrote, hashed. That is how the next run can take a bundle back out without touching your edits.</p>
+<pre>{
+  "version": 1,
+  "projectName": "acme-web",
+  "answers": { "pm": "pnpm" },
+  "bundles": {
+    "nuxt": { "sha": "8f3c1d" }</pre>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="stack">
+      <div class="group">
+        <p class="micro">Home · what you get</p>
+        <h2 class="card-h">Glass card</h2>
+        <p class="note">Three cards, one per artefact the tool writes. Each ends in six real lines from that file, so nobody has to take my word for what lands in the repo.</p>
+      </div>
+      <div class="plate">
+        <div class="layer hive-texture"></div>
+        <div class="grid">
+          <article class="glass-card glow">
+            <p class="micro">One file</p>
+            <h3>CLAUDE.md</h3>
+            <p>Composed from the answers you gave and the bundles you picked. Your own paragraphs stay where you put them.</p>
+<pre><b># acme-web</b>
+<b>## Commands</b>
+&lt;!-- skills:base:pm=pnpm --&gt;
+- Always `pnpm` — never npm
+  or yarn.
+&lt;!-- /skills:base:pm=pnpm --&gt;</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One directory</p>
+            <h3>.claude/</h3>
+            <p>Rules scoped to paths, skills with their scripts, hooks, and the settings that wire them up.</p>
+<pre><b>.claude/</b>
+  rules/web-nuxt.md
+  skills/nuxt-docs/SKILL.md
+  hooks/protect-env.sh
+  settings.json
+  skills.lock.json</pre>
+          </article>
+          <article class="glass-card glow">
+            <p class="micro">One record</p>
+            <h3>Lockfile</h3>
+            <p>Every file the tool wrote, hashed. That is how the next run can take a bundle back out without touching your edits.</p>
+<pre>{
+  "version": 1,
+  "projectName": "acme-web",
+  "answers": { "pm": "pnpm" },
+  "bundles": {
+    "nuxt": { "sha": "8f3c1d" }</pre>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

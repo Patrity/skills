@@ -1,0 +1,27 @@
+:root {
+  --font-teko: "Teko", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-green-50: #f0fae8; --color-green-100: #dff4cf; --color-green-200: #c4e9a7; --color-green-300: #96d76c;
+  --color-green-400: #46c211; --color-green-500: #39a10e; --color-green-600: #2e850b; --color-green-700: #256a09;
+  --color-green-800: #1d520a; --color-green-900: #174209; --color-green-950: #0c2604;
+  --ui-bg: #fafaf9; --ui-bg-elevated: #ffffff; --ui-border: rgba(0,0,0,.08); --ui-text: #171717; --ui-text-muted: #525252; --ui-text-dimmed: #737373;
+}
+.dark {
+  --ui-bg: #0c0c0b; --ui-bg-elevated: #161615; --ui-border: rgba(255,255,255,.08); --ui-text: #fafafa; --ui-text-muted: #a3a3a3; --ui-text-dimmed: #737373;
+}
+body { margin: 0; font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ui-text); background: var(--ui-bg); }
+.teko { font-family: var(--font-teko); font-weight: 600; line-height: .9; letter-spacing: -.01em; }
+.mono { font-family: var(--font-mono); font-size: .875rem; }
+.micro { font-size: .75rem; text-transform: uppercase; letter-spacing: .2em; color: var(--ui-text-dimmed); }
+.accent { color: var(--color-green-400); }
+.glass-card { background: rgba(255,255,255,.03); backdrop-filter: blur(12px); border: 1px solid var(--ui-border); border-radius: .75rem; }
+.light .glass-card { background: rgba(0,0,0,.02); }
+.glow:hover { box-shadow: 0 0 30px rgba(70,194,17,.12); }
+.btn { display: inline-flex; align-items: center; gap: .5rem; padding: .625rem 1rem; border-radius: .5rem; font-weight: 600; text-decoration: none; }
+.btn-solid { background: var(--color-green-500); color: #fff; } .btn-solid:hover { background: var(--color-green-600); }
+.btn-outline { border: 1px solid var(--ui-border); color: var(--ui-text); } .btn-outline-green { border: 1px solid var(--color-green-500); color: var(--color-green-400); }
+.btn-ghost { color: var(--ui-text-muted); }
+.chip { font-family: var(--font-mono); font-size: .6875rem; padding: .125rem .5rem; border-radius: 9999px; border: 1px solid var(--ui-border); color: var(--ui-text-muted); }
+.chip-active { border-color: var(--color-green-500); color: var(--color-green-400); background: color-mix(in srgb, var(--color-green-500) 12%, transparent); }
+.install { font-family: var(--font-mono); font-size: .875rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .625rem .875rem; border: 1px solid var(--ui-border); border-radius: .5rem; background: var(--ui-bg-elevated); }
+.hive-texture { background-image: url("hive-texture.svg"); background-size: 120px 208px; opacity: .04; }

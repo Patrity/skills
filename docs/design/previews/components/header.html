@@ -1,0 +1,116 @@
+<!-- @dsCard group="Components" -->
+<meta charset="utf-8">
+<title>Header</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/card.css">
+<style>
+  .bar { display: flex; align-items: center; gap: 1.5rem; height: 64px; padding: 0 24px; position: relative; z-index: 2;
+         border-bottom: 1px solid var(--ui-border); background: color-mix(in srgb, var(--ui-bg) 72%, transparent); backdrop-filter: blur(12px); }
+  .brand { display: flex; align-items: center; gap: .625rem; text-decoration: none; color: var(--ui-text); }
+  .brand .mark { width: 30px; height: 30px; }
+  .brand .word { font-family: var(--font-teko); font-weight: 600; font-size: 32px; line-height: .9; letter-spacing: -.01em; }
+  .nav { display: flex; align-items: center; gap: 1.75rem; margin: 0 auto; }
+  .nav a { display: inline-flex; align-items: center; gap: .375rem; text-decoration: none; color: var(--ui-text-muted); font-size: .9375rem; }
+  .nav a.on { color: var(--color-green-400); font-weight: 600; }
+  .nav .ico { width: 13px; height: 13px; }
+  .tools { display: flex; align-items: center; gap: .125rem; }
+  .tools a, .tools button { display: inline-flex; padding: .5rem; border: 0; border-radius: .5rem; background: none; color: var(--ui-text-muted); cursor: pointer; }
+  .stage { position: relative; height: 148px; }
+  .stage .layer { position: absolute; inset: 0; opacity: .4; }
+  .stage .hl { position: relative; padding: 18px 24px; margin: 0; font-family: var(--font-teko); font-weight: 600; font-size: 44px; line-height: .9; letter-spacing: -.01em; }
+  .bar.sm { gap: .5rem; height: 56px; padding: 0 16px; }
+  .bar.sm .nav, .bar.sm .by { display: none; }
+  .bar.sm .tools { margin-left: auto; }
+  .drawer { padding: 12px 16px 16px; background: var(--ui-bg-elevated); border-bottom: 1px solid var(--ui-border); }
+  .drawer a { display: flex; align-items: center; gap: .5rem; padding: .5rem 0; text-decoration: none; color: var(--ui-text); }
+  .drawer a.on { color: var(--color-green-400); }
+  .drawer .socials { display: flex; gap: .25rem; margin-top: .5rem; padding-top: .75rem; border-top: 1px solid var(--ui-border); }
+  .drawer .socials a { padding: .5rem; color: var(--ui-text-muted); }
+</style>
+<i data-include="icons.svg"></i>
+
+<div class="frame light">
+  <p class="micro" style="margin:0 0 12px">Header · 1440 · light</p>
+  <div class="viewport w1440">
+    <header class="bar">
+      <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span><span class="micro by">by TechHive Labs</span></a>
+      <nav class="nav">
+        <a class="on" href="/skills">Skills</a><a href="/build">Build</a><a href="/docs">Docs</a>
+        <a href="https://www.techhivelabs.net/blog">Blog <svg class="ico"><use href="#i-external"/></svg></a>
+      </nav>
+      <div class="tools">
+        <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+        <a href="https://github.com/Patrity" rel="me" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+        <a href="https://x.com/Patrity" rel="me" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+      </div>
+    </header>
+    <div class="stage"><div class="layer hive-texture"></div><p class="hl">Nine bundles. <span class="accent">Take what you want.</span></p></div>
+  </div>
+</div>
+
+<div class="frame dark">
+  <p class="micro" style="margin:0 0 12px">Header · 1440 · dark</p>
+  <div class="viewport w1440">
+    <header class="bar">
+      <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span><span class="micro by">by TechHive Labs</span></a>
+      <nav class="nav">
+        <a class="on" href="/skills">Skills</a><a href="/build">Build</a><a href="/docs">Docs</a>
+        <a href="https://www.techhivelabs.net/blog">Blog <svg class="ico"><use href="#i-external"/></svg></a>
+      </nav>
+      <div class="tools">
+        <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+        <a href="https://github.com/Patrity" rel="me" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+        <a href="https://x.com/Patrity" rel="me" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+      </div>
+    </header>
+    <div class="stage"><div class="layer hive-texture"></div><p class="hl">Nine bundles. <span class="accent">Take what you want.</span></p></div>
+  </div>
+</div>
+
+<div class="modes">
+  <section class="light">
+    <p class="micro" style="margin:0 0 12px">375 · light · drawer open</p>
+    <div class="viewport w375">
+      <header class="bar sm">
+        <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+        <div class="tools">
+          <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+          <button type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+        </div>
+      </header>
+      <div class="drawer">
+        <a class="on" href="/skills">Skills</a><a href="/build">Build</a><a href="/docs">Docs</a>
+        <a href="https://www.techhivelabs.net/blog">Blog <svg class="ico"><use href="#i-external"/></svg></a>
+        <div class="socials">
+          <a href="https://github.com/Patrity" rel="me" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+          <a href="https://x.com/Patrity" rel="me" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+          <a href="https://bsky.app/profile/patrity.com" rel="me" aria-label="Bluesky"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg></a>
+          <a href="https://www.linkedin.com/in/tonycos/" rel="me" aria-label="LinkedIn"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="dark">
+    <p class="micro" style="margin:0 0 12px">375 · dark · drawer open</p>
+    <div class="viewport w375">
+      <header class="bar sm">
+        <a class="brand" href="/"><span class="mark"><i data-include="mark.svg"></i></span><span class="word">Skills</span></a>
+        <div class="tools">
+          <button type="button" aria-label="Colour mode"><svg class="ico"><use href="#i-sun"/></svg></button>
+          <button type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+        </div>
+      </header>
+      <div class="drawer">
+        <a class="on" href="/skills">Skills</a><a href="/build">Build</a><a href="/docs">Docs</a>
+        <a href="https://www.techhivelabs.net/blog">Blog <svg class="ico"><use href="#i-external"/></svg></a>
+        <div class="socials">
+          <a href="https://github.com/Patrity" rel="me" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+          <a href="https://x.com/Patrity" rel="me" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+          <a href="https://bsky.app/profile/patrity.com" rel="me" aria-label="Bluesky"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg></a>
+          <a href="https://www.linkedin.com/in/tonycos/" rel="me" aria-label="LinkedIn"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
