@@ -13,7 +13,17 @@ for path in / /skills /skill/nuxt; do
     const fs = require("fs")
     const r = JSON.parse(fs.readFileSync(reportPath, "utf8"))
     const o = JSON.parse(fs.readFileSync(outPath, "utf8"))
-    o[path] = { performance: r.categories.performance.score, accessibility: r.categories.accessibility.score }
+    const perf = r.categories.performance.score
+    const a11y = r.categories.accessibility.score
+    if (!Number.isFinite(perf)) {
+      console.error(`lighthouse: ${path} returned a null performance score`)
+      process.exit(1)
+    }
+    if (!Number.isFinite(a11y)) {
+      console.error(`lighthouse: ${path} returned a null accessibility score`)
+      process.exit(1)
+    }
+    o[path] = { performance: perf, accessibility: a11y }
     fs.writeFileSync(outPath, JSON.stringify(o, null, 2) + "\n")
   ' "$out" "$path" "$tmp/report.json"
 done
