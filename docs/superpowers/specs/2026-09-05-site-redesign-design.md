@@ -16,7 +16,13 @@ Findings, in order of impact:
 6. **Mobile is fine but flat**: the sidebar becomes a hamburger, the hero stacks, nothing is broken; nothing is memorable either.
 7. **Sharing**: no OG image, generic titles.
 
-Baseline metrics (to be measured in the plan's first task and recorded here): Lighthouse performance and accessibility for `/`, `/skills`, `/skill/nuxt`; the redesign must not regress either.
+Baseline metrics (2026-09-05, Lighthouse mobile):
+
+| page | performance | accessibility |
+| --- | --- | --- |
+| / | 82 | 100 |
+| /skills | 78 | 96 |
+| /skill/nuxt | 74 | 96 |
 
 ## 2. Decisions
 

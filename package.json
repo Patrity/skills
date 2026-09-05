@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --exclude 'test/e2e/**'",
     "validate:skills": "tsx scripts/validate-skills.ts",
+    "lighthouse": "bash scripts/lighthouse.sh",
     "cli:build": "pnpm --filter @patrity/skills build",
     "cli:test": "pnpm --filter @patrity/skills test"
   },

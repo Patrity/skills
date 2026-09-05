@@ -1,0 +1,14 @@
+{
+  "/": {
+    "performance": 0.82,
+    "accessibility": 1
+  },
+  "/skills": {
+    "performance": 0.78,
+    "accessibility": 0.96
+  },
+  "/skill/nuxt": {
+    "performance": 0.74,
+    "accessibility": 0.96
+  }
+}
