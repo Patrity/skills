@@ -54,8 +54,8 @@ onScopeDispose(() => {
 })
 
 /**
- * The page's own `<h1>` is the navbar title, so the previewed document's `# <project>` is demoted
- * to an `<h2>`: a preview pane must not put a second top-level heading on the page.
+ * The page owns its heading ("Build your setup"), so the previewed document's `# <project>` is
+ * demoted to an `h2`: a preview pane must not put a second top-level heading on the page.
  */
 const previewBody = computed<MarkdownBody | null>(() => {
   const root = body.value

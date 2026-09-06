@@ -58,9 +58,8 @@ watch(fileError, (err) => {
 
 const view = ref<'rendered' | 'source'>('rendered')
 const treeOpen = ref(false)
-const contentEl = ref<HTMLElement>()
 
-// Code (CodeMirror) gets the whole panel; prose keeps a reading measure. Markdown with no
+// Code (CodeMirror) gets the full width; prose keeps a reading measure. Markdown with no
 // server-rendered body (too large to render) falls through to the code view, so it gets the
 // full width too.
 const showCode = computed(() => !!file.value && file.value.kind === 'text'
@@ -68,7 +67,8 @@ const showCode = computed(() => !!file.value && file.value.kind === 'text'
 
 watch(currentPath, () => {
   view.value = 'rendered'
-  contentEl.value?.scrollTo({ top: 0 })
+  // The document scrolls now that the dashboard panel's own scroll container is gone.
+  if (import.meta.client) window.scrollTo({ top: 0 })
 })
 
 function onSelect(path: string) {
@@ -94,161 +94,136 @@ onMounted(() => trackSkillView(slug.value))
 </script>
 
 <template>
-  <div class="flex flex-1 min-w-0 h-full">
-    <UDashboardPanel
-      id="skill-tree"
-      resizable
-      :default-size="22"
-      :min-size="15"
-      :max-size="35"
-      class="hidden lg:flex"
-      :ui="{ body: 'p-0 sm:p-0 gap-0' }"
-    >
-      <template #header>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+    <div class="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-6">
+      <!-- Side column, plain grid now that the dashboard panels are gone. -->
+      <aside class="hidden lg:block min-w-0">
+        <div class="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-default">
+          <SkillTree
+            :tree="skill.tree"
+            :selected-path="currentPath"
+            :slug="slug"
+            @select="onSelect"
+          />
+        </div>
+      </aside>
+
+      <!--
+        `overflow-x-auto` replaces the scroll boundary the dashboard panel body used to
+        provide: the meta card's min-content is wider than a 375px viewport, and without a
+        container to scroll it the whole document scrolls sideways.
+      -->
+      <div class="min-w-0 flex flex-col gap-4 overflow-x-auto">
         <!--
-          #left (not #title/#leading): DashboardNavbar.vue nests <h1 data-slot="title"> inside
-          #left's own default content, unconditionally — overriding #title alone still renders
-          an empty h1. Overriding #left replaces that whole default, so no h1 renders here at all.
+          Page chrome only: the bundle README supplies the page's single h1, so nothing
+          here may render one (Task 8 restyles this row).
         -->
-        <UDashboardNavbar :toggle="false">
-          <template #left>
-            <UDashboardSidebarCollapse />
-            <span class="text-sm font-semibold text-highlighted truncate">{{ skill.name }}</span>
-          </template>
-        </UDashboardNavbar>
-      </template>
-      <template #body>
-        <SkillTree
-          :tree="skill.tree"
-          :selected-path="currentPath"
-          :slug="slug"
-          @select="onSelect"
-        />
-      </template>
-    </UDashboardPanel>
+        <header class="flex items-center gap-2 min-w-0">
+          <UButton
+            icon="i-lucide-folder-tree"
+            color="neutral"
+            variant="ghost"
+            class="lg:hidden"
+            aria-label="Browse files"
+            @click="treeOpen = true"
+          />
+          <!-- A deep file path overflows on phones; collapse the middle there. -->
+          <UBreadcrumb
+            :items="breadcrumbs"
+            class="hidden sm:flex min-w-0"
+          />
+          <UBreadcrumb
+            :items="compactBreadcrumbs(breadcrumbs)"
+            class="sm:hidden min-w-0"
+          />
+          <!--
+            Nuxt's directory-prefix auto-import only dedups the "Skill" prefix when the
+            filename itself already starts with it (SkillCard, SkillBadges, SkillTree,
+            SkillMetaCard do). FileActions.vue does not, so it registers as SkillFileActions.
+          -->
+          <SkillFileActions
+            v-model:view="view"
+            :slug="slug"
+            :path="currentPath"
+            :is-markdown="isMarkdown"
+            :content="file?.content ?? null"
+            class="ms-auto"
+          />
+        </header>
 
-    <UDashboardPanel
-      id="skill-content"
-      :ui="{ body: 'p-0 sm:p-0 gap-0' }"
-    >
-      <template #header>
-        <!-- #left override: see the tree panel's header above for why this avoids the h1. -->
-        <UDashboardNavbar>
-          <template #left>
-            <UButton
-              icon="i-lucide-folder-tree"
+        <div :class="[showCode ? 'w-full' : 'mx-auto w-full max-w-4xl', 'flex flex-col gap-6 min-w-0']">
+          <SkillMetaCard
+            v-if="isReadme"
+            :skill="skill"
+          />
+
+          <UAlert
+            v-if="skill.errors.length"
+            color="warning"
+            variant="subtle"
+            icon="i-lucide-triangle-alert"
+            title="This bundle has validation issues"
+            :description="skill.errors.join(' · ')"
+          />
+
+          <UAlert
+            v-if="fileError && fileError.statusCode !== 404"
+            color="error"
+            variant="subtle"
+            icon="i-lucide-file-x"
+            title="Could not load this file"
+            :description="fileError.statusMessage ?? 'Something went wrong'"
+          />
+
+          <template v-else-if="file">
+            <UAlert
+              v-if="file.kind !== 'text'"
               color="neutral"
-              variant="ghost"
-              class="lg:hidden"
-              aria-label="Browse files"
-              @click="treeOpen = true"
-            />
-            <!-- A deep file path overflows the navbar on phones; collapse the middle there. -->
-            <UBreadcrumb
-              :items="breadcrumbs"
-              class="hidden sm:flex min-w-0"
-            />
-            <UBreadcrumb
-              :items="compactBreadcrumbs(breadcrumbs)"
-              class="sm:hidden min-w-0"
-            />
-          </template>
-          <template #right>
-            <!--
-              Nuxt's directory-prefix auto-import only dedups the "Skill" prefix when the
-              filename itself already starts with it (SkillCard, SkillBadges, SkillTree,
-              SkillMetaCard do). FileActions.vue does not, so it registers as SkillFileActions.
-            -->
-            <SkillFileActions
-              v-model:view="view"
-              :slug="slug"
-              :path="currentPath"
-              :is-markdown="isMarkdown"
-              :content="file?.content ?? null"
-            />
-          </template>
-        </UDashboardNavbar>
-      </template>
-
-      <template #body>
-        <div
-          ref="contentEl"
-          class="h-full overflow-y-auto"
-        >
-          <div :class="[showCode ? 'w-full' : 'mx-auto max-w-4xl', 'p-4 sm:p-6 flex flex-col gap-6']">
-            <SkillMetaCard
-              v-if="isReadme"
-              :skill="skill"
-            />
-
-            <UAlert
-              v-if="skill.errors.length"
-              color="warning"
               variant="subtle"
-              icon="i-lucide-triangle-alert"
-              title="This bundle has validation issues"
-              :description="skill.errors.join(' · ')"
+              icon="i-lucide-file"
+              :title="file.kind === 'binary' ? 'Binary file' : 'File too large to preview'"
+              :description="`${formatBytes(file.size)} · view it on GitHub or download the bundle.`"
             />
 
-            <UAlert
-              v-if="fileError && fileError.statusCode !== 404"
-              color="error"
-              variant="subtle"
-              icon="i-lucide-file-x"
-              title="Could not load this file"
-              :description="fileError.statusMessage ?? 'Something went wrong'"
-            />
+            <template v-else>
+              <UCollapsible v-if="isMarkdown && !isReadme && file.frontmatterRaw && view === 'rendered'">
+                <UButton
+                  label="Frontmatter"
+                  icon="i-lucide-braces"
+                  trailing-icon="i-lucide-chevron-down"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                />
+                <template #content>
+                  <pre class="mt-2 rounded-md bg-elevated border border-default p-3 text-xs overflow-x-auto">{{ file.frontmatterRaw }}</pre>
+                </template>
+              </UCollapsible>
 
-            <template v-else-if="file">
-              <UAlert
-                v-if="file.kind !== 'text'"
-                color="neutral"
-                variant="subtle"
-                icon="i-lucide-file"
-                :title="file.kind === 'binary' ? 'Binary file' : 'File too large to preview'"
-                :description="`${formatBytes(file.size)} · view it on GitHub or download the bundle.`"
+              <MarkdownView
+                v-if="isMarkdown && view === 'rendered' && file.body"
+                :body="file.body"
+                :data="file.data"
               />
-
-              <template v-else>
-                <UCollapsible v-if="isMarkdown && !isReadme && file.frontmatterRaw && view === 'rendered'">
-                  <UButton
-                    label="Frontmatter"
-                    icon="i-lucide-braces"
-                    trailing-icon="i-lucide-chevron-down"
-                    color="neutral"
-                    variant="ghost"
-                    size="sm"
-                  />
-                  <template #content>
-                    <pre class="mt-2 rounded-md bg-elevated border border-default p-3 text-xs overflow-x-auto">{{ file.frontmatterRaw }}</pre>
-                  </template>
-                </UCollapsible>
-
-                <MarkdownView
-                  v-if="isMarkdown && view === 'rendered' && file.body"
-                  :body="file.body"
-                  :data="file.data"
-                />
-                <CodeView
-                  v-else
-                  :code="file.content ?? ''"
-                  :language="file.language"
-                />
-              </template>
+              <CodeView
+                v-else
+                :code="file.content ?? ''"
+                :language="file.language"
+              />
             </template>
+          </template>
 
-            <div
-              v-else-if="fileStatus === 'pending'"
-              class="space-y-3"
-            >
-              <USkeleton class="h-6 w-1/3" />
-              <USkeleton class="h-4 w-full" />
-              <USkeleton class="h-4 w-5/6" />
-            </div>
+          <div
+            v-else-if="fileStatus === 'pending'"
+            class="space-y-3"
+          >
+            <USkeleton class="h-6 w-1/3" />
+            <USkeleton class="h-4 w-full" />
+            <USkeleton class="h-4 w-5/6" />
           </div>
         </div>
-      </template>
-    </UDashboardPanel>
+      </div>
+    </div>
 
     <USlideover
       v-model:open="treeOpen"

@@ -48,71 +48,43 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="flex flex-1 min-w-0 h-full">
-    <UDashboardPanel
-      id="docs-nav"
-      resizable
-      :default-size="20"
-      :min-size="14"
-      :max-size="30"
-      class="hidden lg:flex"
-    >
-      <template #header>
-        <!--
-          #left (not #title/#leading): DashboardNavbar.vue nests <h1 data-slot="title"> inside
-          #left's own default content, unconditionally — overriding #title alone still renders
-          an empty h1. Overriding #left replaces that whole default, so no h1 renders here at all.
-        -->
-        <UDashboardNavbar :toggle="false">
-          <template #left>
-            <UDashboardSidebarCollapse />
-            <span class="text-sm font-semibold text-highlighted truncate">Docs</span>
-          </template>
-        </UDashboardNavbar>
-      </template>
-      <template #body>
-        <UNavigationMenu
-          :items="items"
-          orientation="vertical"
-        />
-      </template>
-    </UDashboardPanel>
-
-    <UDashboardPanel
-      id="docs-content"
-      :ui="{ body: 'p-0 sm:p-0 gap-0' }"
-    >
-      <template #header>
-        <!--
-          #left override: see the nav panel's header above. The doc's own `# Title` is the
-          page h1, so the navbar must not render a second one.
-        -->
-        <UDashboardNavbar>
-          <template #left>
-            <UButton
-              icon="i-lucide-list"
-              color="neutral"
-              variant="ghost"
-              class="lg:hidden"
-              aria-label="Docs navigation"
-              @click="navOpen = true"
-            />
-            <span class="text-sm font-semibold text-highlighted truncate">{{ doc?.entry.title }}</span>
-          </template>
-        </UDashboardNavbar>
-      </template>
-      <template #body>
-        <div class="h-full overflow-y-auto">
-          <div class="mx-auto max-w-3xl p-4 sm:p-6">
-            <MarkdownView
-              v-if="doc"
-              :body="doc.body"
-              :data="doc.data"
-            />
-          </div>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+    <div class="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-8">
+      <!-- Side column, plain grid now that the dashboard panels are gone. -->
+      <aside class="hidden lg:block min-w-0">
+        <div class="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto">
+          <UNavigationMenu
+            :items="items"
+            orientation="vertical"
+          />
         </div>
-      </template>
-    </UDashboardPanel>
+      </aside>
+
+      <div class="min-w-0">
+        <!--
+          Page chrome only: the doc's own `# Title` is the page h1, so this row must not
+          render a second one (Task 9 restyles it).
+        -->
+        <header class="lg:hidden flex items-center gap-2 mb-4 min-w-0">
+          <UButton
+            icon="i-lucide-list"
+            color="neutral"
+            variant="ghost"
+            aria-label="Docs navigation"
+            @click="navOpen = true"
+          />
+          <span class="text-sm font-semibold text-highlighted truncate">{{ doc?.entry.title }}</span>
+        </header>
+
+        <div class="mx-auto max-w-3xl">
+          <MarkdownView
+            v-if="doc"
+            :body="doc.body"
+            :data="doc.data"
+          />
+        </div>
+      </div>
+    </div>
 
     <USlideover
       v-model:open="navOpen"

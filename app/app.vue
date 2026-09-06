@@ -14,7 +14,7 @@ const canonical = computed(() => {
 })
 
 useHead({
-  titleTemplate: title => (title ? `${title} · Skills` : 'Skills — reusable Claude Code setups'),
+  titleTemplate: title => (title ? `${title} · Skills` : 'Skills — the Claude Code setup I actually run'),
   htmlAttrs: { lang: 'en' },
   link: [
     { rel: 'canonical', href: canonical },

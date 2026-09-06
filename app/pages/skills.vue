@@ -54,87 +54,77 @@ useSeoMeta({
 </script>
 
 <template>
-  <UDashboardPanel
-    id="skills-index"
-    :ui="{ body: 'gap-4' }"
-  >
-    <template #header>
-      <UDashboardNavbar title="Skills">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-        <template #trailing>
-          <UBadge
-            :label="String(filtered.length)"
-            color="neutral"
-            variant="subtle"
-          />
-        </template>
-        <template #right>
-          <UInput
-            v-model="q"
-            icon="i-lucide-search"
-            placeholder="Search skills…"
-            size="sm"
-            class="w-48 sm:w-64"
-          />
-        </template>
-      </UDashboardNavbar>
-    </template>
-
-    <template #body>
-      <div
-        v-if="tags.length"
-        class="flex flex-wrap gap-1.5"
-      >
-        <UButton
-          v-for="{ tag, count } in tags"
-          :key="tag"
-          :label="`${tag} · ${count}`"
-          size="xs"
-          :color="activeTag === tag ? 'primary' : 'neutral'"
-          :variant="activeTag === tag ? 'solid' : 'subtle'"
-          @click="toggleTag(tag)"
-        />
-        <UButton
-          v-if="activeTag || q"
-          label="Clear"
-          icon="i-lucide-x"
-          size="xs"
-          color="neutral"
-          variant="ghost"
-          @click="activeTag = null; q = ''"
-        />
-      </div>
-
-      <div
-        v-if="status === 'pending'"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-        <USkeleton
-          v-for="i in 3"
-          :key="i"
-          class="h-48 w-full"
-        />
-      </div>
-
-      <UPageGrid v-else-if="filtered.length">
-        <SkillCard
-          v-for="skill in filtered"
-          :key="skill.slug"
-          :skill="skill"
-          from="index"
-        />
-      </UPageGrid>
-
-      <UAlert
-        v-else
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-col gap-4">
+    <!-- Page-owned header: the only h1 on the page (Task 8 restyles it). -->
+    <header class="flex flex-wrap items-center gap-3">
+      <h1 class="text-xl font-semibold text-highlighted">
+        Skills
+      </h1>
+      <UBadge
+        :label="String(filtered.length)"
         color="neutral"
         variant="subtle"
-        icon="i-lucide-search-x"
-        title="No skills match"
-        :description="q || activeTag ? 'Try a different search or clear the tag filter.' : 'No bundles have been published yet.'"
       />
-    </template>
-  </UDashboardPanel>
+      <UInput
+        v-model="q"
+        icon="i-lucide-search"
+        placeholder="Search skills…"
+        size="sm"
+        class="ms-auto w-48 sm:w-64"
+      />
+    </header>
+
+    <div
+      v-if="tags.length"
+      class="flex flex-wrap gap-1.5"
+    >
+      <UButton
+        v-for="{ tag, count } in tags"
+        :key="tag"
+        :label="`${tag} · ${count}`"
+        size="xs"
+        :color="activeTag === tag ? 'primary' : 'neutral'"
+        :variant="activeTag === tag ? 'solid' : 'subtle'"
+        @click="toggleTag(tag)"
+      />
+      <UButton
+        v-if="activeTag || q"
+        label="Clear"
+        icon="i-lucide-x"
+        size="xs"
+        color="neutral"
+        variant="ghost"
+        @click="activeTag = null; q = ''"
+      />
+    </div>
+
+    <div
+      v-if="status === 'pending'"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+    >
+      <USkeleton
+        v-for="i in 3"
+        :key="i"
+        class="h-48 w-full"
+      />
+    </div>
+
+    <UPageGrid v-else-if="filtered.length">
+      <SkillCard
+        v-for="skill in filtered"
+        :key="skill.slug"
+        :skill="skill"
+        from="index"
+      />
+    </UPageGrid>
+
+    <UAlert
+      v-else
+      color="neutral"
+      variant="subtle"
+      icon="i-lucide-search-x"
+      title="No skills match"
+      :description="q || activeTag ? 'Try a different search or clear the tag filter.' : 'No bundles have been published yet.'"
+    />
+  </div>
 </template>
