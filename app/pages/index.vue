@@ -81,7 +81,7 @@ useSeoMeta({
             icon="i-lucide-hammer"
             size="xl"
           />
-          <SkillInstallCommand
+          <InstallBox
             command="pnpx @patrity/skills init"
             slug="init"
             class="w-full sm:w-auto sm:min-w-72"

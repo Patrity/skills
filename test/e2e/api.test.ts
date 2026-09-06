@@ -9,6 +9,7 @@ import { planFresh } from '../../shared/setup/plan'
 import { defaultAnswers } from '../../shared/setup/wizard'
 import { serializeLockfile } from '../../shared/setup/lock'
 import { setupZipEntries } from '../../server/lib/setup/setup-zip'
+import { MARK_ACCENT, MARK_HEXAGON_POINTS } from '../../shared/brand/mark'
 
 const skillsDir = fileURLToPath(new URL('../fixtures/skills', import.meta.url))
 
@@ -174,6 +175,56 @@ describe('meta routes', () => {
     expect(xml).toContain('<loc>http://localhost:3000/skill/demo</loc>')
     expect(xml).toContain('<loc>http://localhost:3000/skills</loc>')
     expect(xml).toContain('<loc>http://localhost:3000/build</loc>')
+  })
+})
+
+describe('brand assets', () => {
+  it('serves the mark as the SVG favicon', async () => {
+    const res = await fetch('/favicon.svg')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('image/svg+xml')
+    const svg = await res.text()
+    expect(svg).toContain(`points="${MARK_HEXAGON_POINTS}"`)
+    expect(svg).toContain(`stroke="${MARK_ACCENT}"`)
+    // A standalone SVG cannot inherit currentColor, so it flips its own outline.
+    expect(svg).toContain('prefers-color-scheme: light')
+  })
+
+  it('serves the ICO fallback', async () => {
+    const res = await fetch('/favicon.ico')
+    expect(res.status).toBe(200)
+    const bytes = new Uint8Array(await res.arrayBuffer())
+    // ICONDIR: reserved 0, type 1 (icon), then the image count.
+    expect([bytes[0], bytes[1], bytes[2], bytes[3]]).toEqual([0, 0, 1, 0])
+    expect(bytes.byteLength).toBeGreaterThan(0)
+  })
+})
+
+describe('OG images', () => {
+  /** The og:image the page advertises — signed, so it cannot be guessed. */
+  function ogImagePath(html: string): string {
+    const url = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/)?.[1]
+      ?? html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/)?.[1]
+    expect(url, 'no og:image meta on the page').toBeTruthy()
+    const parsed = new URL(url!.replace(/&amp;/g, '&'))
+    return `${parsed.pathname}${parsed.search}`
+  }
+
+  it('renders the Skills card for the home page', async () => {
+    const html = await $fetch<string>('/')
+    const path = ogImagePath(html)
+    expect(path).toContain('.png')
+    const res = await fetch(path)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('image/png')
+    expect((await res.arrayBuffer()).byteLength).toBeGreaterThan(1000)
+  })
+
+  it('renders one per bundle page', async () => {
+    const html = await $fetch<string>('/skill/demo')
+    const res = await fetch(ogImagePath(html))
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('image/png')
   })
 })
 

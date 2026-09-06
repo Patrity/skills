@@ -2,7 +2,9 @@
   "name": "skills",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "pnpm@10.6.5",
   "scripts": {
     "dev": "nuxt dev",
@@ -32,14 +34,18 @@
     "@codemirror/view": "^6.43.0",
     "@iconify-json/lucide": "^1.2.111",
     "@iconify-json/simple-icons": "^1.2.84",
+    "@nuxt/fonts": "^0.14.0",
     "@nuxt/ui": "^4.11.0",
     "@nuxtjs/mdc": "^0.23.1",
+    "@nuxtjs/seo": "^5.3.14",
+    "@resvg/resvg-js": "^2.6.2",
     "@vercel/functions": "^3.9.5",
     "codemirror": "^6.0.2",
     "fflate": "^0.8.3",
     "gray-matter": "^4.0.3",
     "nuxt": "^4.5.2",
     "nuxt-umami": "^3.2.1",
+    "satori": "^0.33.4",
     "tailwindcss": "^4.3.0",
     "yaml": "^2.9.0",
     "zod": "^4.5.4"

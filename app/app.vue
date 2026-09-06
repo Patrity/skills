@@ -18,15 +18,23 @@ useHead({
   htmlAttrs: { lang: 'en' },
   link: [
     { rel: 'canonical', href: canonical },
-    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }
+    // Modern browsers take the SVG (it flips with the OS colour scheme); the ICO is the
+    // fallback for the ones that don't.
+    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+    { rel: 'icon', type: 'image/x-icon', sizes: '16x16 32x32 48x48', href: '/favicon.ico' }
   ]
 })
 
 useSeoMeta({
-  twitterCard: 'summary',
+  twitterCard: 'summary_large_image',
   ogSiteName: 'Skills',
   ogType: 'website'
 })
+
+// Site-wide default card. Pages override it with their own title (Task 11).
+// `defineOgImage(component, props)` is v6's name for what the plan calls
+// `defineOgImageComponent` — same arguments; the old name only logs a deprecation.
+defineOgImage('Skills', { title: 'Skills' })
 </script>
 
 <template>

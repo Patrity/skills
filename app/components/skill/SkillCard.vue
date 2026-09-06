@@ -71,9 +71,10 @@ function onCardClick(e: MouseEvent) {
     </template>
 
     <template #footer>
-      <SkillInstallCommand
+      <InstallBox
         :command="`pnpx @patrity/skills add ${skill.slug}`"
         :slug="skill.slug"
+        :label="false"
         class="mb-3"
       />
       <div class="flex flex-wrap items-center justify-between gap-2 w-full min-w-0">

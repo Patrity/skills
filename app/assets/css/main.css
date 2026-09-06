@@ -1,2 +1,138 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/*
+  Design tokens — ported verbatim from the approved design system
+  (docs/design/previews/_shared/tokens.css, Claude Design approval 2026-09-06).
+  `static` emits every variable whether or not a utility uses it, because the
+  hand-written rules below read them through var().
+*/
+@theme static {
+  --font-teko: "Teko", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-green-50: #f0fae8;
+  --color-green-100: #dff4cf;
+  --color-green-200: #c4e9a7;
+  --color-green-300: #96d76c;
+  --color-green-400: #46c211;
+  --color-green-500: #39a10e;
+  --color-green-600: #2e850b;
+  --color-green-700: #256a09;
+  --color-green-800: #1d520a;
+  --color-green-900: #174209;
+  --color-green-950: #0c2604;
+}
+
+/*
+  Nuxt UI declares these inside `@layer theme`, so these unlayered rules win and every
+  `text-default` / `bg-default` / `border-default` utility follows the design instead.
+*/
+:root {
+  --ui-bg: #fafaf9;
+  --ui-bg-elevated: #ffffff;
+  --ui-border: rgba(0, 0, 0, 0.08);
+  --ui-text: #171717;
+  --ui-text-muted: #525252;
+  --ui-text-dimmed: #737373;
+
+  /* Consumed by app/components/CodeView.client.vue (Task 8). */
+  --cm-bg: var(--ui-bg-elevated);
+  --cm-gutter: transparent;
+  --cm-accent: var(--color-green-400);
+}
+
+.dark {
+  --ui-bg: #0c0c0b;
+  --ui-bg-elevated: #161615;
+  --ui-border: rgba(255, 255, 255, 0.08);
+  --ui-text: #fafafa;
+  --ui-text-muted: #a3a3a3;
+  --ui-text-dimmed: #737373;
+}
+
+@layer base {
+  body {
+    background: var(--ui-bg);
+    color: var(--ui-text);
+  }
+}
+
+/*
+  Utilities the mockups use by name. They sit in the `components` layer so a Tailwind
+  utility on the same element still wins (`class="micro text-primary"` stays primary).
+*/
+@layer components {
+  /* Frosted plate. The previews split light/dark with a `.light` section class; here
+     light is the default and `.dark` is the override. */
+  .glass-card {
+    background: rgba(0, 0, 0, 0.02);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--ui-border);
+    border-radius: 0.75rem;
+  }
+
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Eyebrow label. .2em is the approved tracking — deliberately wider than Tailwind's
+     tracking-widest (.1em); do not "fix" it. */
+  .micro {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ui-text-dimmed);
+  }
+
+  .glow:hover {
+    box-shadow: 0 0 30px rgba(70, 194, 17, 0.12);
+  }
+
+  /* The honeycomb tile from _shared/hive-texture.svg: pointy-top hexagons, circumradius
+     60, rows 104 apart with odd rows shifted 60 across. Row B is drawn four times so the
+     120x208 tile closes its own seams. */
+  .hive-texture {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='208' viewBox='0 0 120 208'%3E%3Cg fill='none' stroke='%2339a10e' stroke-width='1'%3E%3Cpath d='M60,2 L112,32 L112,92 L60,122 L8,92 L8,32 Z'/%3E%3Cpath d='M0,106 L52,136 L52,196 L0,226 L-52,196 L-52,136 Z'/%3E%3Cpath d='M120,106 L172,136 L172,196 L120,226 L68,196 L68,136 Z'/%3E%3Cpath d='M0,-102 L52,-72 L52,-12 L0,18 L-52,-12 L-52,-72 Z'/%3E%3Cpath d='M120,-102 L172,-72 L172,-12 L120,18 L68,-12 L68,-72 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 208px;
+    opacity: 0.04;
+  }
+
+  /* Hero pieces, from the hero block of _shared/page.css. Task 7 composes them. */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-green-300), var(--color-green-500), var(--color-green-300));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .veil-x {
+    background: linear-gradient(to right, var(--ui-bg), transparent, var(--ui-bg));
+    opacity: 0.6;
+  }
+
+  .veil-y {
+    background: linear-gradient(to top, var(--ui-bg), transparent, var(--ui-bg));
+    opacity: 0.4;
+  }
+
+  .blob {
+    position: absolute;
+    top: 33%;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    margin: -320px 0 0 -320px;
+    border-radius: 50%;
+    background: var(--color-green-400);
+    filter: blur(160px);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
