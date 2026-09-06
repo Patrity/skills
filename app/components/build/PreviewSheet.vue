@@ -4,9 +4,15 @@
  * expands to 80vh of preview. Only mounted below `lg` (the page swaps it for the sticky
  * column), so the download button is never in the page twice.
  */
-defineProps<{
+const props = defineProps<{
   /** The mono line on the bar, e.g. `CLAUDE.md · 5 bundles`. */
   summary: string
+  /**
+   * How many warnings the plan carries. The callout that spells them out lives inside the
+   * preview, which is only mounted while the sheet is open, so the bar has to say that
+   * something is wrong: some of them mean a file is missing from the zip.
+   */
+  warnings: number
   valid: boolean
   downloading: boolean
 }>()
@@ -22,6 +28,8 @@ const VIEWS = [
 ]
 
 const panelId = useId()
+
+const warningLabel = computed(() => `${props.warnings} warning${props.warnings === 1 ? '' : 's'}`)
 </script>
 
 <template>
@@ -40,7 +48,22 @@ const panelId = useId()
     />
 
     <div class="flex items-center justify-between gap-3 px-3.5 pt-1.5">
-      <span class="truncate font-mono text-xs text-muted">{{ summary }}</span>
+      <div class="flex min-w-0 items-center gap-2">
+        <span class="truncate font-mono text-xs text-muted">{{ summary }}</span>
+        <button
+          v-if="warnings > 0"
+          type="button"
+          class="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-md font-mono text-xs text-(--color-green-700) transition-colors hover:text-(--color-green-600) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-(--color-green-300)"
+          :aria-label="`${warningLabel}, open the preview`"
+          @click="open = true"
+        >
+          <UIcon
+            name="i-lucide-triangle-alert"
+            class="size-3.5"
+          />
+          {{ warningLabel }}
+        </button>
+      </div>
       <SegmentedControl
         v-model="view"
         :items="VIEWS"

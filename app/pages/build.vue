@@ -243,6 +243,7 @@ useSeoMeta({
       v-model:open="sheetOpen"
       v-model:view="view"
       :summary="sheetSummary"
+      :warnings="warnings.length"
       :valid="valid"
       :downloading="downloading"
       @download="download"
