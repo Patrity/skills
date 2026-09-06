@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { BaseAxis, CliManifest } from '~~/shared/types/setup'
 import type { BuildState } from '~~/shared/setup/build-state'
-import { cliCommand, encodeBuildState } from '~~/shared/setup/build-state'
 import { CUSTOM_PRESET } from '~/composables/useBuildState'
+import { FIELD_UI, INPUT_UI } from './field-ui'
 
 const props = defineProps<{
   manifest: CliManifest
@@ -12,7 +12,6 @@ const props = defineProps<{
   /** slug → the ticked bundles that depend on it. */
   lockedBy: Record<string, string[]>
   recommended: string[]
-  valid: boolean
   nameError: string | null
 }>()
 
@@ -23,12 +22,9 @@ const emit = defineEmits<{
   'toggle': [slug: string]
 }>()
 
-const toast = useToast()
-const { trackBuildDownload, trackBuildCopyCli } = useAnalytics()
-
 const presetItems = computed(() => [
   ...props.manifest.profiles.map(p => ({ value: p.name, label: p.name, description: p.description })),
-  { value: CUSTOM_PRESET, label: 'Custom', description: 'Start from the defaults' }
+  { value: CUSTOM_PRESET, label: 'Custom', description: 'Start from the defaults and answer everything yourself.' }
 ])
 
 const presetModel = computed<string>({
@@ -41,126 +37,72 @@ const projectName = computed<string>({
   set: value => emit('update:projectName', value)
 })
 
-const command = computed(() => cliCommand(props.state, props.manifest))
-const analyticsProfile = computed(() => props.state.profile ?? CUSTOM_PRESET)
+/** The preset tiles, glass with a green ring on the chosen one (approved `.tile` / `.tile.on`). */
+const PRESET_UI = {
+  legend: 'mb-3.5 block font-teko text-[30px] font-semibold leading-none tracking-[-0.01em] text-default',
+  fieldset: 'grid w-full grid-cols-1 gap-2 sm:grid-cols-2',
+  // The radio itself is `sr-only` under `indicator="hidden"`, so the tile carries the focus
+  // ring: without this, tabbing through the presets shows nothing.
+  item: 'glass-card w-full cursor-pointer rounded-xl border-default p-3 transition-colors hover:border-primary/45 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary has-data-[state=checked]:border-primary has-data-[state=checked]:ring-3 has-data-[state=checked]:ring-primary/14',
+  wrapper: 'w-full items-start text-start',
+  label: 'font-mono text-xs font-medium text-default',
+  description: 'mt-1 block text-[0.6875rem]/[1.4] text-muted'
+} as const
 
-/** A 400 from `/api/build` carries `{ statusMessage }`; with `responseType: 'blob'` it arrives as a Blob. */
-async function messageFor(e: unknown): Promise<string> {
-  const err = e as { statusMessage?: string, message?: string, data?: unknown }
-  const read = (value: unknown): string | null => {
-    if (!value || typeof value !== 'object') return null
-    const message = (value as { statusMessage?: unknown, message?: unknown }).statusMessage
-      ?? (value as { message?: unknown }).message
-    return typeof message === 'string' ? message : null
-  }
-  if (err.data instanceof Blob) {
-    try {
-      return read(JSON.parse(await err.data.text())) ?? err.message ?? 'Unknown error'
-    } catch {
-      // Not JSON — fall through to the fetch error's own message.
-    }
-  }
-  return read(err.data) ?? err.statusMessage ?? err.message ?? 'Unknown error'
-}
-
-const downloading = ref(false)
-
-async function download() {
-  downloading.value = true
-  try {
-    const blob = await $fetch<Blob>('/api/build', {
-      method: 'POST',
-      body: { projectName: props.state.projectName, answers: props.state.answers, bundles: props.state.bundles },
-      responseType: 'blob'
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${props.state.projectName}-claude-setup.zip`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    // Revoking synchronously cancels the download in Safari; one tick is enough.
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-    trackBuildDownload(analyticsProfile.value, props.state.bundles, props.state.answers)
-  } catch (e) {
-    toast.add({ title: 'Could not build the zip', description: await messageFor(e), icon: 'i-lucide-triangle-alert', color: 'error' })
-  } finally {
-    downloading.value = false
-  }
-}
-
-async function copy(text: string, title: string): Promise<boolean> {
-  // navigator.clipboard is undefined outside a secure context and writeText() rejects when the
-  // permission is denied — neither should surface as an unhandled rejection.
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch {
-    toast.add({ title: 'Could not copy — select the text and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
-    return false
-  }
-  toast.add({ title, icon: 'i-lucide-clipboard-check', color: 'success' })
-  return true
-}
-
-async function copyCli() {
-  if (await copy(command.value, 'CLI command copied')) trackBuildCopyCli(analyticsProfile.value)
-}
-
-async function copyShareLink() {
-  // Built from the state rather than read off `location`, which the debounced hash write may
-  // not have caught up with yet.
-  await copy(`${window.location.origin}${window.location.pathname}#${encodeBuildState(props.state)}`, 'Share link copied')
-}
+const SECTION_HEADING = 'm-0 mb-3.5 font-teko text-[30px] font-semibold leading-none tracking-[-0.01em] text-default'
+const HELP = 'mt-2 font-mono text-[0.6875rem]/[1.5] text-dimmed'
 </script>
 
 <template>
-  <div class="space-y-6 min-w-0">
-    <UFormField
-      label="Preset"
-      description="A starting point. Change anything below and the preset becomes Custom."
-    >
+  <!-- One explicit `minmax(0,1fr)` column: a grid item defaults to min-width:auto, so a long
+       select value would push the field wider than the 480px track it sits in. -->
+  <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
+    <section>
+      <!-- The radio group brings its own fieldset and legend; the legend is the section
+           heading the design asks for, so the tiles stay one named group. -->
       <URadioGroup
         v-model="presetModel"
+        legend="Start from a preset"
         variant="card"
+        indicator="hidden"
         :items="presetItems"
-        :ui="{ fieldset: 'grid grid-cols-1 sm:grid-cols-2 gap-2 w-full' }"
+        :ui="PRESET_UI"
       />
-    </UFormField>
+      <p :class="HELP">
+        a preset answers every question; changing one answer keeps the rest
+      </p>
+    </section>
 
     <UFormField
-      label="Project name"
-      description="Used as the CLAUDE.md title and in scaffolded paths."
+      label="What is this project called?"
+      description="names the CLAUDE.md heading and the project browser-testing skill"
       :error="nameError ?? undefined"
+      :ui="FIELD_UI"
     >
       <UInput
         v-model="projectName"
         placeholder="my-project"
         class="w-full"
+        :ui="INPUT_UI"
       />
     </UFormField>
 
-    <div class="space-y-4">
-      <BuildAxisField
-        v-for="axis in axes"
-        :key="axis.id"
-        :axis="axis"
-        :value="state.answers[axis.id]"
-        @update="(id, value) => emit('answer', id, value)"
-      />
-    </div>
+    <BuildAxisField
+      v-for="axis in axes"
+      :key="axis.id"
+      :axis="axis"
+      :value="state.answers[axis.id]"
+      @update="(id, value) => emit('answer', id, value)"
+    />
 
     <!--
       A fieldset, not a UFormField: UFormField binds its label to the single control it wraps, and
       around a list of checkboxes that made every row announce the whole group's labels.
     -->
-    <fieldset class="space-y-2">
-      <legend class="text-sm font-medium text-default">
+    <fieldset class="min-w-0">
+      <legend :class="SECTION_HEADING">
         Bundles
       </legend>
-      <p class="text-xs text-muted">
-        Everything ticked here lands under .claude/, with its CLAUDE.md section merged in.
-      </p>
       <BuildBundlePicker
         :skills="manifest.skills"
         :selected="state.bundles"
@@ -168,34 +110,9 @@ async function copyShareLink() {
         :recommended="recommended"
         @toggle="slug => emit('toggle', slug)"
       />
+      <p :class="HELP">
+        a padlock means an answer above chose this one; change the answer to free it
+      </p>
     </fieldset>
-
-    <div class="flex flex-wrap items-center gap-2">
-      <UButton
-        label="Download setup"
-        icon="i-lucide-download"
-        :loading="downloading"
-        :disabled="!valid"
-        @click="download"
-      />
-      <UButton
-        label="Copy CLI command"
-        icon="i-lucide-terminal"
-        color="neutral"
-        variant="outline"
-        @click="copyCli"
-      />
-      <UButton
-        label="Copy share link"
-        icon="i-lucide-link"
-        color="neutral"
-        variant="ghost"
-        @click="copyShareLink"
-      />
-    </div>
-
-    <div class="rounded-md border border-default bg-muted px-3 py-2 overflow-x-auto">
-      <code class="text-xs font-mono text-muted whitespace-pre">{{ command }}</code>
-    </div>
   </div>
 </template>

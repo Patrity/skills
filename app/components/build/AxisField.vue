@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BaseAxis } from '~~/shared/types/setup'
+import { FIELD_UI, INPUT_UI } from './field-ui'
 
 const props = defineProps<{
   axis: BaseAxis
@@ -28,18 +29,21 @@ const model = computed<string>({
     :label="axis.question"
     :description="axis.description"
     :name="axis.id"
+    :ui="FIELD_UI"
   >
     <USelect
       v-if="axis.options?.length"
       v-model="model"
       :items="items"
       class="w-full"
+      :ui="INPUT_UI"
     />
     <UInput
       v-else
       v-model="model"
       :placeholder="axis.input?.placeholder"
       class="w-full"
+      :ui="INPUT_UI"
     />
   </UFormField>
 </template>

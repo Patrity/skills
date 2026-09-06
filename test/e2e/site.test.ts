@@ -182,3 +182,72 @@ describe('/skill/demo', () => {
     })
   }
 })
+
+describe('/build', () => {
+  it('renders the preview segmented control', async () => {
+    const html = withoutComments(await (await fetch('/build')).text())
+    // The strip is a button group, not a tablist: the choice is announced by aria-pressed.
+    expect(html).toMatch(/<div[^>]*role="group"[^>]*aria-label="Preview"/)
+    expect(html).toContain('CLAUDE.md')
+    expect(html).toContain('Files')
+  })
+
+  it('renders the download button in the preview footer', async () => {
+    const html = withoutComments(await (await fetch('/build')).text())
+    expect(html).toMatch(/<button[^>]*data-build-download/)
+    expect(html).toContain('Download setup')
+  })
+
+  it('asks the project name and the schema questions', async () => {
+    const html = withoutComments(await (await fetch('/build')).text())
+    expect(html).toContain('What is this project called?')
+    // From the base schema the fixtures and the real repo share.
+    expect(html).toContain('How is the repo laid out?')
+  })
+})
+
+describe('/docs/start-here', () => {
+  /** The first DocsNav on the page (the sticky one); the mobile disclosure renders a second. */
+  function nav(html: string): string {
+    const open = html.indexOf('data-docs-nav')
+    const close = open === -1 ? -1 : html.indexOf('</nav>', open)
+    return open === -1 || close === -1 ? '' : html.slice(open, close)
+  }
+
+  it('groups the nav under Start, Reference and Contribute, in that order', async () => {
+    const html = withoutComments(await (await fetch('/docs/start-here')).text())
+    const section = nav(html)
+    expect(section).not.toBe('')
+    const order = ['Start', 'Reference', 'Contribute'].map(g => section.indexOf(`>${g}<`))
+    expect(order.every(i => i >= 0)).toBe(true)
+    expect([...order].sort((a, b) => a - b)).toEqual(order)
+  })
+
+  it('links every doc in the nav and marks the current one', async () => {
+    const html = withoutComments(await (await fetch('/docs/start-here')).text())
+    const section = nav(html)
+    for (const slug of ['start-here', 'philosophy', 'cli', 'contributing']) {
+      expect(section, slug).toContain(`href="/docs/${slug}"`)
+    }
+    expect(section).toMatch(/<a[^>]*(href="\/docs\/start-here"[^>]*aria-current="page"|aria-current="page"[^>]*href="\/docs\/start-here")/)
+  })
+
+  it('takes its single h1 from the nav entry, not the markdown', async () => {
+    const html = withoutComments(await (await fetch('/docs/start-here')).text())
+    expect(html.match(/<h1[\s>]/g) ?? []).toHaveLength(1)
+    expect(html).toMatch(/<h1[^>]*>\s*Start here\s*<\/h1>/)
+  })
+
+  it('links the doc source for editing and the next doc in nav order', async () => {
+    const html = withoutComments(await (await fetch('/docs/start-here')).text())
+    expect(html).toContain('href="https://github.com/Patrity/skills/edit/main/content/docs/start-here.md"')
+    expect(html).toContain('Edit on GitHub')
+    expect(html).toMatch(/<a[^>]*href="\/docs\/philosophy"[^>]*>[\s\S]*?Philosophy/)
+  })
+
+  it('drops the next link on the last doc', async () => {
+    const html = withoutComments(await (await fetch('/docs/contributing')).text())
+    expect(html).toContain('href="https://github.com/Patrity/skills/edit/main/content/docs/contributing.md"')
+    expect(html).not.toContain('Next:')
+  })
+})

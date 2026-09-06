@@ -16,5 +16,7 @@ export default defineEventHandler(async (event): Promise<DocResponse> => {
     throw createError({ statusCode: 500, statusMessage: 'Could not load this doc' })
   }
 
-  return { entry, ...await renderMarkdown(md, `docs/${entry.file}`) }
+  // The page renders the nav entry's title as its `<h1>`, so the document's own `# Title`
+  // would print the same words twice and ship a second top-level heading.
+  return { entry, ...await renderMarkdown(md, `docs/${entry.file}`, { dropLeadingH1: true }) }
 })

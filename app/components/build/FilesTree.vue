@@ -13,6 +13,10 @@ const props = defineProps<{
   bundles: string[]
 }>()
 
+// The tree is the only thing that knows what every bundle ships, so the panes above it read
+// their file count from here rather than fetching the same trees again.
+const emit = defineEmits<{ 'update:count': [count: number] }>()
+
 // `bundleTree` is the page-wide cache the plan already fills, so listing the files costs no
 // request of its own and ticking a bundle off and on again costs nothing.
 const trees = reactive(new Map<string, TreeNode[]>())
@@ -74,6 +78,8 @@ const entries = computed<Entry[]>(() => {
     .map(([path, size]) => ({ path, size }))
     .sort((a, b) => a.path.localeCompare(b.path))
 })
+
+watch(entries, list => emit('update:count', list.length), { immediate: true })
 
 const totalBytes = computed(() => entries.value.reduce((n, e) => n + (e.size ?? 0), 0))
 const lockSize = computed(() => byteLength(serializeLockfile(props.plan.lock)))
@@ -152,14 +158,12 @@ watch(items, () => {
 
 <template>
   <div class="min-w-0">
-    <div class="flex items-center gap-2 px-2 pb-2 text-xs text-dimmed">
-      <span>{{ entries.length }} files</span>
-      <span aria-hidden="true">·</span>
+    <div class="flex items-center gap-2 px-3 pt-2.5 font-mono text-[0.6875rem] text-dimmed">
       <span>{{ formatBytes(totalBytes + lockSize) }} unpacked</span>
       <UIcon
         v-if="loading"
         name="i-lucide-loader-circle"
-        class="animate-spin size-3.5"
+        class="size-3 animate-spin"
       />
     </div>
     <UTree
@@ -167,13 +171,14 @@ watch(items, () => {
       :items="items"
       :get-key="(item: FileTreeItem) => item.path"
       size="sm"
-      class="p-2 overflow-x-auto"
+      class="overflow-x-auto p-2"
+      :ui="{ link: 'font-mono text-[0.8125rem] text-muted', linkLeadingIcon: 'text-dimmed', linkTrailingIcon: 'text-primary' }"
     >
       <template #item-label="{ item }">
         <span class="truncate">{{ item.label }}</span>
         <span
           v-if="item.size !== undefined"
-          class="ms-2 text-xs text-dimmed tabular-nums"
+          class="ms-2 text-[0.6875rem] text-dimmed tabular-nums"
         >{{ formatBytes(item.size) }}</span>
       </template>
     </UTree>

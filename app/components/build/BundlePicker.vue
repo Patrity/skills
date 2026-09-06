@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SkillSummary } from '~~/shared/types/skills'
-import { groupByTag } from '~~/shared/setup/wizard'
 
 const props = defineProps<{
   skills: SkillSummary[]
@@ -14,7 +13,8 @@ const emit = defineEmits<{
   toggle: [slug: string]
 }>()
 
-const groups = computed(() => Object.entries(groupByTag(props.skills)).sort(([a], [b]) => a.localeCompare(b)))
+/** One flat list in name order, as approved: the tag chips carry the grouping the headings did. */
+const rows = computed(() => [...props.skills].sort((a, b) => a.name.localeCompare(b.name)))
 
 const isSelected = (slug: string) => props.selected.includes(slug)
 const lockReason = (slug: string) => {
@@ -24,58 +24,53 @@ const lockReason = (slug: string) => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div
-      v-for="[tag, list] in groups"
-      :key="tag"
-      class="space-y-2"
+  <ul class="grid list-none gap-2 p-0">
+    <li
+      v-for="skill in rows"
+      :key="skill.slug"
     >
-      <p class="text-xs font-semibold uppercase tracking-wide text-dimmed">
-        {{ tag }}
-      </p>
-      <ul class="space-y-2">
-        <li
-          v-for="skill in list"
-          :key="skill.slug"
+      <div
+        class="flex items-center gap-2.5 rounded-lg border bg-elevated px-3 py-2 transition-colors"
+        :class="isSelected(skill.slug) ? 'border-primary/45' : 'border-default'"
+      >
+        <UCheckbox
+          :model-value="isSelected(skill.slug)"
+          :label="skill.name"
+          :disabled="!!lockReason(skill.slug)"
+          :data-bundle="skill.slug"
+          :ui="{ root: 'min-w-0 items-center', wrapper: 'w-auto min-w-0', label: 'text-sm text-default' }"
+          @update:model-value="emit('toggle', skill.slug)"
+        />
+
+        <SkillTagChips
+          v-if="skill.tags.length"
+          :tags="skill.tags"
+          class="hidden min-w-0 sm:flex"
+        />
+
+        <span
+          v-if="!lockReason(skill.slug) && recommended.includes(skill.slug)"
+          class="ms-auto shrink-0 font-mono text-[0.6875rem] text-dimmed"
+        >recommended</span>
+
+        <!-- The row is disabled rather than refusing the click, so the reason has to be
+             readable without one: the tooltip sits on a focusable glyph. -->
+        <UTooltip
+          v-else-if="lockReason(skill.slug)"
+          :text="lockReason(skill.slug)"
         >
-          <UTooltip
-            :text="lockReason(skill.slug)"
-            :disabled="!lockReason(skill.slug)"
+          <button
+            type="button"
+            class="ms-auto inline-flex shrink-0 cursor-help rounded-sm p-0.5 text-dimmed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :aria-label="lockReason(skill.slug)"
           >
-            <div
-              class="w-full rounded-md border p-3"
-              :class="isSelected(skill.slug) ? 'border-accented bg-elevated/40' : 'border-default'"
-            >
-              <UCheckbox
-                :model-value="isSelected(skill.slug)"
-                :label="skill.name"
-                :description="skill.description"
-                :disabled="!!lockReason(skill.slug)"
-                :data-bundle="skill.slug"
-                @update:model-value="emit('toggle', skill.slug)"
-              />
-              <div class="mt-2 flex flex-wrap items-center gap-1.5 ps-6">
-                <UBadge
-                  v-if="lockReason(skill.slug)"
-                  label="required"
-                  icon="i-lucide-lock"
-                  color="neutral"
-                  variant="outline"
-                  size="sm"
-                />
-                <UBadge
-                  v-else-if="recommended.includes(skill.slug)"
-                  label="recommended"
-                  color="primary"
-                  variant="subtle"
-                  size="sm"
-                />
-                <SkillBadges :badges="skill.badges" />
-              </div>
-            </div>
-          </UTooltip>
-        </li>
-      </ul>
-    </div>
-  </div>
+            <UIcon
+              name="i-lucide-lock"
+              class="size-3.5"
+            />
+          </button>
+        </UTooltip>
+      </div>
+    </li>
+  </ul>
 </template>
