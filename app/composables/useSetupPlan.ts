@@ -10,7 +10,7 @@ const encoder = new TextEncoder()
  * The three files of a bundle that change what a setup renders: its CLAUDE.md section and the two
  * settings halves (which also decide whether `.claude/settings.local.json` joins the managed
  * `.gitignore` block). Everything else a bundle ships is copied verbatim and cannot alter the plan,
- * so the preview never downloads it — the zip is built server-side from the real bytes.
+ * so the preview never downloads it; the zip is built server-side from the real bytes.
  */
 const PLAN_FILES = ['CLAUDE.md', 'settings.json', 'settings.local.json']
 

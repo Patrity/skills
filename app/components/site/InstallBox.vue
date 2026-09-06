@@ -2,7 +2,7 @@
 const props = withDefaults(defineProps<{
   /** The command to show and copy. */
   command: string
-  /** Bundle slug (or `init` for the setup command) — the analytics dimension. */
+  /** Bundle slug (or `init` for the setup command): the analytics dimension. */
   slug: string
   /**
    * Show the word next to the glyph. It is hidden below `sm` either way (a phone has no
@@ -30,11 +30,11 @@ function clearDone() {
 
 async function copy() {
   // navigator.clipboard is undefined outside a secure context and writeText() rejects when
-  // the permission is denied — neither should surface as an unhandled rejection.
+  // the permission is denied: neither should surface as an unhandled rejection.
   try {
     await navigator.clipboard.writeText(props.command)
   } catch {
-    toast.add({ title: 'Could not copy .. select the command and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
+    toast.add({ title: 'The browser blocked the copy. Select the command and copy it by hand.', icon: 'i-lucide-clipboard-x', color: 'error' })
     return
   }
   toast.add({ title: 'Command copied', icon: 'i-lucide-clipboard-check', color: 'success' })

@@ -13,7 +13,7 @@
           Three things land in the repo.
         </h2>
         <p class="mt-3.5 text-base/[1.65] text-muted">
-          Thirty-one files for the <code class="font-mono text-sm">nuxt-app</code> profile, and no wrapper directory to dig them out of. Here is what each one is for.
+          Thirty-one files for the <code class="font-mono text-sm">nuxt-app</code> profile, and no wrapper directory to dig them out of.
         </p>
       </div>
 

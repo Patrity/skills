@@ -17,7 +17,7 @@ function render(report: DiffReport): string {
 }
 
 export default defineCommand({
-  meta: { name: 'diff', description: 'Show what changed since install, locally and upstream' },
+  meta: { name: 'diff', description: 'Show what drifted since install, yours and upstream' },
   args: { ...commonArgs },
   run: ({ args }) => guard(async () => {
     const opts = commonOpts(args)

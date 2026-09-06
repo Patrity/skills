@@ -234,7 +234,7 @@ onMounted(() => trackSkillView(slug.value))
             v-if="skill.errors.length"
             tone="warning"
             icon="i-lucide-triangle-alert"
-            title="This bundle has validation issues"
+            title="This bundle does not validate"
             :description="skill.errors.join(' · ')"
           />
 
@@ -242,8 +242,8 @@ onMounted(() => trackSkillView(slug.value))
             v-if="fileError && fileError.statusCode !== 404"
             tone="error"
             icon="i-lucide-file-x"
-            title="Could not load this file"
-            :description="fileError.statusMessage ?? 'Something went wrong'"
+            title="This file did not load"
+            :description="fileError.statusMessage ?? 'No reason came back.'"
           />
 
           <template v-else-if="file">

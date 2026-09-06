@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Skills OG card (1200x630) — satori renderer.
+ * Skills OG card (1200x630), satori renderer.
  *
  * Adapted from portfolio-v2/app/components/OgImage/TechHive.vue, so the two sites share
  * one social-card language. Satori rules honoured here:
@@ -10,7 +10,7 @@
  *   not contain `flex-`.
  * - satori-html trims text nodes and drops whitespace-only ones, so the title's word spacing
  *   is `column-gap` on per-word spans, not literal spaces.
- * - No `filter: blur()` (satori cannot rasterise it) — the glow is a radial-gradient.
+ * - No `filter: blur()` (satori cannot rasterise it); the glow is a radial-gradient.
  * - Inline <svg> is rasterised from basic shapes and presentation attributes only: no
  *   <style>, <use> or <text>, and the mark is drawn with <path> rather than <polygon>.
  *
@@ -27,7 +27,7 @@ const BG = '#0c0c0b'
 const FG = '#fafafa'
 const DIMMED = '#737373'
 const GREEN = '#46c211'
-const LATTICE = '#96d76c' // green-300 — what the dark hero draws its hairlines in
+const LATTICE = '#96d76c' // green-300, what the dark hero draws its hairlines in
 const LATTICE_HOT = '#46c211'
 
 const FOOTER = 'skills.patrity.com · by TechHive Labs'

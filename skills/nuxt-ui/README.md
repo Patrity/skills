@@ -25,7 +25,7 @@ Two doc-fetching skills plus two path-scoped rules. The rules fire when Claude t
 
 ## Placeholders
 
-The rule globs contain an `{{appDir}}` placeholder that the setup CLI renders from your answers. Installing by hand? Replace it with your srcDir — `app` in a standard Nuxt 4 project.
+The rule globs contain an `{{appDir}}` placeholder that the setup CLI renders from your answers. Installing by hand? Replace it with your srcDir, which is `app` in a standard Nuxt 4 project.
 
 ## Install
 
@@ -46,5 +46,5 @@ The fetchers cache what they download under `skills/<name>/cache/`, hence the `.
 
 ## Companion bundles
 
-- **[`nuxt`](/skill/nuxt)** — the Nuxt 4 framework docs fetcher and its rule. Install both if the project is Nuxt + Nuxt UI.
-- **[`browser-testing`](/skill/browser-testing)** — the playwright-cli workflow `rules/web-vue-ui.md` points at.
+- **[`nuxt`](/skill/nuxt)**: the Nuxt 4 framework docs fetcher and its rule. Install both if the project is Nuxt + Nuxt UI.
+- **[`browser-testing`](/skill/browser-testing)**: the playwright-cli workflow `rules/web-vue-ui.md` points at.

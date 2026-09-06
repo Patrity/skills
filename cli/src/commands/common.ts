@@ -7,10 +7,10 @@ import { CLI_VERSION } from '../version'
 
 /** Flags every command shares. `registry` has no default: `run.ts` resolves flag → lockfile → prod. */
 export const commonArgs = {
-  dir: { type: 'string', description: 'Project directory', default: '.' },
-  registry: { type: 'string', description: 'Registry base URL (default: the lockfile\'s, else https://skills.patrity.com)' },
-  yes: { type: 'boolean', description: 'Take the defaults and never prompt', default: false },
-  force: { type: 'boolean', description: 'Overwrite files and CLAUDE.md blocks edited since install', default: false },
+  dir: { type: 'string', description: 'The project to work in', default: '.' },
+  registry: { type: 'string', description: 'Registry to read from (default: the lockfile\'s, else https://skills.patrity.com)' },
+  yes: { type: 'boolean', description: 'Take the defaults and never ask', default: false },
+  force: { type: 'boolean', description: 'Overwrite the files and CLAUDE.md blocks you edited since install', default: false },
   json: { type: 'boolean', description: 'Print one JSON object on stdout and nothing else', default: false }
 } as const satisfies ArgsDef
 
@@ -104,10 +104,10 @@ export function reportPlan(opts: CommonFlags, result: RunResult, done: string): 
     console.log(summarize(result.plan))
     return
   }
-  outro(result.plan.warnings.length ? `${done} — ${result.plan.warnings.length} warning(s).` : done)
+  outro(result.plan.warnings.length ? `${done} ${result.plan.warnings.length} warning(s) above.` : done)
 }
 
-/** One clear line on stderr and exit 1 — never a dumped Error object or a stack trace. */
+/** One clear line on stderr and exit 1; never a dumped Error object or a stack trace. */
 export async function guard(body: () => Promise<void>): Promise<void> {
   try {
     await body()

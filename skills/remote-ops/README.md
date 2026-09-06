@@ -34,7 +34,7 @@ ssh root@<host> "pct exec <ctid> -- bash -lc 'echo hi; hostname'"
 Both exit 0. The broken form either runs everything after a `;` or `&&` on the outer host, or runs
 a bare first word with the rest discarded into `$@`. It has already turned a healthy production
 container into a report that the app directory was missing, the service inactive and `docker` not
-installed — every one of those true of the host, none of them true of the container.
+installed. Every one of those is true of the host and none of them is true of the container.
 
 The same shape appears anywhere a remote command nests: `ssh … docker exec … sh -c '…'`,
 `ssh … sudo -u app bash -lc '…'`, `ssh … kubectl exec … -- sh -c '…'`.
@@ -54,8 +54,8 @@ cp -R remote-ops/skills/. .claude/skills/
 cat remote-ops/CLAUDE.md >> CLAUDE.md
 ```
 
-No configuration. The examples use `<host>`, `<ctid>`, `<app>` and `<container>` placeholders —
-substitute your own, and keep the project's real hosts in a project-local skill rather than here.
+No configuration. The examples use `<host>`, `<ctid>`, `<app>` and `<container>` placeholders.
+Substitute your own, and keep the project's real hosts in a project-local skill rather than here.
 
 ## Requirements
 

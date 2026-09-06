@@ -3,10 +3,10 @@ import { runUpdate } from '../run'
 import { commonArgs, commonOpts, guard, positionals, reportPlan, startInteractive } from './common'
 
 export default defineCommand({
-  meta: { name: 'update', alias: ['up'], description: 'Re-render the setup from the current registry' },
+  meta: { name: 'update', alias: ['up'], description: 'Re-render everything from the current registry' },
   args: {
     ...commonArgs,
-    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'Bundles to check (default: all installed)' }
+    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'Bundles that must be installed (default: all of them)' }
   },
   run: ({ args }) => guard(async () => {
     const opts = commonOpts(args)

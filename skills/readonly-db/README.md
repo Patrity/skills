@@ -19,7 +19,7 @@ without making writing them possible.
 | Path | Purpose |
 | --- | --- |
 | `skills/readonly-db/` | Setting up the read-only role and the `db:q` runner, and the five rules for handling what comes back. |
-| `rules/database-safety.md` | Fires on `server/`, `db/`, `drizzle/` and `prisma/` — read-only exploration, no destructive SQL, no dumps, migrations from CI. |
+| `rules/database-safety.md` | Fires on `server/`, `db/`, `drizzle/` and `prisma/`: read-only exploration, no destructive SQL, no dumps, migrations from CI. |
 | `CLAUDE.md` | A pointer block to paste into your project's `CLAUDE.md`. |
 
 ## The shape of it
@@ -36,7 +36,7 @@ Two independent guards, because either one alone is a single point of failure:
 The allowlist is there for the error message. `BEGIN READ ONLY` is what makes it true.
 
 It is not a sandbox, and the skill says so plainly: any session in the repo can still reach the
-read-write credential the app uses. This removes a class of accident on the exploration path — it
+read-write credential the app uses. This removes a class of accident on the exploration path. It
 does not contain a session that goes looking.
 
 ## Install
@@ -54,7 +54,7 @@ the `db:q` script, and wires the npm script.
 
 ## Configuration
 
-The runner reads one variable, `DATABASE_URL_RO`, from `.claude/.env` — not from the repo root
+The runner reads one variable, `DATABASE_URL_RO`, from `.claude/.env`, not from the repo root
 `.env`, and not from your shell profile. That is the whole point of the separation: the app keeps
 its own connection string, and Claude gets a different one that cannot write.
 
@@ -79,12 +79,12 @@ replace it with `pnpm`, `npm`, `yarn` or `bun`.
 
 ## What it deliberately does not do
 
-- No `pg_dump`/`pg_restore` — a dump is every revoke undone at once.
+- No `pg_dump`/`pg_restore`: a dump is every revoke undone at once.
 - No production connection. Reproduce on a branch or a local copy.
 - Nothing read from the database is written into a file, a commit message or a PR body. Git history
   is permanent and gets read back into context on every later prompt.
 
 ## Companion bundles
 
-- **[`nuxt`](/skill/nuxt)** — its `rules/database.md` covers the Drizzle side (schema layout,
+- **[`nuxt`](/skill/nuxt)**: its `rules/database.md` covers the Drizzle side (schema layout,
   generated migrations, query conventions) and agrees with this one on the safety rules.

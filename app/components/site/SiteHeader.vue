@@ -2,7 +2,7 @@
 import { NAV } from '~~/shared/utils/links'
 
 /**
- * Sticky top bar. Transparent over the hero, frosted once the page has scrolled — the
+ * Sticky top bar. Transparent over the hero, frosted once the page has scrolled; the
  * threshold is a plain scroll listener rather than a VueUse import so the shell adds no
  * dependency.
  */

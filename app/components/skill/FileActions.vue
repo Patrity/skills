@@ -22,7 +22,7 @@ async function copyRaw() {
   try {
     await navigator.clipboard.writeText(props.content)
   } catch {
-    toast.add({ title: 'Could not copy .. select the file and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
+    toast.add({ title: 'The browser blocked the copy. Select the file and copy it by hand.', icon: 'i-lucide-clipboard-x', color: 'error' })
     return
   }
   toast.add({ title: 'Copied raw file', icon: 'i-lucide-clipboard-check', color: 'success' })

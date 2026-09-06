@@ -55,7 +55,7 @@ const host = computed(() => {
       <div>
         <BrandWordmark byline />
         <p class="mt-3 max-w-96 text-sm/relaxed text-muted">
-          One Claude Code setup, kept in bundles so you can take the parts you agree with and leave the rest.
+          One Claude Code setup, cut into bundles so you can take the parts you agree with and leave the rest.
         </p>
       </div>
 

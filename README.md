@@ -1,16 +1,17 @@
 # Skills
 
-My opinionated Claude Code setup, published so it can be installed rather than copied. Answer a few
-questions and you get a `CLAUDE.md` and a `.claude/` directory that match how I work: rules that
-carry the direction, skills that carry the how-to, hooks that fail closed, docs a test keeps honest.
-Every piece is also a bundle under [`skills/`](skills/) that you can take on its own.
+My Claude Code setup, published so it can be installed instead of copied. Nine bundles, fourteen
+questions, one `CLAUDE.md`. Answer the questions and you get that `CLAUDE.md` and a `.claude/`
+directory shaped like mine: rules that carry the direction, skills that carry the how-to, hooks that
+fail closed, docs a test keeps honest. Every piece is also a bundle under [`skills/`](skills/) you
+can take on its own.
 
-The site renders those bundles straight from this repository at request time, so publishing a bundle
+The site reads those bundles straight from this repository at request time, so publishing a bundle
 never rebuilds the app.
 
 ## Two ways in
 
-[skills.patrity.com/build](https://skills.patrity.com/build) runs the wizard in the browser: pick a
+[skills.patrity.com/build](https://skills.patrity.com/build) runs the wizard in the browser. Pick a
 preset, answer the questions, watch the `CLAUDE.md` compose beside the form, then download a zip and
 unzip it into a new project folder.
 
@@ -106,7 +107,7 @@ pnpm typecheck && pnpm lint && pnpm build
 - `server/lib/skills/` parses bundles from disk (`fs`) or from the repo zip archive (`github`), caches per-bundle blobs in the Vercel Runtime Cache under tag `skills`, and serves them through `/api/skills/**`.
 - `shared/setup/` composes a project from the base questions and the picked bundles. The CLI, the `/build` page and `POST /api/build` all go through it.
 - Pages and API routes are ISR-cached (5 min floor) and tagged; `POST /api/revalidate` purges the tag. After a purge a warm instance re-reads the Runtime Cache within ~5s (its in-process memo TTL); the 5-minute ISR floor is only the backstop.
-- A failing upstream never becomes a cached 404 or empty page: a warm instance (one that already holds a snapshot) keeps serving it stale, while a cold instance (nothing loaded yet) answers 503 until the source recovers — either way Vercel serves the response as stale rather than caching it.
+- A failing upstream never becomes a cached 404 or empty page: a warm instance (one that already holds a snapshot) keeps serving it stale, while a cold instance (nothing loaded yet) answers 503 until the source recovers. Either way Vercel serves the response as stale rather than caching it.
 - On a push that touches `skills/**`, Vercel skips the build (`vercel.json` `ignoreCommand`) and the `revalidate` workflow purges the cache instead.
 
 ## Deploy
@@ -117,4 +118,4 @@ Vercel, Git integration on `main`. Environment variables: `NUXT_REVALIDATE_SECRE
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

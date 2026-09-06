@@ -9,7 +9,7 @@ import { createRegistryClient, type BundleFiles, type RegistryClient } from './r
 import { applyProfile, defaultAnswers, parseAnswerFlags, preselectedBundles, reconcileAnswers, resolveBundles, validateAnswers } from './wizard'
 
 export const DEFAULT_REGISTRY = 'https://skills.patrity.com'
-export const NO_LOCKFILE = 'no .claude/skills.lock.json here — run `skills init` first'
+export const NO_LOCKFILE = 'no .claude/skills.lock.json here; run `skills init` first'
 
 /** `--registry` flag → the lockfile's registry → production. */
 export const registryFor = (flag: string | undefined, lock: Lockfile | null): string => flag || lock?.registry || DEFAULT_REGISTRY
@@ -48,7 +48,7 @@ export interface ListReport {
   installedSha: string
 }
 
-// `--json` owns stdout, so it never prompts — a clack prompt would write into the JSON.
+// `--json` owns stdout, so it never prompts: a clack prompt would write into the JSON.
 const isInteractive = (opts: CommonOpts): boolean => opts.interactive ?? (!opts.yes && !opts.json && Boolean(process.stdout.isTTY))
 
 /** `--json` is the whole of stdout: one object, printed once, by whichever command produced it. */
@@ -82,7 +82,7 @@ interface Selection {
   tolerateMissing: string[]
 }
 
-/** Resolve, download, plan, then write — the tail every mutating command shares. */
+/** Resolve, download, plan, then write: the tail every mutating command shares. */
 async function render(
   opts: CommonOpts,
   project: ProjectState,

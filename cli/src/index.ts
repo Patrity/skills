@@ -3,13 +3,13 @@ import { initArgs } from './commands/init'
 import { hoistSubcommand } from './commands/common'
 import { CLI_VERSION } from './version'
 
-/** Every subcommand name and alias — keep in step with each command's `meta`. */
+/** Every subcommand name and alias; keep in step with each command's `meta`. */
 const SUBCOMMANDS = ['init', 'add', 'remove', 'rm', 'update', 'up', 'diff', 'list', 'ls']
 /** Flags whose value is a separate token, so hoisting does not mistake the value for a command. */
 const VALUE_FLAGS = Object.entries(initArgs).filter(([, def]) => def.type === 'string').map(([name]) => name)
 
 const main = defineCommand({
-  meta: { name: 'skills', version: CLI_VERSION, description: 'Assemble a Claude Code setup from skills.patrity.com' },
+  meta: { name: 'skills', version: CLI_VERSION, description: 'Build a Claude Code setup out of the bundles on skills.patrity.com' },
   // init's args on the root so `skills --profile nuxt-app` parses like `skills init --profile nuxt-app`.
   args: initArgs,
   subCommands: {
@@ -20,7 +20,7 @@ const main = defineCommand({
     diff: () => import('./commands/diff').then(m => m.default),
     list: () => import('./commands/list').then(m => m.default)
   },
-  // Bare `skills` runs the wizard. `default` (not `run`) — citty runs a command's own `run` even
+  // Bare `skills` runs the wizard. `default` (not `run`) because citty runs a command's own `run` even
   // after dispatching to a subcommand, which would run init a second time.
   default: 'init'
 })

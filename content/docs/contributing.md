@@ -1,8 +1,8 @@
 # Contributing
 
-This is primarily a personal registry, but pull requests for genuinely reusable bundles are welcome.
+This is a personal registry first. Pull requests for genuinely reusable bundles still get merged.
 
-## Add a bundle
+## Add a bundle in five steps
 
 1. Fork the repository and create `skills/<slug>/` (see [Bundle structure](/docs/bundle-structure)).
 2. Write `README.md` with valid [frontmatter](/docs/frontmatter) and a body that explains what the bundle does and how to install it.
@@ -22,7 +22,7 @@ This is primarily a personal registry, but pull requests for genuinely reusable 
 
 5. Open a pull request. CI runs the same validator plus the app's lint, typecheck, tests and build.
 
-## What happens on merge
+## What happens the second it merges
 
 Bundle content is read from GitHub **at runtime**. Merging to `main`:
 
@@ -31,10 +31,9 @@ Bundle content is read from GitHub **at runtime**. Merging to `main`:
 
 Your bundle is live within seconds of the merge.
 
-## Skill conventions
+## Three files a bundle must not own
 
-Three habits keep a bundle composable with the others. All three are about files a bundle must not
-own.
+The habits below are what keep a bundle composable with the others.
 
 **Read configuration from `.claude/.env`, never the repo root `.env`.** That separation is the
 whole point: a project can hand Claude a read-only database replica while the app keeps its own
@@ -93,10 +92,10 @@ weight in the repo and nothing else.
 **Never ship a `.env.example` file.** The project gets exactly one, assembled from every installed
 bundle, and a bundle that ships its own fails validation with a pointer to the `env` key.
 
-## Ground rules
+## What gets a pull request sent back
 
 - No secrets, credentials, internal hostnames or IPs. Bundles are public.
 - No generated caches. `cache/` directories are ignored anyway, but do not commit them.
 - Keep bundles generic. Project-specific paths, theme mappings or account names belong in the user's own `CLAUDE.md`, not here.
 - Lowercase tags, one concern per bundle.
-- READMEs render as markdown with raw HTML allowed (scripts and event handlers are stripped), so bundle content is trusted at PR-review time — review it as you would any other code you merge.
+- READMEs render as markdown with raw HTML allowed (scripts and event handlers are stripped), so bundle content is trusted at PR-review time. Review it as you would any other code you merge.

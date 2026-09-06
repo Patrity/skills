@@ -121,7 +121,7 @@ async function copy(text: string, title: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text)
   } catch {
-    toast.add({ title: 'Could not copy .. select the text and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
+    toast.add({ title: 'The browser blocked the copy. Select the text and copy it by hand.', icon: 'i-lucide-clipboard-x', color: 'error' })
     return false
   }
   toast.add({ title, icon: 'i-lucide-clipboard-check', color: 'success' })
@@ -144,7 +144,7 @@ async function copyMarkdown() {
 
 const sheetSummary = computed(() => `${view.value === 'claude' ? 'CLAUDE.md' : 'Files'} · ${count(resolvedBundles.value.length, 'bundle')}`)
 
-const description = 'Compose a Claude Code setup in the browser: pick a preset, answer a few questions, tick the bundles, and download the zip, or copy the equivalent CLI command.'
+const description = 'Compose a Claude Code setup in the browser. Pick a preset, answer the questions, tick the bundles, then take the zip or the CLI command that reproduces it.'
 const { public: { siteUrl } } = useRuntimeConfig()
 
 useSeoMeta({

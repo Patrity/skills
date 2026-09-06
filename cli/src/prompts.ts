@@ -34,7 +34,7 @@ export async function askAxes(schema: BaseSchema, answers: Record<string, string
 export async function askBundles(skills: SkillSummary[], preselected: string[], profiles: Profile[]): Promise<{ bundles: string[], profile?: Profile }> {
   let profile: Profile | undefined
   if (profiles.length) {
-    const picked = bail(await select({ message: 'Start from a profile?', initialValue: 'none', options: [{ value: 'none', label: 'No profile — pick bundles myself' }, ...profiles.map(p => ({ value: p.name, label: p.name, hint: p.description }))] }))
+    const picked = bail(await select({ message: 'Start from a profile?', initialValue: 'none', options: [{ value: 'none', label: 'No profile, I will pick the bundles' }, ...profiles.map(p => ({ value: p.name, label: p.name, hint: p.description }))] }))
     profile = profiles.find(p => p.name === picked)
   }
   const initial = [...new Set([...preselected, ...(profile?.bundles ?? [])])]
@@ -44,7 +44,7 @@ export async function askBundles(skills: SkillSummary[], preselected: string[], 
 }
 
 /**
- * The plan in a dozen lines: counts, then every path the run will not write and why — a skipped
+ * The plan in a dozen lines: counts, then every path the run will not write and why. A skipped
  * conflict or a protected edit is the whole reason to read this, so it is named, not just counted.
  */
 export function summarize(plan: SetupPlan, overwrite: ReadonlySet<string> = new Set()): string {
@@ -57,14 +57,14 @@ export function summarize(plan: SetupPlan, overwrite: ReadonlySet<string> = new 
     : plan.gitignore?.changed ? 'updated' : 'unchanged'
   const envExample = plan.envExample
     ? (plan.envExample.changed ? 'written' : 'unchanged')
-    : plan.envExampleRemove ? 'removed' : '—'
+    : plan.envExampleRemove ? 'removed' : 'none'
   const lines = [
     `create ${count('create')} · update ${count('update')} · unchanged ${count('unchanged')} · conflicts ${count('conflict')} · protected ${count('protected')}`,
     ...paths('conflict').map(p => `conflict: ${p} (${overwrite.has(p) ? 'overwriting' : 'kept yours'})`),
     ...paths('protected').map(p => `protected: ${p} (kept your edit)`),
     ...(plan.removals.length ? [`remove ${plan.removals.length}: ${plan.removals.join(', ')}`] : []),
     `CLAUDE.md: ${plan.claudeMd.changed ? 'updated' : 'unchanged'}${plan.claudeMd.handEdited.length ? ` (hand-edited kept: ${plan.claudeMd.handEdited.join(', ')})` : ''}`,
-    `settings.json: ${plan.settings ? (plan.settings.changed ? 'merged' : 'unchanged') : '—'} · settings.local.json: ${plan.settingsLocal ? (plan.settingsLocal.changed ? 'merged' : 'unchanged') : '—'}`,
+    `settings.json: ${plan.settings ? (plan.settings.changed ? 'merged' : 'unchanged') : 'none'} · settings.local.json: ${plan.settingsLocal ? (plan.settingsLocal.changed ? 'merged' : 'unchanged') : 'none'}`,
     ...(plan.gitignore ? [`.gitignore: ${gitignore}`] : []),
     `${ENV_EXAMPLE_PATH}: ${envExample}`,
     ...plan.warnings.map(w => `⚠ ${w}`)

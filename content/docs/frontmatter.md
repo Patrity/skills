@@ -1,6 +1,6 @@
 # Frontmatter reference
 
-The YAML block at the top of `README.md` is the bundle's metadata. GitHub renders it as a table, and the site validates it on every load.
+The YAML block at the top of `README.md` is the bundle's metadata. GitHub renders it as a table, and the site validates it on every load, so a typo shows up as a warning rather than as a missing bundle.
 
 ```yaml
 ---
@@ -27,17 +27,17 @@ gitignore:
 | `requires` | string[] | no | External tooling the bundle needs on your machine, e.g. `python3`, `curl`, `playwright-cli`. |
 | `dependsOn` | string[] | no | Bundle slugs this one cannot work without. `add` and the wizard install them automatically. |
 | `suggests` | string[] | no | Bundle slugs that pair well with this one. Pre-selected in the wizard, easy to untick. |
-| `gitignore` | string[] | no | Paths this bundle wants ignored — a cache directory it writes into, say. They go in the project's managed `.gitignore` block. |
+| `gitignore` | string[] | no | Paths this bundle wants ignored, usually a cache directory it writes into. They go in the project's managed `.gitignore` block. |
 | `env` | object[] | no | The variables this bundle's skills read from `.claude/.env`. Each one becomes a line in `.claude/.env.example`. |
 
 `dependsOn` and `suggests` take **registry slugs** and are validated against the registry: a slug
 that names no bundle fails the build. They are the bundle graph; `requires` is about your machine,
 not the registry.
 
-## gitignore
+## gitignore: paths the project should forget
 
 Each entry is a project-relative path: no leading `/`, no `..` segment, no drive letter, no
-backslashes. End a directory with `/` — the convention, not something the schema enforces. Write
+backslashes. End a directory with `/`. That is the convention, not something the schema enforces. Write
 the path as the project will see it, from the repo root:
 
 ```yaml
@@ -50,10 +50,9 @@ The CLI and the web builder collect these across every installed bundle, sort th
 one managed block in the project's root `.gitignore`. Removing the bundle takes its lines back out.
 See [Hooks and settings](/docs/hooks-and-settings) for the block itself.
 
-## env
+## env: declare the variables, never the file
 
-A bundle never ships a `.env.example` file. It declares the variables its skills read and lets the
-tool write the example:
+A bundle declares the variables its skills read and lets the tool write the example:
 
 ```yaml
 env:
@@ -82,20 +81,20 @@ Declaring `env` at all does two things beyond the example file: it adds `.claude
 managed `.gitignore` block, and it tells a reader of the bundle page what the skill needs before it
 will work.
 
-## Validation
+## What a bad bundle looks like
 
 A bundle with a missing README, a missing required key, or a bad slug is:
 
 - **shown with a warning** when the site reads from disk (local development), so you can see exactly what is wrong;
 - **hidden** in production;
-- **rejected by CI** — `pnpm validate:skills` fails the pull request with the same messages the site shows.
+- **rejected by CI**, where `pnpm validate:skills` fails the pull request with the same messages the site shows.
 
 Messages look like `frontmatter.tags: required` or `slug "Bad_Slug" must match /^[a-z0-9][a-z0-9-]*$/`.
 
-## Derived metadata
+## The keys you never write
 
-You never write these; the site computes them from the files:
+The site computes these from the files:
 
-- **badges** — which of `skills/`, `rules/`, `hooks/`, `settings.json`/`settings.local.json`, `CLAUDE.md` exist
+- **badges**: which of `skills/`, `rules/`, `hooks/`, `settings.json`/`settings.local.json`, `CLAUDE.md` exist
 - **file count** and **total size**
-- **freshness** — the commit that the whole snapshot was read from
+- **freshness**: the commit that the whole snapshot was read from

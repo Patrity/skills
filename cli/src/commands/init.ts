@@ -5,13 +5,13 @@ import { commonArgs, commonOpts, guard, repeatedArg, reportPlan, startInteractiv
 /** Also the root command's args, so `skills --profile x` parses like `skills init --profile x`. */
 export const initArgs = {
   ...commonArgs,
-  profile: { type: 'string', description: 'Start from a registry profile (e.g. nuxt-app)' },
-  with: { type: 'string', description: 'Bundle slugs to include (repeatable, comma-separated)' },
-  answer: { type: 'string', description: 'axis=option (repeatable, comma-separated)' }
+  profile: { type: 'string', description: 'Start from a registry profile, e.g. nuxt-app' },
+  with: { type: 'string', description: 'Bundle slugs to tick (repeatable, comma-separated)' },
+  answer: { type: 'string', description: 'Answer one question as axis=option (repeatable, comma-separated)' }
 } as const satisfies ArgsDef
 
 export default defineCommand({
-  meta: { name: 'init', description: 'Assemble a Claude Code setup in this project' },
+  meta: { name: 'init', description: 'Set up this project the way I run mine' },
   args: initArgs,
   run: ({ args, rawArgs }) => guard(async () => {
     const opts = commonOpts(args)

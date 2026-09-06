@@ -4,9 +4,9 @@ Five opinions decide what is in this setup. They are mine, and they are separabl
 
 ## Rules carry the direction, skills carry the how-to
 
-A rule is a short markdown file with a `paths:` glob. It loads on its own whenever Claude touches a matching file, and it says what must be true — this package manager, migrations only from CI, never guess at the domain. It does not explain how to do any of it.
+A rule is a short markdown file with a `paths:` glob. It loads on its own whenever Claude touches a matching file, and it says what must be true: this package manager, migrations only from CI, never guess at the domain. It does not explain how to do any of it.
 
-A skill is the procedure, and it has to be invoked. Steps, commands, the gotcha that cost an afternoon: all of that lives there, and a session reads it once, when it needs it.
+A skill is the procedure, and it has to be invoked. Steps, commands, the gotcha that cost an afternoon.. all of it lives there, and a session reads it once, when it needs it.
 
 Splitting them is what keeps `CLAUDE.md` short enough that Claude still reads it. When a rule starts describing a procedure, it should be linking to a skill instead. [`nuxt`](/skill/nuxt) and [`nuxt-ui`](/skill/nuxt-ui) show the pattern at its plainest: a rule saying "fetch the real docs, do not recall them", and a skill that knows how to fetch them.
 
@@ -16,7 +16,7 @@ A line in `CLAUDE.md` is a suggestion. A `PreToolUse` hook is not.
 
 [`quality-hooks`](/skill/quality-hooks) wires three. `protect-env.sh` refuses edits to `.env` and credential files. `lint-check.sh` runs the linter after every write and hands the failure back in the same turn. A `PreCompact` prompt asks whether the session learned a convention worth writing down, in the last moment where the context that learned it still exists.
 
-What makes them worth having is the missing-file case. Each wiring runs the script if it is on disk, and otherwise asks git whether that script is supposed to be there — exiting 2 if it is. A bad checkout refuses the edit instead of quietly allowing it. The obvious one-liner, `[ ! -f "$s" ] || exec "$s"`, gets this exactly backwards: the gate disappears the moment the file does.
+What makes them worth having is the missing-file case. Each wiring runs the script if it is on disk. Otherwise it asks git whether that script is supposed to be there, and exits 2 if it is. A bad checkout refuses the edit instead of quietly allowing it. The obvious one-liner, `[ ! -f "$s" ] || exec "$s"`, gets this exactly backwards: the gate disappears the moment the file does.
 
 [`readonly-db`](/skill/readonly-db) comes from the same instinct. A role with `SELECT` and nothing else, and a runner that wraps every statement in `BEGIN READ ONLY`. Neither is a sandbox and the skill says so, but both remove a class of accident that no amount of prose can.
 

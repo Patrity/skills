@@ -17,12 +17,12 @@ export type { FileOp, SetupPlan }
  * A setup for a project that may already have one. Everything a fresh project gets is rendered once
  * by `renderFresh` (shared with the web builder); this adds what only a real project on disk has: the
  * classification of each file against disk and the previous lock, removals, hand-edited marker
- * blocks and settings entries, and the two files regenerated around what is already there — the
+ * blocks and settings entries, and the two files regenerated around what is already there. The
  * managed `.gitignore` block and `.claude/.env.example`.
  */
 export async function buildPlan(input: {
   manifest: CliManifest
-  /** The base URL the manifest was fetched from — not what it advertises, which may be a mirror. */
+  /** The base URL the manifest was fetched from, not what it advertises, which may be a mirror. */
   registry: string
   project: ProjectState
   answers: Record<string, string>
@@ -32,7 +32,7 @@ export async function buildPlan(input: {
 }): Promise<SetupPlan> {
   const { manifest, registry, project, answers, bundles, bundleFiles, force = false } = input
   // One render, shared with the web builder. `shared`/`local` are the settings halves the selected
-  // bundles contribute and `contributions` the CLAUDE.md snippets — the same values `planFresh`
+  // bundles contribute and `contributions` the CLAUDE.md snippets: the same values `planFresh`
   // used, so the overlay below can never disagree with what it rendered.
   const { plan: fresh, shared, local, contributions, contributionWarnings } = renderFresh({ manifest, projectName: project.name, answers, bundles, bundleFiles, registry })
   // Render warnings first; the contribution ones go in after the removals, where they always were.
@@ -119,7 +119,7 @@ export async function buildPlan(input: {
     lock.blocks[id] = kept ?? hashForSource(composedBlocks, id)
   }
 
-  // Every contribution the previous lock recorded comes out before the new ones go in — of dropped
+  // Every contribution the previous lock recorded comes out before the new ones go in. Of dropped
   // bundles (so their fail-closed hooks stop firing once their scripts are gone) and of kept ones
   // (so a changed hook or permission replaces the installed entry instead of accumulating).
   // Each half comes out of its own file only: `permissions.allow` is merged into settings.local.json

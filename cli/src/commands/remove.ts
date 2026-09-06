@@ -3,10 +3,10 @@ import { runRemove } from '../run'
 import { commonArgs, commonOpts, guard, positionals, reportPlan, startInteractive } from './common'
 
 export default defineCommand({
-  meta: { name: 'remove', alias: ['rm'], description: 'Remove bundles and the files they installed' },
+  meta: { name: 'remove', alias: ['rm'], description: 'Take bundles back out, files and all' },
   args: {
     ...commonArgs,
-    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'Bundle slugs to remove' }
+    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'The bundles to take out' }
   },
   run: ({ args }) => guard(async () => {
     const opts = commonOpts(args)

@@ -14,7 +14,7 @@ const canonical = computed(() => {
 })
 
 useHead({
-  titleTemplate: title => (title ? `${title} · Skills` : 'Skills — the Claude Code setup I actually run'),
+  titleTemplate: title => (title ? `${title} · Skills` : 'Skills.. the Claude Code setup I actually run'),
   htmlAttrs: { lang: 'en' },
   link: [
     { rel: 'canonical', href: canonical },
@@ -33,7 +33,7 @@ useSeoMeta({
 
 // Site-wide default card. Pages override it with their own title (Task 11).
 // `defineOgImage(component, props)` is v6's name for what the plan calls
-// `defineOgImageComponent` — same arguments; the old name only logs a deprecation.
+// `defineOgImageComponent`: same arguments; the old name only logs a deprecation.
 defineOgImage('Skills', { title: 'Skills' })
 </script>
 

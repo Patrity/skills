@@ -38,7 +38,7 @@ function languageExtension(lang: Language): Extension {
 /**
  * Light mode is drawn from the design tokens (`--cm-bg`, `--cm-gutter`, `--cm-accent` in
  * `app/assets/css/main.css`); dark keeps one-dark, which the design signed off as-is.
- * Token colouring stays on CodeMirror's `defaultHighlightStyle` — the tag vocabulary lives
+ * Token colouring stays on CodeMirror's `defaultHighlightStyle`; the tag vocabulary lives
  * in `@lezer/highlight`, which is not a direct dependency and is not worth adding for it.
  */
 const lightTheme = EditorView.theme({

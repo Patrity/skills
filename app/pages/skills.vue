@@ -62,7 +62,7 @@ const countLabel = computed(() => (isFiltered.value
   ? `${filtered.value.length} of ${skills.value.length} bundles`
   : `${skills.value.length} bundles · ${tags.value.length} tags`))
 
-const description = 'Browse every Claude Code bundle: search by name, filter by tag, view the source or download a zip.'
+const description = 'Every Claude Code bundle in the registry. Filter by name or tag, read the files before you trust them, take the zip.'
 const { public: { siteUrl } } = useRuntimeConfig()
 
 useSeoMeta({
@@ -164,8 +164,8 @@ useSeoMeta({
         icon="i-lucide-search-x"
         title="Nothing matches"
         :description="isFiltered
-          ? 'Try a different search, or clear the tag filter.'
-          : 'No bundles have been published yet.'"
+          ? 'Drop a word from the search, or clear the tag filter.'
+          : 'Nothing is published yet.'"
         class="max-w-2xl"
       />
     </section>

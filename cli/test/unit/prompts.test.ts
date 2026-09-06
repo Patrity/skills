@@ -59,7 +59,7 @@ describe('summarize', () => {
     const none = summarize(plan([], { envExampleRemove: true }))
     expect(none).not.toContain('.gitignore:')
     expect(none).toContain('.claude/.env.example: removed')
-    expect(summarize(plan([]))).toContain('.claude/.env.example: —')
+    expect(summarize(plan([]))).toContain('.claude/.env.example: none')
   })
 
   it('says a .gitignore was left alone rather than calling it unchanged', () => {

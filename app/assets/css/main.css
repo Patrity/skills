@@ -2,7 +2,7 @@
 @import "@nuxt/ui";
 
 /*
-  Design tokens — ported verbatim from the approved design system
+  Design tokens, ported verbatim from the approved design system
   (docs/design/previews/_shared/tokens.css, Claude Design approval 2026-09-06).
   `static` emits every variable whether or not a utility uses it, because the
   hand-written rules below read them through var().
@@ -76,7 +76,7 @@
     background: rgba(255, 255, 255, 0.03);
   }
 
-  /* Eyebrow label. .2em is the approved tracking — deliberately wider than Tailwind's
+  /* Eyebrow label. .2em is the approved tracking, deliberately wider than Tailwind's
      tracking-widest (.1em); do not "fix" it. */
   .micro {
     font-size: 0.75rem;

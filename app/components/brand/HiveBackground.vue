@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
- * HiveBackground — a reactive honeycomb drawn on a <canvas>.
+ * HiveBackground: a reactive honeycomb drawn on a <canvas>.
  *
- * Ported from techhivelabs.net (portfolio-v2/app/components/HiveBackground.vue) — same
- * author, same licence — with one addition: the `energy` prop, which dims the hive for
+ * Ported from techhivelabs.net (portfolio-v2/app/components/HiveBackground.vue): same
+ * author, same licence, with one addition: the `energy` prop, which dims the hive for
  * the tool pages (`low` runs the idle breathing and the hot colour blend at 40%).
  *
  * The wrapper and the <canvas> render on the server so the box is reserved and nothing

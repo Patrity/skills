@@ -28,7 +28,7 @@ const bundles = computed(() => data.value?.skills ?? [])
 // while the bundles are fine; the hero pill drops that half rather than claiming "zero questions".
 const axisCount = computed(() => base.value?.base?.axes.length ?? 0)
 
-const description = 'Answer a few questions and download a CLAUDE.md and a .claude/ directory: rules that carry the direction, skills that carry the how-to, hooks that fail closed. Compose it on the web or from the CLI, or take any single bundle on its own.'
+const description = 'Nine bundles, fourteen questions, one CLAUDE.md and a .claude/ directory: rules that carry the direction, skills that carry the how-to, hooks that fail closed. Build it in the browser or from the CLI, or take one bundle on its own.'
 
 useSeoMeta({
   // The app-level titleTemplate appends " · Skills".

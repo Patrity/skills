@@ -179,7 +179,7 @@ onBeforeUnmount(() => {
         </p>
 
         <p class="mt-4 max-w-xl text-base/relaxed lg:text-lg/relaxed text-muted">
-          Nine bundles, fourteen questions, one CLAUDE.md. Take the whole setup or one bundle.. every run writes the same files the CLI would, and the lockfile remembers which.
+          Nine bundles, fourteen questions, one CLAUDE.md. Take the whole setup or one bundle.. the browser and the CLI write the same files, and the lockfile records every one.
         </p>
 
         <div class="flex flex-wrap items-center gap-3 lg:gap-4 mt-7">

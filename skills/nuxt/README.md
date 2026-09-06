@@ -49,5 +49,5 @@ The fetcher caches what it downloads under `skills/nuxt-docs/cache/`, hence the 
 
 ## Companion bundles
 
-- **[`nuxt-ui`](/skill/nuxt-ui)** — the Nuxt UI v4 component and template fetchers plus their rule. Install it alongside this one when the project uses Nuxt UI.
-- **[`browser-testing`](/skill/browser-testing)** — proving UI changes in a real browser with playwright-cli.
+- **[`nuxt-ui`](/skill/nuxt-ui)**: the Nuxt UI v4 component and template fetchers plus their rule. Install it alongside this one when the project uses Nuxt UI.
+- **[`browser-testing`](/skill/browser-testing)**: proving UI changes in a real browser with playwright-cli.

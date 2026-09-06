@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@patrity/skills)](https://www.npmjs.com/package/@patrity/skills)
 
-A CLI that assembles an opinionated Claude Code setup — `.claude/` plus `CLAUDE.md` — from bundles published on [skills.patrity.com](https://skills.patrity.com).
+Assembles a Claude Code setup, `.claude/` plus `CLAUDE.md`, out of the bundles published on [skills.patrity.com](https://skills.patrity.com). One command, no install step.
 
 ## Quick start
 
@@ -19,30 +19,30 @@ and Linux are all supported.
 Every command accepts `--dir <path>` (default `.`), `--registry <url>` (default: the project's
 lockfile, else `https://skills.patrity.com`), `--yes` (take defaults, never prompt), `--force`
 (overwrite files and CLAUDE.md blocks edited since install) and `--json` (print one JSON object on
-stdout and nothing else — implies non-interactive).
+stdout and nothing else, which implies non-interactive).
 
 | Command | Aliases | Positional | What it does |
 | --- | --- | --- | --- |
-| `init` | — (default) | — | The wizard: asks the base questions, offers profiles and the bundle list grouped by tag, shows a dry-run plan, and applies it once confirmed. Also `--profile <name>`, `--with <slugs>` (repeatable/comma-separated), `--answer <axis>=<option>` (repeatable). Re-run it to edit a project, not to start it over — see below. |
-| `add <slug…>` | — | one or more bundle slugs | Adds bundles to an already-initialised project, re-rendering from the answers on record and pulling in anything the new bundles declare in `dependsOn`. |
+| `init` | none (default) | none | The wizard: asks the base questions, offers profiles and the bundle list grouped by tag, shows a dry-run plan, and applies it once confirmed. Also `--profile <name>`, `--with <slugs>` (repeatable/comma-separated), `--answer <axis>=<option>` (repeatable). Re-run it to edit a project, not to start it over. See below. |
+| `add <slug…>` | none | one or more bundle slugs | Adds bundles to an already-initialised project, re-rendering from the answers on record and pulling in anything the new bundles declare in `dependsOn`. |
 | `remove <slug…>` | `rm` | one or more bundle slugs | Removes a bundle's marker blocks and the files it owns. Files it did not create are left alone. |
-| `update [slug…]` | `up` | bundle slugs (optional) | Re-renders every installed bundle from the current registry. Naming slugs only narrows which must already be installed — the plan is always a full re-render, so upstream schema changes reach every bundle. |
-| `diff` | — | — | Compares local files against the lockfile's hashes (your hand edits) and the lockfile's recorded sha against the registry (upstream drift). |
-| `list` | `ls` | — | Prints the installed bundles, the recorded answers, and whether the install is behind the registry. |
+| `update [slug…]` | `up` | bundle slugs (optional) | Re-renders every installed bundle from the current registry. Naming slugs only narrows which must already be installed. The plan is always a full re-render, so upstream schema changes reach every bundle. |
+| `diff` | none | none | Compares local files against the lockfile's hashes (your hand edits) and the lockfile's recorded sha against the registry (upstream drift). |
+| `list` | `ls` | none | Prints the installed bundles, the recorded answers, and whether the install is behind the registry. |
 
 `add`/`remove`/`update` all read the previous answers and bundle list from
 `.claude/skills.lock.json`, so re-run `init` (not `add`) to change an axis answer.
 
 Re-running `init` on an initialised project **edits** it. The answers on record are the starting
-point — a `--profile` and any `--answer` flags override them, and interactively they come up
-pre-selected — and every installed bundle stays ticked, so a bundle you added later with `add`
+point. A `--profile` and any `--answer` flags override them, and interactively they come up
+pre-selected. Every installed bundle stays ticked, so a bundle you added later with `add`
 survives. Untick one in the wizard (or use `remove`) to take it out.
 
 Two things the lockfile can outlive:
 
 - **A bundle that is no longer published.** `update`, `add` and `remove` warn
   (`ghost is installed but no longer in the registry; removing its files`) and remove its files
-  rather than refusing to run. Naming it explicitly — `add ghost` — is still an error.
+  rather than refusing to run. Naming it explicitly, as in `add ghost`, is still an error.
 - **An answer the base no longer has.** An axis that vanished upstream is dropped, an answer that
   is no longer one of its options falls back to the axis default, an axis added upstream gets its
   default, and each correction is reported and written back to the lockfile.
@@ -70,7 +70,7 @@ variables, and whatever paths the bundles themselves declare (a cache directory,
 regenerates the block from the current selection and leaves every line outside it alone; the block
 goes away with the last entry. A bundle that declares variables also gets a group in
 `.claude/.env.example`, one commented line per variable with its description and a sample value.
-Copy it to `.claude/.env` and fill it in — the CLI never creates, reads or deletes that file. When
+Copy it to `.claude/.env` and fill it in. The CLI never creates, reads or deletes that file. When
 the last bundle declaring variables is removed the example is deleted, unless you edited it, in
 which case it is left in place and reported.
 
@@ -92,8 +92,8 @@ and command string (a changed timeout replaces the installed entry rather than d
 `settings.local.json` instead, and the CLI makes sure that file is gitignored.
 
 Each bundle's contribution is recorded in the lockfile once per settings file, so `remove` takes its
-hooks and permissions back out of the file it merged them into — a fail-closed hook never stays
-armed after its script is deleted — and `update` replaces its own entries instead of stacking new
+hooks and permissions back out of the file it merged them into, so a fail-closed hook never stays
+armed after its script is deleted, and `update` replaces its own entries instead of stacking new
 ones beside them. Anything you added by hand survives `remove` and `update` unless it is
 byte-identical to an entry the bundle contributed to that same file: an `allow` you keep in
 `settings.json` stays put when the bundle's copy leaves `settings.local.json`.
@@ -103,14 +103,14 @@ byte-identical to an entry the bundle contributed to that same file: an `allow` 
 `.claude/skills.lock.json` records the registry a project was set up against, the answers given to
 every axis, which bundle owns which file (with its content hash), what each bundle merged into each
 of the two settings files, and the hash of every CLAUDE.md marker block. `add`, `remove`, `update`, `diff`
-and `list` all read it — there is no other place the CLI keeps state, and it is meant to be
+and `list` all read it. There is no other place the CLI keeps state, and it is meant to be
 committed.
 
 ## Updating
 
 Every file and CLAUDE.md block the CLI wrote is hashed at install time. On a later run:
 
-- A **bundle file** whose content still matches the hash on record is `unchanged` — a no-op.
+- A **bundle file** whose content still matches the hash on record is `unchanged`, a no-op.
 - One that was **edited by hand** since install is `protected`: the CLI refuses to overwrite it
   and leaves it alone, unless you pass `--force`.
 - A file that **already existed and was never installed by this CLI** is a `conflict`: interactively
@@ -124,7 +124,7 @@ Every file and CLAUDE.md block the CLI wrote is hashed at install time. On a lat
   on `update` unless you pass `--force` to replace it with the upstream version.
 
 ```bash
-pnpx @patrity/skills diff     # what drifted, locally and upstream — nothing is written
+pnpx @patrity/skills diff     # what drifted, locally and upstream. Nothing is written
 pnpx @patrity/skills update   # re-render and apply, with a confirmation
 ```
 
@@ -154,7 +154,7 @@ human-readable summary.
 ## Using another registry
 
 The CLI talks to `https://skills.patrity.com` by default. Point it at any host that serves the same
-API — a fork, a staging deploy, or a local `pnpm dev`:
+API: a fork, a staging deploy, or a local `pnpm dev`.
 
 ```bash
 pnpx @patrity/skills init --registry http://localhost:3000
@@ -178,7 +178,7 @@ Full documentation also lives at [skills.patrity.com/docs/cli](https://skills.pa
 The `.gitignore` line became a managed block: `# >>> skills` … `# <<< skills`, regenerated on every
 run from the current selection, with every line outside it left alone. A project set up with 0.1.0
 keeps its old loose `.claude/settings.local.json` line above the block; it is harmless, and yours to
-delete. A block that was opened and never closed stops the CLI touching the file at all — it warns
+delete. A block that was opened and never closed stops the CLI touching the file at all: it warns
 and moves on, because there is no telling where that block was meant to end.
 
 Bundles declare `gitignore` paths and `env` variables in their frontmatter now. The variables are

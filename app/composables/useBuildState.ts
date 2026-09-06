@@ -13,7 +13,7 @@ const HASH_DEBOUNCE_MS = 150
  * The whole of the `/build` page's state, and the URL it round-trips through.
  *
  * SSR-safe by construction: the state is seeded from the manifest alone (the same value the server
- * renders), and `location.hash` is only read once mounted — so a shared link is applied as a normal
+ * renders), and `location.hash` is only read once mounted, so a shared link is applied as a normal
  * post-hydration update rather than as a mismatch.
  */
 export function useBuildState(manifest: Ref<CliManifest | null>) {
@@ -77,7 +77,7 @@ export function useBuildState(manifest: Ref<CliManifest | null>) {
   /** Only the axes the wizard would ask, given the answers so far. */
   const axes = computed<BaseAxis[]>(() => (base.value ? activeAxes(base.value, state.value.answers) : []))
 
-  /** What the wizard would pre-tick right now — the "recommended" marker on the picker. */
+  /** What the wizard would pre-tick right now: the "recommended" marker on the picker. */
   const recommended = computed(() => (base.value ? preselectedBundles(base.value, state.value.answers, profile.value, skills.value) : []))
 
   /** slug → the ticked bundles that depend on it, so unticking it can be refused with a reason. */
