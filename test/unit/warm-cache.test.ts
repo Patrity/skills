@@ -77,6 +77,12 @@ describe('buildWarmUrls', () => {
     expect(urls).toContain('/api/cli/manifest')
   })
 
+  // The home page renders the lab feed server-side, so a cold /api/lab-feed makes the
+  // first visitor after a purge wait on techhivelabs.net.
+  it('warms the lab feed the home page reads', () => {
+    expect(urls).toContain('/api/lab-feed')
+  })
+
   it('warms the /build page and its payload', () => {
     expect(urls).toContain('/build')
     expect(urls).toContain('/build/_payload.json')

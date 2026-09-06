@@ -88,6 +88,8 @@ export default defineNuxtConfig({
     '/api/base': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/api/profiles': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/api/cli/**': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } },
+    // Someone else's RSS feed: an hour is plenty, and the tag lets a purge re-warm it.
+    '/api/lab-feed': { isr: 3600, headers: { 'Vercel-Cache-Tag': 'skills' } },
     '/sitemap.xml': { isr: 300, headers: { 'Vercel-Cache-Tag': 'skills' } }
   },
 

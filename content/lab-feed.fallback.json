@@ -1,0 +1,14 @@
+[
+  {
+    "title": "I Gave an AI Agent the Keys to Navisworks, and Five Trades of Takeoff Took Four Days",
+    "url": "https://www.techhivelabs.net/blog/automated-bim-takeoff",
+    "date": "2026-08-19T00:00:00.000Z",
+    "summary": "Automated BIM takeoff platforms assume your model followed the rules. Real models never do. So an AI agent drove Navisworks headless.. and five trades of takeoff took four days."
+  },
+  {
+    "title": "I Built a Bot Army to Attack My Own Game Server, and 45 of Them Took It Down",
+    "url": "https://www.techhivelabs.net/blog/game-server-scaling",
+    "date": "2026-07-25T00:00:00.000Z",
+    "summary": "My movement bots said the server could hold hundreds. Then I taught them to swing a sword and the whole thing fell over at 45.. which is how I ended up shopping for CPUs instead of RAM."
+  }
+]

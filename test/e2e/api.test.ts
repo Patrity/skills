@@ -5,6 +5,7 @@ import { unzipSync } from 'fflate'
 import type { SkillDetailResponse, SkillFileResponse, SkillsListResponse } from '../../shared/types/skills'
 import type { DocResponse } from '../../shared/types/docs'
 import type { BaseResponse, CliManifest, ProfilesResponse } from '../../shared/types/setup'
+import type { LabFeedResponse } from '../../shared/types/site'
 import { planFresh } from '../../shared/setup/plan'
 import { defaultAnswers } from '../../shared/setup/wizard'
 import { serializeLockfile } from '../../shared/setup/lock'
@@ -143,6 +144,30 @@ describe('GET /api/docs/:slug', () => {
     expect((await fetch('/api/docs/nope')).status).toBe(404)
     // getting-started was renamed to single-bundle; only the page redirects, not the API.
     expect((await fetch('/api/docs/getting-started')).status).toBe(404)
+  })
+})
+
+describe('GET /api/lab-feed', () => {
+  // The live feed is fetched with a 5 s budget and falls back to the frozen snapshot, so
+  // this passes with or without network: either way it is two posts on a cacheable route.
+  it('returns two posts and says where they came from', async () => {
+    const res = await $fetch<LabFeedResponse>('/api/lab-feed')
+    expect(['live', 'fallback']).toContain(res.source)
+    expect(res.posts).toHaveLength(2)
+    for (const post of res.posts) {
+      expect(post.title.length).toBeGreaterThan(0)
+      expect(post.url).toMatch(/^https:\/\/www\.techhivelabs\.net\//)
+      expect(Number.isNaN(Date.parse(post.date))).toBe(false)
+    }
+    // Newest first, which is the order the two cards render in.
+    expect(Date.parse(res.posts[0]!.date)).toBeGreaterThanOrEqual(Date.parse(res.posts[1]!.date))
+  })
+
+  it('is cacheable and carries the skills purge tag', async () => {
+    const res = await fetch('/api/lab-feed')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('vercel-cache-tag')).toBe('skills')
+    expect(res.headers.get('cache-control') ?? '').not.toContain('no-store')
   })
 })
 

@@ -35,7 +35,9 @@ function filePaths(nodes: TreeNode[], out: string[] = []): string[] {
  * has to fetch those to build this list, which warms them already.
  */
 export function buildWarmUrls(sitemapXml: string, details: SkillDetailResponse[], buildId?: string): string[] {
-  const urls = new Set<string>(['/api/base', '/api/profiles', '/api/cli/manifest'])
+  // /api/lab-feed is the home page's only off-site read: cold, the first visitor after a
+  // purge waits on techhivelabs.net, so it is warmed with everything else.
+  const urls = new Set<string>(['/api/base', '/api/profiles', '/api/cli/manifest', '/api/lab-feed'])
   const query = buildId ? `?_b=${encodeURIComponent(buildId)}` : ''
   // The site root's payload is /_payload.json, not //_payload.json.
   const payload = (path: string) => `${path === '/' ? '' : path}/_payload.json${query}`

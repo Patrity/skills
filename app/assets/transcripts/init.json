@@ -1,0 +1,85 @@
+{
+  "lines": [
+    {
+      "type": "cmd",
+      "text": "pnpx @patrity/skills init --yes --profile nuxt-app",
+      "delay": 45
+    },
+    {
+      "type": "out",
+      "text": ".claude/rules/browser-testing.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/skills/browser-testing/SKILL.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/rules/docs.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/skills/handover/SKILL.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/skills/wiki-parity/SKILL.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/skills/wiki-parity/_systems.example.json",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/skills/wiki-parity/wiki-parity.test.ts",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/rules/backend.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/rules/cli.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".. 18 more",
+      "delay": 90,
+      "dim": true
+    },
+    {
+      "type": "out",
+      "text": "CLAUDE.md",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/settings.json",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".claude/settings.local.json",
+      "delay": 90
+    },
+    {
+      "type": "out",
+      "text": ".gitignore",
+      "delay": 90
+    },
+    {
+      "type": "ok",
+      "text": "Setup written.",
+      "delay": 260
+    }
+  ]
+}
