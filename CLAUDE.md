@@ -37,7 +37,7 @@ Nuxt 4 + Nuxt UI v4 site that lists, renders and zips Claude Code bundles stored
 
 ## Production (verified 2026-09-03)
 - https://skills.patrity.com on Vercel team `patritys-projects`, project `skills`; repo `Patrity/skills` is public. Vercel CLI is linked from this directory (`.vercel/`, gitignored).
-- Env (Vercel): `NUXT_SKILLS_SOURCE=github`, `NUXT_PUBLIC_SITE_URL`, `UMAMI_DOMAINS`, `NUXT_REVALIDATE_SECRET` (sensitive; same value as the GitHub Actions secret `REVALIDATE_SECRET`), `NUXT_GITHUB_TOKEN` (sensitive), `NUXT_PUBLIC_UMAMI_ID` (production only). Do NOT set `NUXT_PUBLIC_GITHUB_*` unless overriding — empty values override the config defaults and break every GitHub URL.
+- Env (Vercel): `NUXT_SKILLS_SOURCE=github`, `NUXT_PUBLIC_SITE_URL`, `UMAMI_DOMAINS`, `NUXT_REVALIDATE_SECRET` (sensitive; same value as the GitHub Actions secret `REVALIDATE_SECRET`), `NUXT_GITHUB_TOKEN` (sensitive), `NUXT_PUBLIC_UMAMI_ID` (production only), `NUXT_OG_IMAGE_SECRET` (sensitive; must stay stable across deploys — it signs every `/_og/**` URL, and rotating it 404s the og:image links social networks have already cached). Do NOT set `NUXT_PUBLIC_GITHUB_*` unless overriding — empty values override the config defaults and break every GitHub URL.
 - `invalidateByTag('skills')` DOES purge ISR entries: after `POST /api/revalidate` the next hit is `x-vercel-cache: STALE`, then `HIT`. No bypass-token fallback needed.
 - A skills-only push is ignored by Vercel (`scripts/should-build.sh`) and the `revalidate` workflow puts the new sha on the CDN in ~5 s. A redeploy of the same commit (env changes) always builds.
 - Env changes need a redeploy: `vercel redeploy <latest-production-url> --scope patritys-projects`.

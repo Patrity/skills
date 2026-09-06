@@ -242,6 +242,14 @@ describe('docs pages', () => {
   it('404s for an unknown doc', async () => {
     expect((await fetch('/docs/nope')).status).toBe(404)
   })
+  // app.vue emits the canonical; nuxt-seo-utils (bundled in @nuxtjs/seo) sets one per route
+  // too. Unhead treats link[rel=canonical] as a unique tag so ours wins — this guards the
+  // day it stops doing that and every page ships two conflicting canonicals.
+  it('ships exactly one canonical, ours', async () => {
+    const html = await $fetch<string>('/docs/start-here')
+    expect(html.match(/rel="canonical"/g)).toHaveLength(1)
+    expect(html).toContain('<link rel="canonical" href="http://localhost:3000/docs/start-here">')
+  })
 })
 
 describe('skill pages', () => {

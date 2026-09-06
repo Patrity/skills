@@ -6,12 +6,19 @@ import { fileURLToPath } from 'node:url'
 // satori (0.33) shapes text with harfbuzzjs, which reads `hb.wasm` off disk at runtime via
 // `__dirname + '/hb.wasm'`. node-file-trace follows hb.js but never sees that read, so the
 // built server answers every OG image with
-// `ENOENT .output/server/node_modules/harfbuzzjs/hb.wasm` — a 500 on Vercel, not just
-// locally. `externals.traceInclude` cannot help (it resolves JS entries), so copy the file
-// in once Nitro has written the output. Resolved through satori because harfbuzzjs is its
+// `ENOENT <serverDir>/node_modules/harfbuzzjs/hb.wasm` — a 500 on Vercel, not just locally.
+// `externals.traceInclude` cannot help (it resolves JS entries), so copy the file in once
+// Nitro has written the output. Resolved through satori because harfbuzzjs is its
 // dependency, not ours.
 const hbWasmSource = createRequire(createRequire(import.meta.url).resolve('satori/package.json'))
   .resolve('harfbuzzjs/hb.wasm')
+
+/** Put hb.wasm next to the hb.js that Nitro traced into the server bundle. */
+async function copyHarfbuzzWasm(serverDir: string) {
+  const dir = join(serverDir, 'node_modules/harfbuzzjs')
+  await mkdir(dir, { recursive: true })
+  await copyFile(hbWasmSource, join(dir, 'hb.wasm'))
+}
 
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/mdc', 'nuxt-umami', '@nuxt/fonts', '@nuxtjs/seo'],
@@ -90,15 +97,17 @@ export default defineNuxtConfig({
   // Nitro server assets: the /api/docs route reads them from memory and a deploy is what
   // invalidates them.
   nitro: {
-    serverAssets: [{ baseName: 'docs', dir: fileURLToPath(new URL('./content/docs', import.meta.url)) }],
+    serverAssets: [{ baseName: 'docs', dir: fileURLToPath(new URL('./content/docs', import.meta.url)) }]
+  },
 
-    hooks: {
-      // See hbWasmSource above.
-      async compiled(nitro) {
-        const dir = join(nitro.options.output.serverDir, 'node_modules/harfbuzzjs')
-        await mkdir(dir, { recursive: true })
-        await copyFile(hbWasmSource, join(dir, 'hb.wasm'))
-      }
+  // `nitro.hooks.compiled` would REPLACE the hook the deploy preset registers, not run
+  // alongside it: Nitro merges preset into user config with defu, which overwrites
+  // functions, and the vercel preset's own `compiled` is what writes
+  // .vercel/output/config.json and every ISR .func / .prerender-config.json. Registering
+  // through `nitro:init` adds a listener instead, so both run.
+  hooks: {
+    'nitro:init'(nitro) {
+      nitro.hooks.hook('compiled', n => copyHarfbuzzWasm(n.options.output.serverDir))
     }
   },
 
@@ -124,7 +133,12 @@ export default defineNuxtConfig({
   // inside `defaults` — the default template is the one app.vue registers with
   // defineOgImage(), and the renderer comes from the `.satori.vue` filename suffix.
   ogImage: {
-    defaults: { width: 1200, height: 630 }
+    defaults: { width: 1200, height: 630 },
+    // Runtime OG image URLs are signed. Left alone the module generates a fresh secret per
+    // build, which invalidates every og:image URL already scraped or sitting in a social
+    // cache (they are served immutable for 3 days). NUXT_OG_IMAGE_SECRET pins it in
+    // production; locally it stays unset and the per-build random secret is fine.
+    security: { secret: process.env.NUXT_OG_IMAGE_SECRET }
   },
   robots: { enabled: false },
   schemaOrg: { enabled: true },
