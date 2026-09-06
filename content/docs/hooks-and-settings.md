@@ -1,6 +1,6 @@
 # Hooks and settings
 
-Claude Code hooks live in a settings file and point at scripts on disk. A bundle can ship both halves.
+Claude Code hooks live in a settings file and point at scripts on disk. A bundle can ship both files.
 
 There are two settings files, and which one a key belongs in is decided by whether it is shared or
 machine-local:

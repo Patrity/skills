@@ -6,7 +6,7 @@ export default defineCommand({
   meta: { name: 'update', alias: ['up'], description: 'Re-render everything from the current registry' },
   args: {
     ...commonArgs,
-    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'Bundles that must be installed (default: all of them)' }
+    slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'Bundles that must be installed (none named: everything re-renders)' }
   },
   run: ({ args }) => guard(async () => {
     const opts = commonOpts(args)

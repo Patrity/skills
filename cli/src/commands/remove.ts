@@ -3,7 +3,7 @@ import { runRemove } from '../run'
 import { commonArgs, commonOpts, guard, positionals, reportPlan, startInteractive } from './common'
 
 export default defineCommand({
-  meta: { name: 'remove', alias: ['rm'], description: 'Take bundles back out, files and all' },
+  meta: { name: 'remove', alias: ['rm'], description: 'Take bundles back out, and the files they installed' },
   args: {
     ...commonArgs,
     slugs: { type: 'positional', required: false, valueHint: 'slug...', description: 'The bundles to take out' }

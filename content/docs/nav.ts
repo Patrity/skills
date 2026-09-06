@@ -15,7 +15,7 @@ export const docsNav: DocEntry[] = [
   { slug: 'cli', title: 'CLI', file: 'cli.md', group: 'Reference', description: 'Every command and flag in @patrity/skills, and what each run writes.' },
   { slug: 'base-and-profiles', title: 'Base and profiles', file: 'base-and-profiles.md', group: 'Reference', description: 'How the questions become a CLAUDE.md, and how to add an axis or a profile.' },
   { slug: 'single-bundle', title: 'Single bundle', file: 'single-bundle.md', group: 'Reference', description: 'Take one bundle by hand and leave the rest of the setup alone.' },
-  { slug: 'bundle-structure', title: 'Bundle structure', file: 'bundle-structure.md', group: 'Reference', description: 'What goes where inside skills/<slug>/, and what the site throws away.' },
+  { slug: 'bundle-structure', title: 'Bundle structure', file: 'bundle-structure.md', group: 'Reference', description: 'What goes where inside skills/<slug>/, and what the site will not serve.' },
   { slug: 'frontmatter', title: 'Frontmatter reference', file: 'frontmatter.md', group: 'Reference', description: 'Every README key, which ones are required, and what the site derives on its own.' },
   { slug: 'hooks-and-settings', title: 'Hooks and settings', file: 'hooks-and-settings.md', group: 'Reference', description: 'The two settings files, hook scripts, and the files the tool manages for you.' },
   { slug: 'contributing', title: 'Contributing', file: 'contributing.md', group: 'Contribute', description: 'How a pull request becomes a live bundle.' }

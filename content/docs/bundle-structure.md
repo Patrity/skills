@@ -16,11 +16,11 @@ skills/
     └── CLAUDE.md              optional: pointer snippet
 ```
 
-Only `README.md` is required. Everything else is copied into a project's `.claude/` verbatim, the two settings files excepted because those get merged, so structure it exactly as Claude Code expects.
+Only `README.md` is required. Everything else is copied into a project's `.claude/` verbatim, so structure it exactly as Claude Code expects. The two settings files are the exception: the CLI merges those into the files of the same name.
 
 ## README.md is two files in a trenchcoat
 
-It is **metadata** (YAML frontmatter, see [Frontmatter reference](/docs/frontmatter)) and **documentation** (the markdown body) at the same time. The body is what renders on the bundle's page. Write it for someone deciding whether to install: what it does, what it needs, how to wire the `CLAUDE.md` snippet.
+The README is **metadata** (YAML frontmatter, see [Frontmatter reference](/docs/frontmatter)) and **documentation** (the markdown body) at the same time. The body is what renders on the bundle's page. Write it for someone deciding whether to install: what it does, what it needs, how to wire the `CLAUDE.md` snippet.
 
 ## skills/ is whatever Claude Code already expects
 

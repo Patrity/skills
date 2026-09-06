@@ -1,6 +1,6 @@
 # Contributing
 
-This is a personal registry first. Pull requests for genuinely reusable bundles still get merged.
+This is a personal registry first. Pull requests for genuinely reusable bundles are still welcome.
 
 ## Add a bundle in five steps
 
