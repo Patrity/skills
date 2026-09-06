@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fileURLToPath } from 'node:url'
-import { fetch, setup } from '@nuxt/test-utils/e2e'
+import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
+import type { SkillsListResponse } from '../../shared/types/skills'
 
 const skillsDir = fileURLToPath(new URL('../fixtures/skills', import.meta.url))
 
@@ -112,5 +113,51 @@ describe('site shell', () => {
     const header = section(await (await fetch('/')).text(), 'header')
     expect(header).toMatch(/<a[^>]*href="https:\/\/github\.com\/Patrity"[^>]*rel="me noopener"/)
     expect(header).toMatch(/<a[^>]*href="https:\/\/x\.com\/Patrity"[^>]*rel="me noopener"/)
+  })
+})
+
+describe('/skills', () => {
+  it('renders one row per bundle the API returns', async () => {
+    const list = await $fetch<SkillsListResponse>('/api/skills')
+    expect(list.skills.length).toBeGreaterThan(0)
+
+    const html = withoutComments(await (await fetch('/skills')).text())
+    expect(html.match(/data-skill-row/g) ?? []).toHaveLength(list.skills.length)
+    for (const skill of list.skills) {
+      expect(html, skill.slug).toContain(`href="/skill/${skill.slug}"`)
+      expect(html, skill.slug).toContain(skill.name)
+    }
+  })
+
+  it('renders the search field and the tag chips', async () => {
+    const html = withoutComments(await (await fetch('/skills')).text())
+    expect(html).toMatch(/<input[^>]*type="search"/)
+    // Chips are toggle buttons, so their state is announced rather than implied by colour.
+    expect(html).toMatch(/<button[^>]*aria-pressed="false"/)
+  })
+})
+
+describe('/skill/demo', () => {
+  it('renders the bundle header: install command and meta list', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo')).text())
+    expect(html).toContain('pnpx @patrity/skills add demo')
+    // From the fixture frontmatter — the meta list, not the SEO tags.
+    expect(html).toContain('Tester')
+    expect(html).toContain('python3')
+  })
+
+  it('renders the file tree', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo')).text())
+    expect(html).toContain('role="tree"')
+    // Root-level rows (a collapsed folder's children are not server-rendered). The
+    // data attribute is the tree's own, so this cannot pass on a stray mention.
+    expect(html).toContain('data-tree-path="README.md"')
+    expect(html).toContain('data-tree-path="settings.json"')
+  })
+
+  it('renders the README', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo')).text())
+    expect(html).toContain('This README is rendered on')
+    expect(html).toMatch(/<h1[^>]*>Demo bundle<\/h1>/)
   })
 })

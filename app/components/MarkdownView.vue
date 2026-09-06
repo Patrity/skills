@@ -31,4 +31,12 @@ withDefaults(defineProps<{
 .skill-prose pre {
   overflow-x: auto;
 }
+/*
+  A fenced block scrolls; an inline path like `.claude/rules/{a,b,c}.md` has nowhere to
+  scroll, so it breaks instead. Without this the widest line of prose sets the document's
+  min-content width and the whole page scrolls sideways on a phone.
+*/
+.skill-prose :not(pre) > code {
+  overflow-wrap: anywhere;
+}
 </style>

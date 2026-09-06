@@ -8,72 +8,70 @@ const props = defineProps<{
 
 const view = defineModel<'rendered' | 'source'>('view', { required: true })
 
+const VIEWS = [
+  { value: 'rendered' as const, label: 'Rendered' },
+  { value: 'source' as const, label: 'Source' }
+]
+
 const { blob } = useGithubUrls()
 const { trackDownload, trackSource } = useAnalytics()
 const toast = useToast()
 
 async function copyRaw() {
   if (!props.content) return
-  await navigator.clipboard.writeText(props.content)
+  try {
+    await navigator.clipboard.writeText(props.content)
+  } catch {
+    toast.add({ title: 'Could not copy .. select the file and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
+    return
+  }
   toast.add({ title: 'Copied raw file', icon: 'i-lucide-clipboard-check', color: 'success' })
 }
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
-    <UFieldGroup
+  <div class="flex items-center gap-1.5">
+    <SegmentedControl
       v-if="isMarkdown"
-      size="xs"
-    >
-      <UButton
-        label="Rendered"
-        icon="i-lucide-eye"
-        :color="view === 'rendered' ? 'primary' : 'neutral'"
-        :variant="view === 'rendered' ? 'solid' : 'outline'"
-        @click="view = 'rendered'"
-      />
-      <UButton
-        label="Source"
-        icon="i-lucide-code"
-        :color="view === 'source' ? 'primary' : 'neutral'"
-        :variant="view === 'source' ? 'solid' : 'outline'"
-        @click="view = 'source'"
-      />
-    </UFieldGroup>
+      v-model="view"
+      :items="VIEWS"
+      label="File view"
+    />
 
-    <UFieldGroup size="xs">
-      <UTooltip text="Copy raw file">
-        <UButton
-          icon="i-lucide-clipboard"
-          color="neutral"
-          variant="outline"
-          :disabled="!content"
-          aria-label="Copy raw file"
-          @click="copyRaw"
-        />
-      </UTooltip>
-      <UTooltip text="View on GitHub">
-        <UButton
-          icon="i-simple-icons-github"
-          color="neutral"
-          variant="outline"
-          :to="blob(slug, path)"
-          target="_blank"
-          aria-label="View on GitHub"
-          @click="trackSource(slug)"
-        />
-      </UTooltip>
-      <UTooltip text="Download bundle (.zip)">
-        <UButton
-          icon="i-lucide-download"
-          color="neutral"
-          variant="outline"
-          :to="`/api/skills/${slug}/download`"
-          external
-          aria-label="Download bundle"
-          @click="trackDownload(slug, 'detail')"
-        />
-      </UTooltip>
-    </UFieldGroup>
+    <UTooltip text="Copy raw file">
+      <UButton
+        icon="i-lucide-clipboard"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        :disabled="!content"
+        aria-label="Copy raw file"
+        @click="copyRaw"
+      />
+    </UTooltip>
+    <UTooltip text="View on GitHub">
+      <UButton
+        icon="i-simple-icons-github"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        :to="blob(slug, path)"
+        target="_blank"
+        aria-label="View this file on GitHub"
+        @click="trackSource(slug)"
+      />
+    </UTooltip>
+    <UTooltip text="Download bundle (.zip)">
+      <UButton
+        icon="i-lucide-download"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        :to="`/api/skills/${slug}/download`"
+        external
+        aria-label="Download bundle"
+        @click="trackDownload(slug, 'detail')"
+      />
+    </UTooltip>
   </div>
 </template>

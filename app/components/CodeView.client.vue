@@ -35,20 +35,41 @@ function languageExtension(lang: Language): Extension {
   }
 }
 
+/**
+ * Light mode is drawn from the design tokens (`--cm-bg`, `--cm-gutter`, `--cm-accent` in
+ * `app/assets/css/main.css`); dark keeps one-dark, which the design signed off as-is.
+ * Token colouring stays on CodeMirror's `defaultHighlightStyle` — the tag vocabulary lives
+ * in `@lezer/highlight`, which is not a direct dependency and is not worth adding for it.
+ */
+const lightTheme = EditorView.theme({
+  '&': { backgroundColor: 'var(--cm-bg)', color: 'var(--ui-text)' },
+  '.cm-content': { caretColor: 'var(--cm-accent)' },
+  '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--cm-accent)' },
+  '.cm-gutters': {
+    backgroundColor: 'var(--cm-gutter)',
+    borderRight: '1px solid var(--ui-border)',
+    color: 'var(--ui-text-dimmed)'
+  },
+  '.cm-activeLine': { backgroundColor: 'color-mix(in srgb, var(--cm-accent) 6%, transparent)' },
+  '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection': {
+    backgroundColor: 'color-mix(in srgb, var(--cm-accent) 20%, transparent)'
+  },
+  '.cm-foldPlaceholder': {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: 'var(--ui-text-dimmed)'
+  }
+}, { dark: false })
+
 function themeExtension(dark: boolean): Extension {
-  return dark ? oneDark : syntaxHighlighting(defaultHighlightStyle, { fallback: true })
+  return dark ? oneDark : [lightTheme, syntaxHighlighting(defaultHighlightStyle, { fallback: true })]
 }
 
 const baseTheme = EditorView.theme({
   '&': { fontSize: '13px' },
   '.cm-scroller': {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-    lineHeight: '1.6'
-  },
-  '.cm-gutters': {
-    backgroundColor: 'var(--ui-bg-muted)',
-    borderRight: '1px solid var(--ui-border)',
-    color: 'var(--ui-text-dimmed)'
+    fontFamily: 'var(--font-mono)',
+    lineHeight: '1.7'
   },
   '.cm-content': { padding: '12px 0' },
   '.cm-line': { padding: '0 16px' }
@@ -102,7 +123,7 @@ onUnmounted(() => {
 <template>
   <div
     ref="host"
-    class="code-view rounded-md border border-default overflow-hidden"
+    class="code-view rounded-xl border border-default overflow-hidden"
   />
 </template>
 

@@ -32,12 +32,37 @@ function iconFor(name: string): string {
   return 'i-lucide-file'
 }
 
-function toItems(nodes: TreeNode[]): SkillTreeItem[] {
-  return nodes.map(n => n.type === 'dir'
-    ? { label: n.name, path: n.path, nodeType: 'dir' as const, children: toItems(n.children ?? []) }
-    : { label: n.name, path: n.path, nodeType: 'file' as const, icon: iconFor(n.name) })
+function isReadme(node: TreeNode): boolean {
+  return node.type === 'file' && node.name.toLowerCase() === 'readme.md'
 }
-const items = computed(() => toItems(props.tree))
+
+/**
+ * The API sorts directories before files, which buries the README under the folders it
+ * describes. At the bundle root the reading order wins instead: README, the other loose
+ * files, then the directories. `sort` is stable, so each band keeps the API's order.
+ * Nested levels are left alone: inside `rules/` the folders-first order still reads best.
+ */
+function rootOrder(nodes: TreeNode[]): TreeNode[] {
+  const rank = (n: TreeNode) => (isReadme(n) ? 0 : n.type === 'file' ? 1 : 2)
+  return [...nodes].sort((a, b) => rank(a) - rank(b))
+}
+
+/** Selected rows take the green plate; the README keeps a rule under it, as the design pins it. */
+function uiFor(node: TreeNode, root: boolean) {
+  const selected = node.path === props.selectedPath
+  return {
+    link: selected ? 'before:bg-primary/12 text-primary' : '',
+    linkLeadingIcon: selected ? 'text-primary' : 'text-dimmed',
+    item: root && isReadme(node) ? 'mb-1 border-b border-default pb-1' : ''
+  }
+}
+
+function toItems(nodes: TreeNode[], root = false): SkillTreeItem[] {
+  return (root ? rootOrder(nodes) : nodes).map(n => n.type === 'dir'
+    ? { label: n.name, path: n.path, nodeType: 'dir' as const, ui: uiFor(n, root), children: toItems(n.children ?? []) }
+    : { label: n.name, path: n.path, nodeType: 'file' as const, icon: iconFor(n.name), ui: uiFor(n, root) })
+}
+const items = computed(() => toItems(props.tree, true))
 
 function ancestors(path: string): string[] {
   const parts = path.split('/')
@@ -48,7 +73,7 @@ function ancestors(path: string): string[] {
 
 // UTree keys expanded nodes by `get-key` (the path). Start with the selected file's ancestors
 // open and keep adding as the route changes; never collapse on the user's behalf. The desktop
-// panel and the mobile slideover each mount their own SkillTree instance, so expansion is
+// column and the mobile disclosure each mount their own SkillTree instance, so expansion is
 // lifted into useState (Nuxt's SSR-safe shared state), keyed by slug, so both share it.
 const expanded = useState<string[]>(`skill-tree-expanded:${props.slug}`, () => ancestors(props.selectedPath))
 watch(() => props.selectedPath, (path) => {
@@ -109,6 +134,11 @@ function onPointerOver(event: PointerEvent) {
     :get-key="(item: SkillTreeItem) => item.path"
     size="sm"
     class="p-2"
+    :ui="{
+      link: 'font-mono text-[0.8125rem] gap-2 px-2 py-[0.3125rem] text-muted hover:text-default',
+      linkLeadingIcon: 'size-[15px]',
+      linkTrailingIcon: 'size-3.5'
+    }"
     @select="onSelect"
     @pointerover="onPointerOver"
   >

@@ -4,9 +4,17 @@ const props = withDefaults(defineProps<{
   command: string
   /** Bundle slug (or `init` for the setup command) — the analytics dimension. */
   slug: string
-  /** Show the word next to the glyph. Bundle pages drop it so the box stays command-width. */
+  /**
+   * Show the word next to the glyph. It is hidden below `sm` either way (a phone has no
+   * room for it beside the command) but never dropped from the accessible name.
+   */
   label?: boolean
-}>(), { label: true })
+  /**
+   * `box` is the `$ command [Copy]` plate.
+   * `icon` is the bare glyph button from a bundle row's action cluster.
+   */
+  variant?: 'box' | 'icon'
+}>(), { label: true, variant: 'box' })
 
 const emit = defineEmits<{ copied: [slug: string] }>()
 
@@ -26,7 +34,7 @@ async function copy() {
   try {
     await navigator.clipboard.writeText(props.command)
   } catch {
-    toast.add({ title: 'Could not copy — select the command and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
+    toast.add({ title: 'Could not copy .. select the command and copy it manually', icon: 'i-lucide-clipboard-x', color: 'error' })
     return
   }
   toast.add({ title: 'Command copied', icon: 'i-lucide-clipboard-check', color: 'success' })
@@ -41,11 +49,34 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
 </script>
 
 <template>
-  <!-- The whole box is the click target (approved install-box card), so it is one button. -->
+  <UTooltip
+    v-if="variant === 'icon'"
+    :text="command"
+  >
+    <button
+      type="button"
+      class="inline-flex rounded-md border border-default bg-elevated p-[0.4375rem] text-muted transition-colors cursor-pointer hover:border-primary/45 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      :class="{ 'text-primary': done }"
+      :aria-label="`Copy install command: ${command}`"
+      @click.stop="copy"
+    >
+      <UIcon
+        :name="done ? 'i-lucide-check' : 'i-lucide-copy'"
+        class="size-4"
+      />
+    </button>
+  </UTooltip>
+
+  <!--
+    The whole box is the click target (approved install-box card), so it is one button.
+    No aria-label: the name is built from the contents, so it always contains the visible
+    text (Lighthouse `label-content-name-mismatch`) and still says "Copy" when the word
+    itself is only there for a screen reader.
+  -->
   <button
+    v-else
     type="button"
     class="install w-full"
-    :aria-label="`Copy command: ${command}`"
     @click.stop="copy"
   >
     <span class="line">
@@ -63,7 +94,7 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
         :name="done ? 'i-lucide-check' : 'i-lucide-copy'"
         class="size-3.5 shrink-0"
       />
-      <span v-if="label">{{ done ? 'Copied' : 'Copy' }}</span>
+      <span :class="label ? 'sr-only sm:not-sr-only' : 'sr-only'">{{ done ? 'Copied' : 'Copy' }}</span>
     </span>
   </button>
 </template>

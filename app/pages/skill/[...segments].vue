@@ -76,11 +76,22 @@ function onSelect(path: string) {
   navigateTo(`/skill/${slug.value}/${encodePathSegments(path)}`)
 }
 
-const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-  { label: 'Skills', to: '/skills' },
-  { label: skill.value.name, to: isReadme.value ? undefined : `/skill/${slug.value}` },
-  ...(isReadme.value ? [] : currentPath.value.split('/').map(label => ({ label })))
+// The `open` attribute is one-way, so mirror the user's own toggles back into the ref;
+// without this, opening the disclosure by hand and then picking a file would leave the
+// ref stale and the next programmatic close would do nothing.
+function onDisclosureToggle(event: Event) {
+  treeOpen.value = (event.target as HTMLDetailsElement).open
+}
+
+/**
+ * The path of the open file inside the bundle, as crumbs. Navigation lives in the page
+ * header (`skills / <slug>`); this is the "you are here" line above the file itself.
+ */
+const fileTrail = computed<BreadcrumbItem[]>(() => [
+  { label: slug.value, to: `/skill/${slug.value}` },
+  ...currentPath.value.split('/').filter(Boolean).map(label => ({ label }))
 ])
+const compactTrail = computed(() => compactBreadcrumbs(fileTrail.value))
 
 useSeoMeta({
   title: () => (isReadme.value ? skill.value.name : `${currentPath.value} · ${skill.value.name}`),
@@ -94,11 +105,35 @@ onMounted(() => trackSkillView(slug.value))
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6">
-    <div class="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-6">
-      <!-- Side column, plain grid now that the dashboard panels are gone. -->
-      <aside class="hidden lg:block min-w-0">
-        <div class="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-default">
+  <div>
+    <SkillHeader
+      :skill="skill"
+      :slug="slug"
+      :sha="detail?.sha"
+      :committed-at="detail?.committedAt"
+    />
+
+    <div class="mx-auto grid max-w-7xl items-start gap-5 px-4 pt-6 pb-12 sm:px-6 lg:grid-cols-[264px_minmax(0,1fr)] lg:gap-10 lg:pt-10 lg:pb-20">
+      <!-- Below lg the sticky column becomes a disclosure above the file. -->
+      <details
+        :open="treeOpen"
+        class="overflow-hidden rounded-xl border border-default bg-elevated lg:hidden"
+        @toggle="onDisclosureToggle"
+      >
+        <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 font-mono text-[0.8125rem] text-default">
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="size-3.5 text-primary transition-transform"
+            :class="{ 'rotate-90': treeOpen }"
+          />
+          <UIcon
+            name="i-lucide-folder"
+            class="size-[15px] text-dimmed"
+          />
+          Files
+          <span class="ms-auto text-[0.6875rem] text-dimmed">{{ skill.fileCount }}</span>
+        </summary>
+        <div class="max-h-[60vh] overflow-y-auto border-t border-default">
           <SkillTree
             :tree="skill.tree"
             :selected-path="currentPath"
@@ -106,40 +141,84 @@ onMounted(() => trackSkillView(slug.value))
             @select="onSelect"
           />
         </div>
+      </details>
+
+      <aside class="sticky top-[88px] hidden max-h-[calc(100dvh-7rem)] overflow-y-auto rounded-xl border border-default bg-elevated lg:block">
+        <div class="flex items-center justify-between px-4 pt-3 pb-1">
+          <MicroLabel>Files</MicroLabel>
+          <span class="font-mono text-[0.6875rem] text-dimmed">{{ skill.fileCount }}</span>
+        </div>
+        <SkillTree
+          :tree="skill.tree"
+          :selected-path="currentPath"
+          :slug="slug"
+          @select="onSelect"
+        />
       </aside>
 
-      <!--
-        `overflow-x-auto` replaces the scroll boundary the dashboard panel body used to
-        provide: the meta card's min-content is wider than a 375px viewport, and without a
-        container to scroll it the whole document scrolls sideways.
-      -->
-      <div class="min-w-0 flex flex-col gap-4 overflow-x-auto">
-        <!--
-          Page chrome only: the bundle README supplies the page's single h1, so nothing
-          here may render one (Task 8 restyles this row).
-        -->
-        <header class="flex items-center gap-2 min-w-0">
-          <UButton
-            icon="i-lucide-folder-tree"
-            color="neutral"
-            variant="ghost"
-            class="lg:hidden"
-            aria-label="Browse files"
-            @click="treeOpen = true"
-          />
-          <!-- A deep file path overflows on phones; collapse the middle there. -->
-          <UBreadcrumb
-            :items="breadcrumbs"
-            class="hidden sm:flex min-w-0"
-          />
-          <UBreadcrumb
-            :items="compactBreadcrumbs(breadcrumbs)"
-            class="sm:hidden min-w-0"
-          />
+      <div class="min-w-0">
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <nav
+            class="flex min-w-0 items-center gap-2 font-mono text-[0.8125rem] text-muted"
+            aria-label="File path"
+          >
+            <UIcon
+              :name="isReadme ? 'i-lucide-book-open' : 'i-lucide-file-text'"
+              class="size-[15px] shrink-0 text-dimmed"
+            />
+            <!-- A deep path overflows on phones; the middle collapses there. -->
+            <ol class="m-0 hidden min-w-0 list-none items-center gap-1.5 p-0 sm:flex">
+              <li
+                v-for="(crumb, i) in fileTrail"
+                :key="`${i}-${crumb.label}`"
+                class="flex min-w-0 items-center gap-1.5"
+              >
+                <span
+                  v-if="i"
+                  class="text-dimmed"
+                  aria-hidden="true"
+                >/</span>
+                <NuxtLink
+                  v-if="crumb.to"
+                  :to="crumb.to"
+                  class="truncate text-muted no-underline transition-colors hover:text-primary"
+                >{{ crumb.label }}</NuxtLink>
+                <span
+                  v-else
+                  class="truncate"
+                  :class="i === fileTrail.length - 1 ? 'text-default' : ''"
+                >{{ crumb.label }}</span>
+              </li>
+            </ol>
+            <ol class="m-0 flex min-w-0 list-none items-center gap-1.5 p-0 sm:hidden">
+              <li
+                v-for="(crumb, i) in compactTrail"
+                :key="`${i}-${crumb.label}`"
+                class="flex min-w-0 items-center gap-1.5"
+              >
+                <span
+                  v-if="i"
+                  class="text-dimmed"
+                  aria-hidden="true"
+                >/</span>
+                <NuxtLink
+                  v-if="crumb.to"
+                  :to="crumb.to"
+                  class="truncate text-muted no-underline transition-colors hover:text-primary"
+                >{{ crumb.label }}</NuxtLink>
+                <span
+                  v-else
+                  class="truncate"
+                  :class="i === compactTrail.length - 1 ? 'text-default' : ''"
+                >{{ crumb.label }}</span>
+              </li>
+            </ol>
+          </nav>
+
           <!--
             Nuxt's directory-prefix auto-import only dedups the "Skill" prefix when the
-            filename itself already starts with it (SkillCard, SkillBadges, SkillTree,
-            SkillMetaCard do). FileActions.vue does not, so it registers as SkillFileActions.
+            filename itself already starts with it (SkillRow, SkillBadges, SkillTree,
+            SkillHeader do). FileActions.vue does not, so it registers as SkillFileActions.
           -->
           <SkillFileActions
             v-model:view="view"
@@ -147,58 +226,48 @@ onMounted(() => trackSkillView(slug.value))
             :path="currentPath"
             :is-markdown="isMarkdown"
             :content="file?.content ?? null"
-            class="ms-auto"
           />
-        </header>
+        </div>
 
-        <div :class="[showCode ? 'w-full' : 'mx-auto w-full max-w-4xl', 'flex flex-col gap-6 min-w-0']">
-          <SkillMetaCard
-            v-if="isReadme"
-            :skill="skill"
-          />
-
-          <UAlert
+        <div :class="[showCode ? 'w-full' : 'w-full max-w-[46rem]', 'flex min-w-0 flex-col gap-6']">
+          <Callout
             v-if="skill.errors.length"
-            color="warning"
-            variant="subtle"
+            tone="warning"
             icon="i-lucide-triangle-alert"
             title="This bundle has validation issues"
             :description="skill.errors.join(' · ')"
           />
 
-          <UAlert
+          <Callout
             v-if="fileError && fileError.statusCode !== 404"
-            color="error"
-            variant="subtle"
+            tone="error"
             icon="i-lucide-file-x"
             title="Could not load this file"
             :description="fileError.statusMessage ?? 'Something went wrong'"
           />
 
           <template v-else-if="file">
-            <UAlert
+            <Callout
               v-if="file.kind !== 'text'"
-              color="neutral"
-              variant="subtle"
               icon="i-lucide-file"
               :title="file.kind === 'binary' ? 'Binary file' : 'File too large to preview'"
               :description="`${formatBytes(file.size)} · view it on GitHub or download the bundle.`"
             />
 
             <template v-else>
-              <UCollapsible v-if="isMarkdown && !isReadme && file.frontmatterRaw && view === 'rendered'">
-                <UButton
-                  label="Frontmatter"
-                  icon="i-lucide-braces"
-                  trailing-icon="i-lucide-chevron-down"
-                  color="neutral"
-                  variant="ghost"
-                  size="sm"
-                />
-                <template #content>
-                  <pre class="mt-2 rounded-md bg-elevated border border-default p-3 text-xs overflow-x-auto">{{ file.frontmatterRaw }}</pre>
-                </template>
-              </UCollapsible>
+              <details
+                v-if="isMarkdown && !isReadme && file.frontmatterRaw && view === 'rendered'"
+                class="overflow-hidden rounded-lg border border-default bg-elevated"
+              >
+                <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-[0.8125rem] text-muted transition-colors hover:text-default">
+                  <UIcon
+                    name="i-lucide-braces"
+                    class="size-3.5 text-primary"
+                  />
+                  Frontmatter
+                </summary>
+                <pre class="m-0 overflow-x-auto border-t border-default p-3 font-mono text-xs text-muted">{{ file.frontmatterRaw }}</pre>
+              </details>
 
               <MarkdownView
                 v-if="isMarkdown && view === 'rendered' && file.body"
@@ -217,28 +286,12 @@ onMounted(() => trackSkillView(slug.value))
             v-else-if="fileStatus === 'pending'"
             class="space-y-3"
           >
-            <USkeleton class="h-6 w-1/3" />
-            <USkeleton class="h-4 w-full" />
-            <USkeleton class="h-4 w-5/6" />
+            <div class="h-6 w-1/3 animate-pulse rounded-md bg-(--ui-border)" />
+            <div class="h-4 w-full animate-pulse rounded-md bg-(--ui-border)" />
+            <div class="h-4 w-5/6 animate-pulse rounded-md bg-(--ui-border)" />
           </div>
         </div>
       </div>
     </div>
-
-    <USlideover
-      v-model:open="treeOpen"
-      side="left"
-      :title="skill.name"
-      :ui="{ body: 'p-0' }"
-    >
-      <template #body>
-        <SkillTree
-          :tree="skill.tree"
-          :selected-path="currentPath"
-          :slug="slug"
-          @select="onSelect"
-        />
-      </template>
-    </USlideover>
   </div>
 </template>
