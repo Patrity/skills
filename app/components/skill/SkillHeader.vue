@@ -6,9 +6,10 @@ import { formatBytes } from '~~/shared/utils/format'
  * The `.phead` band above the tree/content split: crumb, name, description, tags,
  * badges, and the install/meta/links side column.
  *
- * The bundle name is deliberately not an `<h1>`. The open file's markdown owns the
- * page heading (spec §7: one `<h1>` per page from our markup), and a bundle README
- * already opens with one.
+ * The bundle name is the page's single `<h1>` for every file under `/skill/` (spec §7).
+ * The markdown cannot supply it: a CLAUDE.md opens at `##`, `fetch.py` has no headings
+ * at all, and the Source view renders no prose. So the file route drops the document's
+ * own leading `# Title` (`renderMarkdown`'s `dropLeadingH1`) and this owns the heading.
  */
 const props = defineProps<{
   skill: SkillManifest
@@ -58,9 +59,9 @@ const meta = computed(() => [
             <span class="text-primary">{{ slug }}</span>
           </p>
 
-          <p class="mt-2 mb-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] text-default lg:text-[64px]">
+          <h1 class="mt-2 mb-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] text-default lg:text-[64px]">
             {{ skill.name }}
-          </p>
+          </h1>
 
           <p class="mt-3.5 max-w-[44rem] text-base/[1.65] text-muted">
             {{ skill.description }}

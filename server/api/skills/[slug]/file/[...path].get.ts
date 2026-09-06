@@ -42,7 +42,9 @@ export default defineEventHandler(async (event): Promise<SkillFileResponse> => {
       if (bytes.byteLength <= MAX_RENDER_BYTES) {
         try {
           // Rendering here is what keeps the parser and Shiki out of the browser.
-          ({ body, data } = await renderMarkdown(content, `${slug}/${path}`))
+          // `dropLeadingH1`: the skill page's header renders the bundle name as the page's
+          // single <h1>, so the file's own leading `# Title` would be a duplicate heading.
+          ({ body, data } = await renderMarkdown(content, `${slug}/${path}`, { dropLeadingH1: true }))
         } catch (err) {
           // 5xx, not a null body: ISR caches 200s, so a bad render must not be pinned
           // as an empty page (same reasoning as getBundleFilesOr503).

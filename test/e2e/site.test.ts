@@ -155,9 +155,30 @@ describe('/skill/demo', () => {
     expect(html).toContain('data-tree-path="settings.json"')
   })
 
-  it('renders the README', async () => {
+  it('renders the README without its own leading heading', async () => {
     const html = withoutComments(await (await fetch('/skill/demo')).text())
     expect(html).toContain('This README is rendered on')
-    expect(html).toMatch(/<h1[^>]*>Demo bundle<\/h1>/)
+    // The header owns the h1, so the README's `# Demo bundle` is dropped server-side
+    // (renderMarkdown's dropLeadingH1) rather than becoming a second heading. The raw
+    // source still ships in the payload, so assert on the headings, not the whole page.
+    expect(html).not.toMatch(/<h1[^>]*>[^<]*Demo bundle/)
   })
+
+  it('takes its single h1 from the page header, not the markdown', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo')).text())
+    expect(html.match(/<h1[\s>]/g) ?? []).toHaveLength(1)
+    expect(html).toMatch(/<h1[^>]*>\s*Demo\s*<\/h1>/)
+  })
+
+  // A CLAUDE.md opens at `##`, settings.json is not markdown at all and a shell script
+  // renders as code: none of them can supply a heading, so the header has to.
+  for (const path of ['CLAUDE.md', 'settings.json', 'hooks/pre-commit.sh']) {
+    it(`renders exactly one h1 on /skill/demo/${path}`, async () => {
+      const res = await fetch(`/skill/demo/${path}`)
+      expect(res.status).toBe(200)
+      const html = withoutComments(await res.text())
+      expect(html.match(/<h1[\s>]/g) ?? []).toHaveLength(1)
+      expect(html).toMatch(/<h1[^>]*>\s*Demo\s*<\/h1>/)
+    })
+  }
 })
