@@ -17,26 +17,73 @@
     </div>
   </header>
 
-  <!-- 1 · Hero. -->
+  <!-- 1 · Hero. Mirrors the blog hero on techhivelabs.net: the hive lattice (a canvas there, a
+       static SVG here), the two depth veils and the green glow behind an identity column on the
+       left and the featured run plus two doc rows on the right, with the scroll hint at the foot.
+       The lattice is redrawn for the narrow column so both clusters stay on screen. -->
   <section class="hero">
-    <div class="layer hive-texture"></div>
-    <div class="wrap inner">
-      <div>
-        <span class="pill"><span class="dot"></span> 9 bundles · 14 questions</span>
-        <h1>Claude Code, set up<br>
-          the way I <span class="accent">actually</span><br>
+    <svg class="lattice" viewBox="0 0 420 1800" preserveAspectRatio="xMinYMin slice" aria-hidden="true">
+      <defs><path id="hx" d="M0 -60 52 -30 52 30 0 60 -52 30 -52 -30Z"/></defs>
+      <g class="l1">
+        <use href="#hx" x="52" y="60"/><use href="#hx" x="412" y="60"/><use href="#hx" x="172" y="216"/><use href="#hx" x="232" y="294"/><use href="#hx" x="472" y="294"/><use href="#hx" x="232" y="450"/><use href="#hx" x="472" y="450"/><use href="#hx" x="412" y="528"/>
+        <use href="#hx" x="352" y="606"/><use href="#hx" x="172" y="684"/><use href="#hx" x="412" y="684"/><use href="#hx" x="352" y="762"/><use href="#hx" x="472" y="762"/><use href="#hx" x="292" y="840"/><use href="#hx" x="352" y="918"/><use href="#hx" x="292" y="1152"/>
+        <use href="#hx" x="352" y="1230"/><use href="#hx" x="472" y="1230"/><use href="#hx" x="292" y="1308"/><use href="#hx" x="412" y="1308"/><use href="#hx" x="112" y="1386"/><use href="#hx" x="352" y="1386"/><use href="#hx" x="52" y="1464"/><use href="#hx" x="412" y="1464"/>
+        <use href="#hx" x="232" y="1542"/><use href="#hx" x="52" y="1620"/><use href="#hx" x="172" y="1620"/><use href="#hx" x="352" y="1854"/><use href="#hx" x="472" y="1854"/>
+      </g>
+      <g class="l2">
+        <use href="#hx" x="52" y="216"/><use href="#hx" x="412" y="216"/><use href="#hx" x="112" y="294"/><use href="#hx" x="172" y="372"/><use href="#hx" x="292" y="372"/><use href="#hx" x="412" y="372"/><use href="#hx" x="112" y="450"/><use href="#hx" x="52" y="528"/>
+        <use href="#hx" x="172" y="528"/><use href="#hx" x="292" y="528"/><use href="#hx" x="112" y="606"/><use href="#hx" x="232" y="606"/><use href="#hx" x="472" y="606"/><use href="#hx" x="292" y="684"/><use href="#hx" x="412" y="840"/><use href="#hx" x="172" y="996"/>
+        <use href="#hx" x="352" y="1074"/><use href="#hx" x="472" y="1074"/><use href="#hx" x="412" y="1152"/><use href="#hx" x="112" y="1230"/><use href="#hx" x="52" y="1308"/><use href="#hx" x="172" y="1308"/><use href="#hx" x="172" y="1464"/><use href="#hx" x="292" y="1464"/>
+        <use href="#hx" x="352" y="1542"/><use href="#hx" x="472" y="1542"/><use href="#hx" x="292" y="1620"/><use href="#hx" x="112" y="1698"/><use href="#hx" x="52" y="1776"/><use href="#hx" x="292" y="1776"/><use href="#hx" x="412" y="1776"/><use href="#hx" x="112" y="1854"/>
+        <use href="#hx" x="232" y="1854"/>
+      </g>
+      <g class="l3">
+        <use href="#hx" x="172" y="60"/><use href="#hx" x="112" y="138"/><use href="#hx" x="352" y="138"/><use href="#hx" x="472" y="138"/><use href="#hx" x="52" y="372"/><use href="#hx" x="352" y="450"/><use href="#hx" x="232" y="762"/><use href="#hx" x="52" y="840"/>
+        <use href="#hx" x="112" y="918"/><use href="#hx" x="232" y="918"/><use href="#hx" x="472" y="918"/><use href="#hx" x="52" y="996"/><use href="#hx" x="292" y="996"/><use href="#hx" x="412" y="996"/><use href="#hx" x="112" y="1074"/><use href="#hx" x="232" y="1074"/>
+        <use href="#hx" x="52" y="1152"/><use href="#hx" x="172" y="1152"/><use href="#hx" x="232" y="1230"/><use href="#hx" x="232" y="1386"/><use href="#hx" x="472" y="1386"/><use href="#hx" x="112" y="1542"/><use href="#hx" x="412" y="1620"/><use href="#hx" x="232" y="1698"/>
+        <use href="#hx" x="352" y="1698"/><use href="#hx" x="472" y="1698"/><use href="#hx" x="172" y="1776"/>
+      </g>
+      <g class="hot e1"><use href="#hx" x="292" y="216"/><use href="#hx" x="112" y="762"/></g>
+      <g class="hot e2"><use href="#hx" x="292" y="60"/><use href="#hx" x="352" y="294"/><use href="#hx" x="172" y="840"/></g>
+      <g class="hot e3"><use href="#hx" x="232" y="138"/><use href="#hx" x="52" y="684"/></g>
+    </svg>
+    <div class="veil veil-x"></div>
+    <div class="veil veil-y"></div>
+    <div class="blob"></div>
+    <div class="wash"></div>
+
+    <div class="hero-grid">
+      <div class="hero-main">
+        <span class="pill glass-card"><span class="dot"></span> 9 bundles · 14 questions</span>
+        <h1>Claude Code,<br>
+          set up the way<br>
+          I <span class="gradient-text">actually</span><br>
           run it.</h1>
-        <p class="tilde"><span class="prompt">~/</span> CLAUDE.md · rules · skills · hooks</p>
+        <p class="tilde"><span class="prompt">~/</span> <span class="path">CLAUDE.md · rules · skills · hooks</span></p>
+        <p class="lede">Nine bundles, fourteen questions, one CLAUDE.md. Take the whole setup or one bundle.. every run writes the same files the CLI would, and the lockfile remembers which.</p>
         <div class="actions">
           <a class="btn btn-solid btn-lg glow" href="/build">Build it on the web <svg class="ico"><use href="#i-arrow-right"/></svg></a>
-          <div class="install">
-            <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
-            <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
-          </div>
+          <a class="btn btn-outline btn-lg glow" href="/docs"><svg class="ico"><use href="#i-file"/></svg> Read the docs</a>
+        </div>
+        <div class="install">
+          <span><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init</span></span>
+          <button class="copy" type="button" aria-label="Copy"><svg class="ico"><use href="#i-copy"/></svg></button>
+        </div>
+        <div class="findme">
+          <span class="micro">Find me</span>
+          <span class="hair"></span>
+          <a href="https://github.com/Patrity" target="_blank" rel="me noopener" aria-label="GitHub"><svg class="ico ico-solid"><use href="#i-github"/></svg></a>
+          <a href="https://x.com/Patrity" target="_blank" rel="me noopener" aria-label="X"><svg class="ico ico-solid"><use href="#i-x"/></svg></a>
+          <a href="https://bsky.app/profile/patrity.com" target="_blank" rel="me noopener" aria-label="Bluesky"><svg class="ico ico-solid"><use href="#i-bluesky"/></svg></a>
+          <a href="https://www.linkedin.com/in/tonycos/" target="_blank" rel="me noopener" aria-label="LinkedIn"><svg class="ico ico-solid"><use href="#i-linkedin"/></svg></a>
         </div>
       </div>
-      <div class="term glass-card">
-        <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="path">~/acme-web</span></div>
+
+      <div class="hero-side">
+        <span class="micro">What init writes</span>
+        <div class="feature dark">
+          <div class="term">
+            <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="path">~/acme-web</span></div>
 <pre><span class="prompt">$</span> <span class="cmd">pnpx @patrity/skills init --yes \
     --profile nuxt-app</span>
 .claude/rules/browser-testing.md
@@ -48,8 +95,29 @@ CLAUDE.md
 .claude/settings.json
 .gitignore
 <span class="ok">Setup written.</span> <span class="caret"></span></pre>
+          </div>
+          <div class="cap">
+            <div class="chips"><span class="chip">init</span><span class="chip">nuxt-app</span></div>
+            <p class="cap-h">31 files land in the repo, and the lockfile lists every one.</p>
+            <p class="cap-m">pnpx @patrity/skills init · --yes --profile nuxt-app</p>
+          </div>
+        </div>
+        <span class="micro">Start here</span>
+        <a class="rr" href="/docs/start-here">
+          <span class="thumb"><i data-include="mark.svg"></i></span>
+          <span class="rr-txt"><span class="rr-t">Start here</span><span class="rr-m">3 min read</span></span>
+        </a>
+        <a class="rr" href="/docs/philosophy">
+          <span class="thumb"><i data-include="mark.svg"></i></span>
+          <span class="rr-txt"><span class="rr-t">Philosophy</span><span class="rr-m">4 min read</span></span>
+        </a>
       </div>
     </div>
+
+    <a class="scroll-hint" href="#writes">
+      <span class="micro">Scroll</span>
+      <svg class="ico"><use href="#i-chevron-down"/></svg>
+    </a>
   </section>
 
   <!-- 2 · What you get. -->

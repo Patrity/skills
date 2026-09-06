@@ -209,32 +209,98 @@
 
 /* ================================================================ page compositions */
 
-/* Hero: the hive canvas stands in as a static texture at 40%. */
-.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--ui-border); }
-.hero .layer { position: absolute; inset: 0; opacity: .4; }
-.hero .inner { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 3.5rem; align-items: center; padding: 96px 0 88px; }
-.pill { display: inline-flex; align-items: center; gap: .5rem; padding: .3125rem .75rem; border-radius: 9999px; border: 1px solid var(--ui-border);
-        background: var(--ui-bg-elevated); font-family: var(--font-mono); font-size: .75rem; color: var(--ui-text-muted); }
-.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-green-400); flex: none; }
-.hero h1 { font-family: var(--font-teko); font-weight: 600; font-size: 92px; line-height: .88; letter-spacing: -.015em; margin: 1.25rem 0 0; }
-.tilde { margin: 1.25rem 0 0; font-family: var(--font-mono); font-size: .875rem; color: var(--ui-text-muted); }
-.tilde .prompt { color: var(--color-green-500); }
-.hero .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 2rem; }
-.hero .install { flex: 1 1 20rem; max-width: 24rem; }
+/* hero. Mirrors the blog hero (techhivelabs.net): a full-height stage with the hive lattice, the
+   two depth veils and the central glow behind a 7/5 grid .. identity on the left, the featured run
+   and the two doc rows on the right, scroll hint at the foot. The canvas there is a static SVG
+   here, so a handful of cells are drawn energised instead of reacting to the pointer. */
+.hero { position: relative; display: flex; align-items: center; min-height: 100dvh; overflow: hidden;
+        border-bottom: 1px solid var(--ui-border); --hex-line: var(--color-green-500); }
+/* green-300 carries the lattice on the dark ground; on the light one it disappears, so the light
+   hero draws the same alphas in green-500, which is what the blog's canvas reads as. */
+.dark .hero { --hex-line: var(--color-green-300); }
+.hero .lattice { position: absolute; top: 0; left: 0; width: 100%; height: 1100px; pointer-events: none; }
+.hero .lattice g { fill: none; stroke: var(--hex-line); stroke-width: 1; }
+.hero .lattice .l1 { stroke-opacity: .10; }
+.hero .lattice .l2 { stroke-opacity: .14; }
+.hero .lattice .l3 { stroke-opacity: .18; }
+.hero .lattice .hot { stroke: var(--color-green-400); stroke-width: 1.6;
+                      fill: var(--color-green-400); fill-opacity: .06; filter: drop-shadow(0 0 10px rgba(70,194,17,.45)); }
+.hero .lattice .e1 { stroke-opacity: .45; }
+.hero .lattice .e2 { stroke-opacity: .58; }
+.hero .lattice .e3 { stroke-opacity: .7; }
+.hero .veil { position: absolute; inset: 0; pointer-events: none; }
+.hero .veil-x { background: linear-gradient(to right, var(--ui-bg), transparent, var(--ui-bg)); opacity: .6; }
+.hero .veil-y { background: linear-gradient(to top, var(--ui-bg), transparent, var(--ui-bg)); opacity: .4; }
+.hero .blob { position: absolute; top: 33%; left: 50%; width: 640px; height: 640px; margin: -320px 0 0 -320px;
+              border-radius: 50%; background: var(--color-green-400); filter: blur(160px); opacity: .2; pointer-events: none; }
+/* The light hero reads as a green wash off the top-left corner; the dark one keeps the glow alone. */
+.hero .wash { position: absolute; inset: 0; pointer-events: none;
+              background: radial-gradient(700px 420px at 12% 10%, color-mix(in srgb, var(--color-green-400) 16%, transparent), transparent 70%); }
+.dark .hero .wash { display: none; }
+.hero-grid { position: relative; z-index: 1; box-sizing: border-box; width: 100%; max-width: 80rem; margin: 0 auto; padding: 6rem 2rem;
+             display: grid; grid-template-columns: repeat(12, 1fr); gap: 4rem; align-items: center; }
+.hero-main { grid-column: span 7; max-width: 48rem; }
+.hero-side { grid-column: span 5; display: flex; flex-direction: column; gap: 1rem; }
 
-/* Terminal frame: a frozen `init --yes` run, the transcript the hero card types. */
-.term { overflow: hidden; }
+/* Identity column. */
+.pill { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 1.5rem; padding: .375rem 1rem;
+        border-radius: 9999px; font-size: .875rem; color: var(--color-green-400); }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-green-400); flex: none; }
+.gradient-text { background: linear-gradient(135deg, var(--color-green-300), var(--color-green-500), var(--color-green-300));
+                 -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero h1 { font-family: var(--font-teko); font-weight: 700; font-size: 6rem; line-height: .86; letter-spacing: -.025em;
+           color: var(--ui-text); margin: 0; }
+.tilde { display: flex; align-items: baseline; gap: .5rem; margin: 1.5rem 0 0; font-family: var(--font-mono); }
+.tilde .prompt { font-size: .875rem; color: var(--color-green-500); opacity: .6; }
+.tilde .path { font-size: 1.125rem; color: var(--ui-text); }
+.hero .lede { margin: 1rem 0 0; max-width: 36rem; font-size: 1.125rem; line-height: 1.625; color: var(--ui-text-muted); }
+.hero .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.75rem; }
+.hero .btn-lg { padding: .75rem 1.25rem; font-size: 1rem; }
+.hero .install { box-sizing: border-box; margin-top: 1rem; max-width: 36rem; }
+.findme { display: flex; align-items: center; gap: 1rem; margin-top: 2.25rem; }
+.findme .hair { width: 32px; height: 1px; background: var(--ui-border); flex: none; }
+.findme a { display: inline-flex; color: var(--ui-text-dimmed); }
+.findme a:hover { color: var(--color-green-400); }
+.findme .ico { width: 20px; height: 20px; }
+.scroll-hint { position: absolute; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 1;
+               display: flex; flex-direction: column; align-items: center; gap: .5rem;
+               color: var(--ui-text-dimmed); text-decoration: none; }
+.scroll-hint:hover { color: var(--color-green-400); }
+
+/* Featured card: the shape of the blog's "latest from the lab" tile, holding a frozen `init --yes`
+   run. It carries `dark` so the transcript keeps its colours in both modes. */
+.feature { position: relative; min-height: 26rem; border-radius: .75rem; overflow: hidden;
+           background: #0c0c0b; box-shadow: 0 0 0 1px var(--ui-border); }
+.feature .cap { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: .5rem;
+                padding: 4rem 1.25rem 1.25rem;
+                background: linear-gradient(to top, rgba(12,12,11,.95), rgba(12,12,11,.5), transparent); }
+.feature .cap .chip { border: 0; color: var(--color-green-300);
+                      background: color-mix(in srgb, var(--color-green-500) 15%, transparent); }
+.feature .cap-h { margin: 0; font-size: 1.25rem; font-weight: 600; line-height: 1.35; color: #fff; }
+.feature .cap-m { margin: 0; font-family: var(--font-mono); font-size: .75rem; color: var(--ui-text-dimmed); }
+
+/* Terminal frame: a frozen `init --yes` run, the transcript the featured card holds. */
 .term .chrome { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .875rem; border-bottom: 1px solid var(--ui-border); }
 .term .chrome .dots { display: flex; gap: .375rem; }
-.term .chrome .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--ui-border); }
+.term .chrome .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--ui-border); }
 .term .chrome .path { font-family: var(--font-mono); font-size: .75rem; color: var(--ui-text-dimmed); }
-.term pre { margin: 0; padding: 14px 16px 16px; font-family: var(--font-mono); font-size: .75rem; line-height: 1.75;
+.term pre { margin: 0; padding: 14px 16px 9.5rem; font-family: var(--font-mono); font-size: 13px; line-height: 1.6;
             color: var(--ui-text-muted); white-space: pre; overflow: hidden; font-variant-ligatures: none; }
 .term .prompt { color: var(--color-green-500); }
 .term .cmd { color: var(--ui-text); }
 .term .dim { color: var(--ui-text-dimmed); }
 .term .ok { color: var(--color-green-400); }
 .term .caret { display: inline-block; width: 8px; height: 1em; vertical-align: -2px; background: var(--color-green-400); }
+
+/* Two doc rows under the card, the shape of the blog's "most read" list. */
+.rr { display: flex; align-items: center; gap: .875rem; text-decoration: none; color: inherit; }
+.rr .thumb { width: 104px; height: 64px; flex: none; display: grid; place-items: center; border-radius: .5rem;
+             background: #0c0c0b; box-shadow: 0 0 0 1px var(--ui-border); color: var(--color-green-400); }
+.rr .thumb svg { width: 30px; height: 30px; }
+.rr-txt { display: flex; flex-direction: column; gap: .125rem; min-width: 0; }
+.rr-t { font-size: .875rem; font-weight: 600; line-height: 1.3; color: var(--ui-text); }
+.rr-m { font-size: .75rem; color: var(--ui-text-dimmed); }
+.rr:hover .rr-t { color: var(--color-green-400); }
 
 /* The opinions: five numbered paragraphs. */
 .ops { display: grid; gap: 1.5rem; max-width: 52rem; }
@@ -337,10 +403,16 @@
 .m .section { padding: 48px 0; }
 .m .sec-head { margin-bottom: 1.75rem; }
 .m .sec-head h2 { font-size: 36px; }
-.m .hero .inner { grid-template-columns: 1fr; gap: 2rem; padding: 40px 0 48px; }
-.m .hero h1 { font-size: 48px; }
-.m .hero .actions { gap: .625rem; }
-.m .hero .install { flex: 1 1 100%; max-width: none; }
+.m .hero .lattice { height: 1800px; }
+.m .hero-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 5rem 1.5rem; }
+.m .hero-main, .m .hero-side { grid-column: auto; max-width: none; }
+.m .hero h1 { font-size: 3rem; }
+.m .tilde .path { font-size: 1rem; }
+.m .hero .lede { font-size: 1rem; }
+.m .hero .actions { gap: .75rem; }
+.m .hero .install { max-width: none; }
+.m .feature { min-height: 20rem; }
+.m .feature .cap-h { font-size: 1.125rem; }
 .m .plate { padding: 12px; }
 .m .plate .grid { grid-template-columns: 1fr; }
 .m .rows, .m .posts { grid-template-columns: 1fr; }
