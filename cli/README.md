@@ -173,6 +173,13 @@ Full documentation also lives at [skills.patrity.com/docs/cli](https://skills.pa
 
 ## Changelog
 
+### 0.2.1
+
+`--help`, every prompt and the run summary were rewritten in the same voice as the site: plainer
+questions, a summary that says what it did rather than what it touched, and `none` where a `—`
+placeholder used to stand. Nothing about what the CLI does changed, and no lockfile is rewritten by
+the upgrade.
+
 ### 0.2.0
 
 The `.gitignore` line became a managed block: `# >>> skills` … `# <<< skills`, regenerated on every
