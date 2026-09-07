@@ -1,5 +1,5 @@
 ## Workflow
-- Creative work follows the superpowers cycle: brainstorm → design spec (`docs/superpowers/specs/`) → implementation plan (`docs/superpowers/plans/`) → subagent-driven build with TDD → two-stage review (spec compliance, then code quality). Never skip the review loop.
+- Creative work follows the superpowers cycle (Superpowers: https://github.com/obra/superpowers): brainstorm → design spec (`docs/superpowers/specs/`) → implementation plan (`docs/superpowers/plans/`) → subagent-driven build with TDD → two-stage review (spec compliance, then code quality). Never skip the review loop.
 - Verification before completion: run the tests, typecheck and build and paste the evidence before claiming anything is done. Green typecheck is not proof the UI works.
 
 ## Testing
