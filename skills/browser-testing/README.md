@@ -4,6 +4,7 @@ description: Prove UI changes in a real browser with playwright-cli. Install-if-
 tags: [testing, e2e, playwright, browser]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-app-window
 requires: [node, npm]
 ---
 

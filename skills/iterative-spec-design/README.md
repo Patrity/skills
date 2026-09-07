@@ -4,6 +4,7 @@ description: Design a system section by section with an approval checkpoint afte
 tags: [process, planning, specs]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-drafting-compass
 ---
 
 # Iterative Spec Design

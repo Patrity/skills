@@ -68,6 +68,22 @@ describe('parseFrontmatter', () => {
     expect(bad.errors.some(e => e.startsWith('frontmatter.dependsOn.0:'))).toBe(true)
   })
 
+  it('accepts an icon from the two allowed sets and rejects anything else', () => {
+    const lucide = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\nicon: i-lucide-database\n---\n')
+    expect(lucide.errors).toEqual([])
+    expect(lucide.data?.icon).toBe('i-lucide-database')
+
+    const simple = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\nicon: i-simple-icons-nuxt\n---\n')
+    expect(simple.data?.icon).toBe('i-simple-icons-nuxt')
+
+    const bad = parseFrontmatter('---\nname: X\ndescription: d\ntags: [t]\nauthor: a\nicon: i-heroicons-x\n---\n')
+    expect(bad.data).toBeNull()
+    expect(bad.errors).toEqual(['frontmatter.icon: an Iconify name from the lucide or simple-icons sets, e.g. i-lucide-database'])
+
+    // Optional: a bundle without one falls back to the mark.
+    expect(parseFrontmatter(good).data?.icon).toBeUndefined()
+  })
+
   it('accepts gitignore and env declarations and rejects bad shapes', () => {
     const ok = parseFrontmatter(`---\nname: X\ndescription: d\ntags: [t]\nauthor: a\ngitignore: [".claude/skills/x/cache/"]\nenv:\n  - { name: API_KEY, description: key, required: true, example: "<key>" }\n---\n`)
     expect(ok.errors).toEqual([])

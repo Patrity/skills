@@ -9,6 +9,7 @@ description: Nuxt 4 + Nuxt UI v4 doc fetchers and the rules that make Claude use
 tags: [nuxt, nuxt-ui, vue, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-simple-icons-nuxt
 requires: [python3]
 dependsOn: [doc-fetcher]
 suggests: [nuxt-ui]
@@ -24,6 +25,7 @@ gitignore:
 | `tags` | string[] | yes | Lowercase. At least one. Drives the filter chips on the index. |
 | `author` | string | yes | A person or org name. |
 | `authorUrl` | URL | no | Where the author name links to. |
+| `icon` | string | no | An Iconify name from the `lucide` or `simple-icons` sets, e.g. `i-lucide-database`. It stands in front of the bundle name on the site. A bundle without one keeps the brand mark, so nothing looks unfinished. |
 | `requires` | string[] | no | External tooling the bundle needs on your machine, e.g. `python3`, `curl`, `playwright-cli`. |
 | `dependsOn` | string[] | no | Bundle slugs this one cannot work without. `add` and the wizard install them automatically. |
 | `suggests` | string[] | no | Bundle slugs that pair well with this one. Pre-selected in the wizard, easy to untick. |

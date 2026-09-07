@@ -35,7 +35,8 @@ const label = computed(() => `${count.value.charAt(0).toUpperCase()}${count.valu
           :to="`/skill/${bundle.slug}`"
           class="group glass-card grid grid-cols-[28px_minmax(0,1fr)] md:grid-cols-[34px_minmax(0,1fr)] gap-3 md:gap-4 items-start p-4 md:p-5 no-underline hover:border-primary/30 hover:shadow-[0_0_30px_rgba(70,194,17,0.12)] transition"
         >
-          <BrandMark
+          <SkillIcon
+            :icon="bundle.icon"
             :size="34"
             class="mt-0.5 w-7 h-7 md:w-[34px] md:h-[34px]"
           />

@@ -44,6 +44,9 @@ export const frontmatterSchema = z.object({
   tags: z.array(z.string().min(1)).min(1),
   author: z.string().min(1),
   authorUrl: z.url().optional(),
+  icon: z.string().regex(/^i-(lucide|simple-icons)-[a-z0-9-]+$/, {
+    message: 'an Iconify name from the lucide or simple-icons sets, e.g. i-lucide-database'
+  }).optional(),
   requires: z.array(z.string().min(1)).optional(),
   dependsOn: z.array(z.string().regex(SLUG_RE)).optional(),
   suggests: z.array(z.string().regex(SLUG_RE)).optional(),

@@ -4,6 +4,7 @@ description: A fixture bundle used by the test-suite.
 tags: [demo, fixture]
 author: Tester
 authorUrl: https://example.com
+icon: i-lucide-flask-conical
 requires: [python3]
 gitignore: [".claude/skills/demo-skill/cache/"]
 env:

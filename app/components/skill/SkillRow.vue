@@ -23,7 +23,8 @@ const { trackDownload, trackSource } = useAnalytics()
     data-skill-row
     class="group glass-card glow relative grid grid-cols-[28px_minmax(0,1fr)] items-start gap-3 p-4 transition-colors hover:border-primary/30 focus-within:border-primary/45 md:grid-cols-[34px_minmax(0,1fr)_auto] md:gap-4 md:p-5"
   >
-    <BrandMark
+    <SkillIcon
+      :icon="skill.icon"
       :size="34"
       class="mt-0.5 size-7 md:size-[34px]"
     />

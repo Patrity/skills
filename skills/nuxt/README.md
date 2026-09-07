@@ -4,6 +4,7 @@ description: Nuxt 4 framework docs fetcher and the rule that makes Claude Code c
 tags: [nuxt, vue, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-simple-icons-nuxt
 requires: [python3]
 suggests: [nuxt-ui, browser-testing]
 gitignore: [".claude/skills/nuxt-docs/cache/"]

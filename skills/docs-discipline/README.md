@@ -4,6 +4,7 @@ description: The three-tier docs model (handovers, living wiki, frozen specs) wi
 tags: [docs, handovers, wiki, process]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-book-check
 ---
 
 # Docs Discipline

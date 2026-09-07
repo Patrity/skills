@@ -33,6 +33,12 @@ const lockReason = (slug: string) => {
         class="flex items-center gap-2.5 rounded-lg border bg-elevated px-3 py-2 transition-colors"
         :class="isSelected(skill.slug) ? 'border-primary/45' : 'border-default'"
       >
+        <SkillIcon
+          :icon="skill.icon"
+          :size="18"
+          class="size-[18px]"
+        />
+
         <UCheckbox
           :model-value="isSelected(skill.slug)"
           :label="skill.name"

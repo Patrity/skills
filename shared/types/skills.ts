@@ -21,6 +21,8 @@ export interface SkillFrontmatter {
   tags: string[]
   author: string
   authorUrl?: string
+  /** Iconify name from the lucide or simple-icons sets; the brand mark stands in when there is none. */
+  icon?: string
   requires?: string[]
   /** Bundle slugs that must be installed with this one. */
   dependsOn?: string[]

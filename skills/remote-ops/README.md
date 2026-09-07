@@ -4,6 +4,7 @@ description: The ssh argument-flattening trap that silently runs your command on
 tags: [ops, ssh, proxmox, shell]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-terminal
 requires: [ssh]
 ---
 

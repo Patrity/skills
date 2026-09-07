@@ -4,6 +4,7 @@ description: "Fail-closed Claude Code hooks: protect .env and credential files, 
 tags: [hooks, quality, safety]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-shield-check
 requires: [bash, jq, git]
 ---
 

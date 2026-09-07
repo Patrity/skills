@@ -4,6 +4,7 @@ description: A generator for per-library documentation skills. Configure a templ
 tags: [docs, generator, python]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-book-down
 requires: [python3, curl]
 gitignore: [".claude/skills/doc-fetcher/cache/"]
 ---

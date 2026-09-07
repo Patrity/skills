@@ -59,9 +59,16 @@ const meta = computed(() => [
             <span class="text-primary">{{ slug }}</span>
           </p>
 
-          <h1 class="mt-2 mb-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] text-default lg:text-[64px]">
-            {{ skill.name }}
-          </h1>
+          <div class="mt-2 flex items-center gap-3 lg:gap-4">
+            <SkillIcon
+              :icon="skill.icon"
+              :size="48"
+              class="size-8 lg:size-12"
+            />
+            <h1 class="m-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] text-default lg:text-[64px]">
+              {{ skill.name }}
+            </h1>
+          </div>
 
           <p class="mt-3.5 max-w-[44rem] text-base/[1.65] text-muted">
             {{ skill.description }}

@@ -40,6 +40,14 @@ describe('parseBundle', () => {
     expect(manifest.totalBytes).toBe(Object.values(files).reduce((n, f) => n + f.byteLength, 0))
   })
 
+  it('carries the icon into the manifest and leaves it unset when there is none', () => {
+    const withIcon = readme.replace('tags: [demo]', 'tags: [demo]\nicon: i-lucide-flask-conical')
+    const { manifest } = parseBundle({ slug: 'demo', files: { ...demoFiles(), 'README.md': enc(withIcon) } })
+    expect(manifest.errors).toEqual([])
+    expect(manifest.icon).toBe('i-lucide-flask-conical')
+    expect(parseBundle({ slug: 'demo', files: demoFiles() }).manifest.icon).toBeUndefined()
+  })
+
   it('marks binary and oversized files', () => {
     const { manifest } = parseBundle({ slug: 'demo', files: demoFiles() })
     const assets = manifest.tree.find(n => n.name === 'assets')!

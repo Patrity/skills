@@ -4,6 +4,7 @@ description: Nuxt UI v4 component docs and template fetchers plus the rule that 
 tags: [nuxt-ui, vue, ui, docs]
 author: Patrity
 authorUrl: https://github.com/Patrity
+icon: i-lucide-layout-template
 requires: [python3]
 dependsOn: [nuxt]
 gitignore: [".claude/skills/nuxt-ui-docs/cache/", ".claude/skills/nuxt-ui-templates/cache/"]

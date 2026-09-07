@@ -52,6 +52,7 @@ export function parseBundle(raw: RawBundle): { manifest: SkillManifest, files: B
     tags: fm?.tags ?? [],
     author: fm?.author ?? '',
     authorUrl: fm?.authorUrl,
+    icon: fm?.icon,
     requires: fm?.requires,
     dependsOn: fm?.dependsOn,
     suggests: fm?.suggests,
