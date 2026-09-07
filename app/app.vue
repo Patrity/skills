@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { docsNav } from '~~/content/docs/nav'
+import { LINKS } from '~~/shared/utils/links'
 
 const route = useRoute()
 const { public: { siteUrl } } = useRuntimeConfig()
@@ -14,7 +15,7 @@ const canonical = computed(() => {
 })
 
 useHead({
-  titleTemplate: title => (title ? `${title} · Skills` : 'Skills.. the Claude Code setup I actually run'),
+  titleTemplate: title => (title ? `${title} · Skills` : 'Skills · the Claude Code setup I actually run'),
   htmlAttrs: { lang: 'en' },
   link: [
     { rel: 'canonical', href: canonical },
@@ -31,10 +32,22 @@ useSeoMeta({
   ogType: 'website'
 })
 
-// Site-wide default card. Pages override it with their own title (Task 11).
+// Site-wide default card. Pages override it with their own title through useSiteSeo().
 // `defineOgImage(component, props)` is v6's name for what the plan calls
 // `defineOgImageComponent`: same arguments; the old name only logs a deprecation.
 defineOgImage('Skills', { title: 'Skills' })
+
+// One author for the whole site. `definePerson` gives the node the `#identity` id the
+// module's other nodes (WebSite, WebPage) point at, so this is the site's author rather
+// than a stray Person floating in the graph. `sameAs` is the same profile list the footer
+// links with rel="me" — the machine-readable half of the same claim.
+useSchemaOrg([
+  definePerson({
+    name: 'Tony Costanzo',
+    url: LINKS.lab,
+    sameAs: [LINKS.x, LINKS.github, LINKS.bluesky, LINKS.linkedin]
+  })
+])
 </script>
 
 <template>

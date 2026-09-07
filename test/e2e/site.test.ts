@@ -251,3 +251,143 @@ describe('/docs/start-here', () => {
     expect(html).not.toContain('Next:')
   })
 })
+
+describe('author card', () => {
+  /**
+   * The card's markup: from the attribute it carries to the site footer, which is the next
+   * thing on the page. Scoping matters — the footer links the same profile.
+   */
+  function card(html: string): string {
+    const open = html.indexOf('data-author-card')
+    if (open === -1) return ''
+    const end = html.indexOf('<footer', open)
+    return end === -1 ? html.slice(open) : html.slice(open, end)
+  }
+
+  for (const path of ['/docs/start-here', '/skill/demo']) {
+    it(`renders the author card on ${path}`, async () => {
+      const html = withoutComments(await (await fetch(path)).text())
+      const section = card(html)
+      expect(section, 'no [data-author-card] on the page').not.toBe('')
+      expect(section).toContain('Tony Costanzo')
+      expect(section).toContain('TechHive Labs')
+      // Blog stays in the same tab; X is a profile, so it opens away with rel="me".
+      expect(section).toMatch(/<a[^>]*href="https:\/\/www\.techhivelabs\.net\/blog"/)
+      expect(section).toMatch(/<a[^>]*href="https:\/\/x\.com\/Patrity"[^>]*rel="me noopener"/)
+      expect(section).toMatch(/<a[^>]*href="https:\/\/x\.com\/Patrity"[^>]*target="_blank"/)
+    })
+  }
+
+  it('keeps the card on the README only, not on the other files in a bundle', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo/CLAUDE.md')).text())
+    expect(html).not.toContain('data-author-card')
+  })
+})
+
+describe('structured data', () => {
+  interface LdNode { '@type'?: string | string[], [key: string]: unknown }
+
+  /** Every JSON-LD node on the page, with `@graph` flattened out. */
+  function ldNodes(html: string): LdNode[] {
+    const nodes: LdNode[] = []
+    for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+      const parsed = JSON.parse(match[1]!) as LdNode | LdNode[]
+      const list = Array.isArray(parsed) ? parsed : (parsed['@graph'] as LdNode[] | undefined) ?? [parsed]
+      nodes.push(...list)
+    }
+    return nodes
+  }
+
+  function ofType(nodes: LdNode[], type: string): LdNode[] {
+    return nodes.filter((n) => {
+      const t = n['@type']
+      return Array.isArray(t) ? t.includes(type) : t === type
+    })
+  }
+
+  it('describes the author as a Person on the home page', async () => {
+    const nodes = ldNodes(await (await fetch('/')).text())
+    const people = ofType(nodes, 'Person')
+    expect(people.length).toBeGreaterThan(0)
+    const person = people.find(p => p.name === 'Tony Costanzo')
+    expect(person, 'no Person named Tony Costanzo').toBeTruthy()
+    expect(person!.url).toBe('https://www.techhivelabs.net')
+    expect(person!.sameAs).toEqual(expect.arrayContaining([
+      'https://x.com/Patrity',
+      'https://github.com/Patrity',
+      'https://bsky.app/profile/patrity.com',
+      'https://www.linkedin.com/in/tonycos/'
+    ]))
+  })
+
+  it('describes a bundle as SoftwareSourceCode', async () => {
+    const nodes = ldNodes(await (await fetch('/skill/demo')).text())
+    const code = ofType(nodes, 'SoftwareSourceCode')[0]
+    expect(code, 'no SoftwareSourceCode node').toBeTruthy()
+    expect(code!.name).toBe('Demo')
+    expect(code!.description).toBeTruthy()
+    expect(code!.codeRepository).toBe('https://github.com/Patrity/skills/tree/main/skills/demo')
+    expect(code!.programmingLanguage).toBe('Markdown')
+    expect((code!.author as { name?: string } | undefined)?.name).toBe('Tony Costanzo')
+  })
+
+  it('keeps the Person on every page of the shell', async () => {
+    for (const path of PAGES) {
+      const nodes = ldNodes(await (await fetch(path)).text())
+      expect(ofType(nodes, 'Person').some(p => p.name === 'Tony Costanzo'), path).toBe(true)
+    }
+  })
+})
+
+describe('page meta', () => {
+  function metas(html: string, property: string): string[] {
+    const re = new RegExp(`<meta[^>]*(?:property|name)="${escapeRe(property)}"[^>]*>`, 'g')
+    return html.match(re) ?? []
+  }
+
+  const TITLES: Record<string, string> = {
+    '/': 'The Claude Code setup I actually run · Skills',
+    '/skills': 'All skills · Skills',
+    '/skill/demo': 'Demo · Skills',
+    '/build': 'Build your setup · Skills',
+    '/docs/start-here': 'Start here · Skills'
+  }
+
+  /**
+   * The title nuxt-og-image baked into the signed card URL. Props ride in the path as
+   * `title_<value>`: form-encoded (spaces as `+`) when that round-trips, and base64url
+   * behind a `~` when it does not.
+   */
+  function ogCardTitle(html: string): string {
+    const url = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
+    expect(url, 'no og:image meta').toBeTruthy()
+    const segment = new URL(url!.replace(/&amp;/g, '&')).pathname.split(',').find(p => p.startsWith('title_'))
+    expect(segment, `no title prop in ${url}`).toBeTruthy()
+    const raw = segment!.slice('title_'.length)
+    return raw.startsWith('~')
+      ? Buffer.from(raw.slice(1), 'base64url').toString('utf8')
+      : decodeURIComponent(raw.replace(/\+/g, '%20'))
+  }
+
+  // fitOgTitle() cuts the card's title at 42 characters, so a title carrying the site name
+  // twice comes back with an ellipsis. The card draws the wordmark already.
+  it('draws each card title whole, without the site suffix', async () => {
+    expect(ogCardTitle(await (await fetch('/')).text())).toBe('The Claude Code setup I actually run')
+    expect(ogCardTitle(await (await fetch('/skill/demo')).text())).toBe('Demo')
+    expect(ogCardTitle(await (await fetch('/docs/start-here')).text())).toBe('Start here')
+  })
+
+  for (const path of PAGES) {
+    it(`titles ${path} through the app template`, async () => {
+      const html = await (await fetch(path)).text()
+      expect(html).toContain(`<title>${TITLES[path]}</title>`)
+    })
+
+    it(`emits exactly one og:title, og:description, description and og:image on ${path}`, async () => {
+      const html = withoutComments(await (await fetch(path)).text())
+      for (const property of ['og:title', 'og:description', 'description', 'og:image', 'twitter:card']) {
+        expect(metas(html, property), `${path} ${property}`).toHaveLength(1)
+      }
+    })
+  }
+})

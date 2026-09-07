@@ -35,11 +35,9 @@ function onDisclosureToggle(event: Event) {
 
 const { public: { siteUrl } } = useRuntimeConfig()
 
-useSeoMeta({
+useSiteSeo({
   title: () => doc.value?.entry.title ?? 'Docs',
   description: () => doc.value?.entry.description ?? '',
-  ogTitle: () => doc.value?.entry.title ?? 'Docs',
-  ogDescription: () => doc.value?.entry.description ?? '',
   ogUrl: () => `${siteUrl.replace(/\/+$/, '')}/docs/${slug.value}`
 })
 </script>
@@ -96,7 +94,11 @@ useSeoMeta({
         <DocsFooter
           v-if="doc"
           :entry="doc.entry"
-        />
+        >
+          <template #author>
+            <AuthorCard class="mt-8" />
+          </template>
+        </DocsFooter>
       </article>
     </div>
   </div>

@@ -65,11 +65,9 @@ const countLabel = computed(() => (isFiltered.value
 const description = 'Every Claude Code bundle in the registry. Filter by name or tag, read the files before you trust them, take the zip.'
 const { public: { siteUrl } } = useRuntimeConfig()
 
-useSeoMeta({
+useSiteSeo({
   title: 'All skills',
   description,
-  ogTitle: 'All skills',
-  ogDescription: description,
   ogUrl: `${siteUrl.replace(/\/+$/, '')}/skills`
 })
 </script>

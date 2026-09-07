@@ -5,6 +5,7 @@ import { isMarkdownPath } from '~~/shared/utils/language'
 import { encodePathSegments } from '~~/shared/utils/paths'
 import { formatBytes } from '~~/shared/utils/format'
 import { compactBreadcrumbs } from '~~/shared/utils/breadcrumbs'
+import { LINKS } from '~~/shared/utils/links'
 
 definePageMeta({
   // One page instance per bundle: moving between files must not remount the tree.
@@ -93,12 +94,34 @@ const fileTrail = computed<BreadcrumbItem[]>(() => [
 ])
 const compactTrail = computed(() => compactBreadcrumbs(fileTrail.value))
 
-useSeoMeta({
+useSiteSeo({
   title: () => (isReadme.value ? skill.value.name : `${currentPath.value} · ${skill.value.name}`),
   description: () => skill.value.description,
-  ogTitle: () => skill.value.name,
-  ogDescription: () => skill.value.description
+  // The card is the bundle, not the file that happens to be open.
+  ogTitle: () => skill.value.name
 })
+
+// The bundle as a thing, not just a page: a directory of markdown in the registry repo.
+// `codeRepository` is a tree URL rather than the repo root so the node points at this
+// bundle's own source. The page instance is keyed by slug, so setup re-runs per bundle
+// and the node never describes the previous one.
+useSchemaOrg([{
+  '@type': 'SoftwareSourceCode',
+  'name': skill.value.name,
+  'description': skill.value.description,
+  'codeRepository': `${LINKS.repo}/tree/main/skills/${slug.value}`,
+  'programmingLanguage': 'Markdown',
+  'author': { '@type': 'Person', 'name': 'Tony Costanzo' }
+}])
+
+/**
+ * The author card closes the README, and only the README: on a rule, a hook or the raw
+ * source it would be signing someone else's file.
+ */
+const showAuthorCard = computed(() => isReadme.value
+  && view.value === 'rendered'
+  && !fileError.value
+  && !!file.value?.body)
 
 const { trackSkillView } = useAnalytics()
 onMounted(() => trackSkillView(slug.value))
@@ -290,6 +313,12 @@ onMounted(() => trackSkillView(slug.value))
             <div class="h-4 w-full animate-pulse rounded-md bg-(--ui-border)" />
             <div class="h-4 w-5/6 animate-pulse rounded-md bg-(--ui-border)" />
           </div>
+
+          <!-- mt-4 on top of the column's gap-6 makes the 2.5rem the design asks for. -->
+          <AuthorCard
+            v-if="showAuthorCard"
+            class="mt-4"
+          />
         </div>
       </div>
     </div>

@@ -30,17 +30,15 @@ const axisCount = computed(() => base.value?.base?.axes.length ?? 0)
 
 const description = 'Nine bundles, fourteen questions, one CLAUDE.md and a .claude/ directory: rules that carry the direction, skills that carry the how-to, hooks that fail closed. Build it in the browser or from the CLI, or take one bundle on its own.'
 
-useSeoMeta({
-  // The app-level titleTemplate appends " · Skills".
+useSiteSeo({
+  // The app-level titleTemplate appends " · Skills". A shared link carries no template, so
+  // the og:title spells the site out; the card itself already draws the wordmark, so it
+  // takes the bare title rather than a suffixed one that would not fit.
   title: 'The Claude Code setup I actually run',
   description,
   ogTitle: 'The Claude Code setup I actually run · Skills',
-  ogDescription: description
+  ogImageTitle: 'The Claude Code setup I actually run'
 })
-
-// `defineOgImage(component, props)` is v6's name for what the plan calls
-// defineOgImageComponent: same arguments, and the old name only logs a deprecation.
-defineOgImage('Skills', { title: 'The Claude Code setup I actually run' })
 </script>
 
 <template>

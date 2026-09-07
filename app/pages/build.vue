@@ -147,11 +147,9 @@ const sheetSummary = computed(() => `${view.value === 'claude' ? 'CLAUDE.md' : '
 const description = 'Compose a Claude Code setup in the browser. Pick a preset, answer the questions, tick the bundles, then take the zip or the CLI command that reproduces it.'
 const { public: { siteUrl } } = useRuntimeConfig()
 
-useSeoMeta({
+useSiteSeo({
   title: 'Build your setup',
   description,
-  ogTitle: 'Build your setup',
-  ogDescription: description,
   ogUrl: `${siteUrl.replace(/\/+$/, '')}/build`
 })
 </script>
