@@ -9,6 +9,8 @@ can take on its own.
 The site reads those bundles straight from this repository at request time, so publishing a bundle
 never rebuilds the app.
 
+![The Skills home page: a hive-lit hero, the CLAUDE.md that a run writes, and the bundle list](docs/design/screenshots/after/home-1440-light.png)
+
 ## Two ways in
 
 [skills.patrity.com/build](https://skills.patrity.com/build) runs the wizard in the browser. Pick a
