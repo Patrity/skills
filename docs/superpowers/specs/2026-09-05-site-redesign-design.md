@@ -24,6 +24,14 @@ Baseline metrics (2026-09-05, Lighthouse mobile):
 | /skills | 78 | 96 |
 | /skill/nuxt | 74 | 96 |
 
+After the redesign (2026-09-07, production on the CDN, same script):
+
+| page | performance | accessibility |
+| --- | --- | --- |
+| / | 85 | 100 |
+| /skills | 83 | 98 |
+| /skill/nuxt | 78 | 100 |
+
 ## 2. Decisions
 
 | Decision | Choice |
