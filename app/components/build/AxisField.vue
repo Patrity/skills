@@ -40,12 +40,21 @@ const fieldUi = computed(() => (props.axis.info ? { ...FIELD_UI, labelWrapper: '
       v-if="axis.info"
       #hint
     >
-      <UTooltip :ui="{ content: 'h-auto max-w-72 items-start p-2.5' }">
+      <!--
+        A popover, not a tooltip: tooltip content takes no focus, so the link inside one is
+        mouse-only. Reka's popover moves focus into the panel on open, which puts the link one
+        Tab away, and Escape closes it and hands focus back to the glyph. Click-only on purpose:
+        `mode="hover"` swaps in a HoverCard, which opens on neither Enter nor Space.
+      -->
+      <UPopover
+        :content="{ side: 'bottom', align: 'start' }"
+        :ui="{ content: 'max-w-72 p-3' }"
+      >
         <button
           type="button"
           :data-axis-info="axis.id"
           aria-label="About this question"
-          class="inline-flex cursor-help rounded-sm p-0.5 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="inline-flex rounded-sm p-0.5 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-info"
@@ -54,18 +63,18 @@ const fieldUi = computed(() => (props.axis.info ? { ...FIELD_UI, labelWrapper: '
         </button>
 
         <template #content>
-          <span class="block text-xs/[1.5] font-normal text-default">
+          <p class="m-0 text-xs/[1.55] font-normal text-default">
             {{ axis.info.text }}
-            <a
-              v-if="axis.info.href"
-              :href="axis.info.href"
-              target="_blank"
-              rel="noopener"
-              class="whitespace-nowrap text-primary underline underline-offset-2"
-            >{{ axis.info.label ?? 'Repo' }} ↗</a>
-          </span>
+          </p>
+          <a
+            v-if="axis.info.href"
+            :href="axis.info.href"
+            target="_blank"
+            rel="noopener"
+            class="mt-2 inline-flex font-mono text-[0.6875rem] text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >{{ axis.info.label ?? 'Repo' }} ↗</a>
         </template>
-      </UTooltip>
+      </UPopover>
     </template>
 
     <USelect

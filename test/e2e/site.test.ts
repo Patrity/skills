@@ -254,11 +254,13 @@ describe('/build', () => {
     expect(html).toContain('How is the repo laid out?')
   })
 
-  it('puts an axis with an info block behind a focusable glyph', async () => {
+  it('puts an axis with an info block behind a focusable popover glyph', async () => {
     const html = withoutComments(await (await fetch('/build')).text())
-    // The tooltip content is rendered on open, so the button is what the HTML can prove.
-    expect(html).toMatch(/<button[^>]*data-axis-info="layout"/)
-    expect(html).toContain('About this question')
+    // The panel is rendered on open, so the trigger is what the HTML can prove. It has to be a
+    // popover trigger, not a tooltip's: only a popover's panel can hold a link you can tab to.
+    const button = html.match(/<button[^>]*data-axis-info="layout"[^>]*>/)?.[0] ?? ''
+    expect(button).toContain('aria-label="About this question"')
+    expect(button).toContain('aria-haspopup="dialog"')
   })
 })
 
