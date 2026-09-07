@@ -26,11 +26,6 @@ const schemaErrors = computed(() => manifest.value?.errors ?? [])
 const resolvedBundles = computed(() => (manifest.value ? resolveBundles(state.value.bundles, manifest.value.skills).bundles : []))
 
 const count = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
-const countLabel = computed(() => [
-  count(manifest.value?.base?.axes.length ?? 0, 'question'),
-  count(manifest.value?.skills.length ?? 0, 'bundle'),
-  count(manifest.value?.profiles.length ?? 0, 'preset')
-].join(' · '))
 
 /** Shared by the sticky column and the bottom sheet, so switching between them keeps the view. */
 const view = ref<'claude' | 'files'>('claude')
@@ -168,13 +163,13 @@ useSiteSeo({
       />
       <div class="relative mx-auto max-w-7xl px-4 pt-8 pb-6 sm:px-6 lg:pt-14 lg:pb-10">
         <MicroLabel class="mb-2.5 block">
-          {{ countLabel }}
+          The builder
         </MicroLabel>
         <h1 class="m-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] text-default lg:text-[64px]">
-          Answer the questions. <span class="text-primary">Take the zip.</span>
+          Answer the questions and <span class="text-primary">take the zip.</span>
         </h1>
         <p class="mt-3.5 max-w-[44rem] text-base/[1.65] text-muted">
-          Nothing is stored here. The whole form lives in the URL hash, so the share link is the only memory this site has.
+          Nothing is stored here. The whole form lives in the URL hash, so a share link is the only way this site remembers what you answered.
         </p>
       </div>
     </section>
@@ -216,7 +211,7 @@ useSiteSeo({
         />
 
         <!-- The pane fills the viewport rather than the page: it scrolls inside itself while
-             the seven questions beside it scroll the document. -->
+             the questions beside it scroll the document. -->
         <div
           v-if="isDesktop"
           class="hidden min-w-0 lg:sticky lg:top-20 lg:flex lg:h-[calc(100dvh-6rem)] lg:max-h-[calc(100dvh-6rem)] lg:flex-col"

@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@patrity/skills)](https://www.npmjs.com/package/@patrity/skills)
 
-Assembles a Claude Code setup, `.claude/` plus `CLAUDE.md`, out of the bundles published on [skills.patrity.com](https://skills.patrity.com). One command, no install step.
+Assembles a Claude Code setup, `.claude/` plus `CLAUDE.md`, out of the bundles published on [skills.patrity.com](https://skills.patrity.com). It is the setup I run on my own projects, and there is no install step.
 
 ## Quick start
 
@@ -10,9 +10,9 @@ Assembles a Claude Code setup, `.claude/` plus `CLAUDE.md`, out of the bundles p
 pnpx @patrity/skills
 ```
 
-No install step: `pnpx`/`npx`/`bunx` all fetch and run the package straight from npm. With no
-subcommand it runs `init`, the interactive wizard. Node 22 or newer is required; Windows, macOS
-and Linux are all supported.
+`pnpx`, `npx` and `bunx` all fetch and run the package straight from npm, so there is nothing to
+install first. With no subcommand it runs `init`, the interactive wizard. Node 22 or newer is
+required; Windows, macOS and Linux are all supported.
 
 ## Commands
 

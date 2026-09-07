@@ -6,8 +6,12 @@ import { LINKS } from '~~/shared/utils/links'
   <section class="py-12 lg:py-20 border-t border-default text-center">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <h2 class="font-teko font-semibold text-[38px] lg:text-[56px] leading-[.92] tracking-[-0.01em] m-0 mx-auto max-w-[22ch]">
-        Take the whole thing, or take one bundle and ignore me on the rest.
+        Take what you want
       </h2>
+
+      <p class="mt-4 mx-auto max-w-[46ch] text-base/[1.65] text-muted">
+        Take the whole thing, or just the bundle you came for.
+      </p>
 
       <InstallBox
         command="pnpx @patrity/skills init"

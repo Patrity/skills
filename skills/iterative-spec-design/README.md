@@ -9,7 +9,7 @@ icon: i-lucide-drafting-compass
 
 # Iterative Spec Design
 
-One skill, one habit: partition the design into four to six sections, present each with a
+One skill for one habit: partition the design into four to six sections, present each with a
 recommendation and a rationale, and stop for feedback before moving on.
 
 ## What's inside

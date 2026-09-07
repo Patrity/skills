@@ -3,44 +3,44 @@
 type Part = string | { code: string }
 
 /**
- * The five opinions the setup encodes, each pointing at the bundle that enforces it.
- * Hand-written, not derived: an opinion is a claim about the setup, not bundle metadata.
+ * The choices the setup makes, each pointing at the bundle that carries it.
+ * Hand-written, not derived: a choice is a claim about the setup, not bundle metadata.
  * The long form lives at /docs/philosophy.
  */
 const opinions: { n: string, title: string, body: Part[], to: string }[] = [
   {
     n: '01',
-    title: 'Rules carry the direction, skills carry the how-to',
-    body: ['A rule is a glob and a constraint that loads on its own. A skill is the procedure, and it has to be invoked. Splitting them is what keeps CLAUDE.md short enough that Claude still reads it. '],
+    title: 'Rules and skills stay apart',
+    body: ['A rule is a glob and a constraint, and it loads on its own when Claude touches a matching file. A skill is the procedure, and it gets invoked when it is needed. Keeping them apart is what keeps my CLAUDE.md short enough that Claude still reads it. '],
     to: '/skill/nuxt'
   },
   {
     n: '02',
     title: 'Hooks fail closed',
-    body: ['A line in CLAUDE.md is a suggestion. A PreToolUse hook is not. Delete a tracked hook script and the wiring exits 2 rather than waving the edit through. '],
+    body: ['I moved the checks I keep forgetting into hooks, so the harness runs them rather than me. Delete a tracked hook script and the wiring exits 2, which is the behaviour I want from a check I rely on. '],
     to: '/skill/quality-hooks'
   },
   {
     n: '03',
-    title: 'Docs come in three tiers, and one of them is tested',
-    body: ['The wiki is the tier that rots. A registry names every system, and the test fails on a page nobody registered, so drift shows up red in the commit that caused it. '],
+    title: 'Docs in three tiers, one of them tested',
+    body: ['Handovers, a wiki and frozen specs. The wiki is the tier that rots on me, so a registry names every system and a test fails on a system with no page, or a page nobody registered. '],
     to: '/skill/docs-discipline'
   },
   {
     n: '04',
-    title: 'UI work is proven in a real browser',
-    body: ['Typecheck, lint and unit tests all pass on a component that never mounted. Snapshot, act on refs, assert with eval, read a screenshot. Then call it done. '],
+    title: 'UI work is checked in a browser',
+    body: ['Typecheck, lint and unit tests all pass on a component that never mounted, so I drive the change with ', { code: 'playwright-cli' }, ': snapshot, act on refs, assert with ', { code: 'eval' }, ', then read a screenshot. '],
     to: '/skill/browser-testing'
   },
   {
     n: '05',
-    title: 'Memory and process are opt-in',
+    title: 'Memory and process are questions',
     body: [
-      'The two habits most likely to be wrong for your project are questions, not defaults. ',
+      'These are the habits most likely to be wrong for your project, so the wizard asks instead of assuming. ',
       { code: 'full' },
-      ' process is brainstorm, spec, plan, TDD, then a two-stage review; ',
+      ' process is brainstorm, spec, plan, TDD, then a two-stage review, and ',
       { code: 'none' },
-      ' is also on the list. '
+      ' is on the list too. Memory is off unless you turn it on. '
     ],
     to: '/skill/iterative-spec-design'
   }
@@ -52,13 +52,13 @@ const opinions: { n: string, title: string, body: Part[], to: string }[] = [
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="max-w-3xl mb-7 lg:mb-10">
         <MicroLabel class="block mb-2.5">
-          The opinions
+          The choices
         </MicroLabel>
         <h2 class="font-teko font-semibold text-4xl lg:text-[46px] leading-[.9] tracking-[-0.01em] m-0">
-          Five opinions, and the bundle that holds each one up.
+          Why the setup looks like this
         </h2>
         <p class="mt-3.5 text-base/[1.65] text-muted">
-          They are mine and they are separable. Disagree with one, skip its bundle or its answer, and nothing else breaks.
+          These are my choices, and each one is either a question you can answer differently or a bundle you can leave out.
         </p>
       </div>
 

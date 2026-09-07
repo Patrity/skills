@@ -38,7 +38,7 @@ function when(post: LabFeedResponse['posts'][number]): string {
           From the lab
         </MicroLabel>
         <h2 class="font-teko font-semibold text-4xl lg:text-[46px] leading-[.9] tracking-[-0.01em] m-0">
-          What broke recently.
+          Recent posts
         </h2>
       </div>
 

@@ -10,7 +10,7 @@ machine-local:
 | `settings.json` | committed with the project | the consumer's `.claude/settings.json` | hooks: the checks every clone of the project should run |
 | `settings.local.json` | gitignored on the consumer's machine | the consumer's `.claude/settings.local.json` | permission allowlists and anything machine-specific |
 
-## settings.json is the half everyone gets
+## settings.json is the committed half
 
 The CLI **merges** it into the project's `.claude/settings.json`. Hook entries are unioned per
 event, so a bundle adding a `PreToolUse` hook never drops one that is already there, and any
@@ -56,7 +56,7 @@ Paths inside the settings file are relative to the **project root**, so referenc
 
 The CLI merges this into the user's own `.claude/settings.local.json`; downloading the zip from the site does not, so say so in the README.
 
-## Two files the tool owns outright
+## The files the tool owns outright
 
 Neither belongs to any one bundle, and both are rebuilt from scratch on every run.
 
@@ -102,7 +102,7 @@ Put the scripts the settings reference here. Make them executable in git (`chmod
 
 Shell, Python, JavaScript and TypeScript files render with syntax highlighting on the site so people can read a hook before they trust it.
 
-## Trigger it yourself before you trust it
+## Trying a hook before you trust it
 
 ```bash
 unzip <slug>.zip

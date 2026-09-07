@@ -1,10 +1,10 @@
 # Skills
 
-My Claude Code setup, published so it can be installed instead of copied. Nine bundles, fourteen
-questions, one `CLAUDE.md`. Answer the questions and you get that `CLAUDE.md` and a `.claude/`
-directory shaped like mine: rules that carry the direction, skills that carry the how-to, hooks that
-fail closed, docs a test keeps honest. Every piece is also a bundle under [`skills/`](skills/) you
-can take on its own.
+This is the Claude Code setup I use on my own projects, published so it can be installed instead
+of copied. Answer a short list of questions and you get a `CLAUDE.md` and a `.claude/` directory
+shaped like mine: rules that carry the direction, skills that carry the how-to, hooks that fail
+closed, and docs a test keeps honest. It is split into bundles under [`skills/`](skills/), so you
+can take the parts that fit and leave the rest.
 
 The site reads those bundles straight from this repository at request time, so publishing a bundle
 never rebuilds the app.
@@ -32,31 +32,61 @@ command, and [/docs/start-here](https://skills.patrity.com/docs/start-here) for 
 
 ## Use a single bundle
 
-You do not have to take all of it. Every bundle has its own page with a download button and a
-readable file tree, so you can take the browser-testing workflow or the fail-closed hooks and leave
-the rest. Copy the contents into your project's `.claude/`, paste the bundle's `CLAUDE.md` snippet
+None of it is all-or-nothing. Every bundle has its own page with a download button and a readable
+file tree, so you can take the browser-testing workflow or the fail-closed hooks and leave the
+rest. Copy the contents into your project's `.claude/`, paste the bundle's `CLAUDE.md` snippet
 into your own, and add whatever the page lists under **Gitignore** and **Environment**. Details:
 [/docs/single-bundle](https://skills.patrity.com/docs/single-bundle).
 
 ## Philosophy
 
-- **Rules carry the direction, skills carry the how-to.** A rule is a `paths:`-scoped file that
-  loads on its own and states what must be true. A skill is the procedure, invoked when it is
-  needed. Keeping them apart is what keeps `CLAUDE.md` short enough to be read.
-- **Hooks fail closed.** A `PreToolUse` hook refuses the edit; a line in `CLAUDE.md` only asks. When
-  a hook script goes missing, the wiring asks git whether it was supposed to exist and exits 2 if it
-  was, rather than waving the action through.
-- **Docs come in three tiers.** Handovers for what shipped, a living wiki for how things work today,
-  frozen specs for what was intended. The wiki tier gets a parity test, because it is the one that
-  rots.
-- **UI work is proven in a real browser with `playwright-cli`**, never the Playwright MCP: one
-  browser session, one source of truth for refs. A green typecheck never caught a component that
-  failed to mount.
-- **Memory and process are opt-in.** The MyMind memory server and the full brainstorm → spec → plan
-  → TDD → review cycle are both answers to a question, not defaults you inherit.
+- **Rules and skills stay apart.** A rule is a `paths:`-scoped file that loads on its own and
+  states what must be true. A skill is the procedure, invoked when it is needed. Keeping them
+  apart is what keeps `CLAUDE.md` short enough to be read.
+- **Hooks fail closed.** I moved the checks I keep forgetting into hooks, so the harness runs them
+  rather than me. When a hook script goes missing, the wiring asks git whether it was supposed to
+  exist and exits 2 if it was.
+- **Docs come in three tiers.** Handovers for what shipped, a living wiki for how things work
+  today, frozen specs for what was intended. The wiki tier gets a parity test, because it is the
+  one that rots on me.
+- **UI work is checked in a real browser with `playwright-cli`.** The rule keeps me off the
+  Playwright MCP while the CLI is available, so there is one browser session and one source of
+  truth for refs. A green typecheck has never caught a component that failed to mount.
+- **Memory and process are questions.** The MyMind memory server and the brainstorm, spec, plan,
+  TDD and review cycle are each an answer you give in the wizard. Memory is off unless you turn
+  it on.
 
-The long version, with the bundle behind each one:
+The longer version, with the bundle behind each one:
 [/docs/philosophy](https://skills.patrity.com/docs/philosophy).
+
+## Superpowers
+
+The `full` and `lightweight` workflow answers lean on [Superpowers](https://github.com/obra/superpowers),
+obra's plugin: the `CLAUDE.md` this setup writes points Claude at its `brainstorming`,
+`writing-plans`, `subagent-driven-development`, `test-driven-development` and
+`requesting-code-review` skills. Install it into your user plugins, where it covers every project
+on the machine:
+
+```text
+/plugin install superpowers@claude-plugins-official
+```
+
+That is the official marketplace. obra's own works too:
+
+```text
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+```
+
+The [plugin page](https://claude.com/plugins/superpowers) lists what is in it. Answer `none` to the
+workflow question and you can skip it.
+
+## MyMind
+
+Answering `on` to the memory question wires [MyMind](https://github.com/Patrity/mymind), my own
+open-source memory server, into the generated `CLAUDE.md`: search it before answering from
+recollection, mirror docs into it, keep tasks there. It is useful to me across sessions and useless
+to you unless you run it, so the question is off by default.
 
 ## Configuration and caches
 
@@ -82,9 +112,9 @@ Every run regenerates the block. Lines outside it are never touched.
 
 ## Contributing
 
-Curated and opinionated, and pull requests are welcome anyway. A bundle that is genuinely reusable,
-carries no secrets and keeps to one concern has a good chance of being merged. See
-`content/docs/contributing.md`.
+This is a personal registry first, and pull requests are welcome anyway. A bundle that is
+genuinely reusable, carries no secrets and keeps to one concern has a good chance of being merged.
+See `content/docs/contributing.md`.
 
 ## Bundle structure
 

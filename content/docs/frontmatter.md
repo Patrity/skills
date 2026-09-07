@@ -36,7 +36,7 @@ gitignore:
 that names no bundle fails the build. They are the bundle graph; `requires` is about your machine,
 not the registry.
 
-## gitignore: paths the project should forget
+## gitignore: paths the project should ignore
 
 Each entry is a project-relative path: no leading `/`, no `..` segment, no drive letter, no
 backslashes. End a directory with `/`. That is the convention, not something the schema enforces. Write
@@ -52,7 +52,7 @@ The CLI and the web builder collect these across every installed bundle, sort th
 one managed block in the project's root `.gitignore`. Removing the bundle takes its lines back out.
 See [Hooks and settings](/docs/hooks-and-settings) for the block itself.
 
-## env: declare the variables, never the file
+## env: declare the variables
 
 A bundle declares the variables its skills read and lets the tool write the example:
 
@@ -93,7 +93,7 @@ A bundle with a missing README, a missing required key, or a bad slug is:
 
 Messages look like `frontmatter.tags: required` or `slug "Bad_Slug" must match /^[a-z0-9][a-z0-9-]*$/`.
 
-## The keys you never write
+## The keys the site computes
 
 The site computes these from the files:
 

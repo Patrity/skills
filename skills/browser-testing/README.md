@@ -10,8 +10,8 @@ requires: [node, npm]
 
 # Browser Testing
 
-A skill, a path-scoped rule and the permissions to run them. Together they stop Claude Code
-declaring UI work finished on the strength of a green typecheck.
+A skill, a path-scoped rule and the permissions to run them. I use them so a UI change gets
+driven in a real browser before it is called finished, rather than resting on a green typecheck.
 
 ## What's inside
 

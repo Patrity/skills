@@ -33,7 +33,7 @@ Rendering rules:
 - Placeholders (below) are rendered in snippets and in rule `paths:` frontmatter.
 - `validate:skills` rejects a snippet whose headings are not canonical.
 
-## Five placeholders, and where each one goes
+## Placeholders
 
 | Placeholder | Renders to | Use it for |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ Rules for the file:
 
 ## Axes are the questions
 
-`base/questions.yaml` is the ordered list. Fourteen of them today, three of which only appear when an earlier answer calls for them. Each axis has an id, a question, a default, and either a set of `options` or a free-text `input`:
+`base/questions.yaml` is the ordered list. Some of them are follow-ups, asked only when an earlier answer calls for them. Each axis has an id, a question, a default, and either a set of `options` or a free-text `input`:
 
 ```yaml
 version: 1
@@ -113,7 +113,7 @@ Answers plus bundles, nothing else. One file per profile under `profiles/<name>.
 ```yaml
 name: library
 description: A package or library.. lightweight process, hooks, no browser validation.
-answers: { pm: pnpm, layout: single, workflow: lightweight, docs: reminder, memory: "on", commits: proactive, pushes: ask, browser: none, enforcement: hooks, deploy: none, domain: "off" }
+answers: { pm: pnpm, layout: single, workflow: lightweight, docs: reminder, memory: "off", commits: proactive, pushes: ask, browser: none, enforcement: hooks, deploy: none, domain: "off" }
 bundles: [quality-hooks]
 ```
 

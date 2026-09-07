@@ -9,19 +9,6 @@ import transcript from '~/assets/transcripts/init.json'
  * veils, central glow) with the lattice drawn by <HiveBackground> rather than the
  * frozen SVG the mockup used. Markup follows docs/design/previews/pages/home.html.
  */
-const props = defineProps<{
-  /** Bundles in the registry, for the status pill. */
-  bundleCount: number
-  /** Questions the wizard can ask. 0 when /api/base could not be read; the pill drops that half. */
-  axisCount: number
-}>()
-
-const pill = computed(() => {
-  const bundles = `${props.bundleCount} bundle${props.bundleCount === 1 ? '' : 's'}`
-  if (!props.axisCount) return bundles
-  return `${bundles} · ${props.axisCount} question${props.axisCount === 1 ? '' : 's'}`
-})
-
 /**
  * Read times, from `wc -w content/docs/<slug>.md / 220` on 2026-09-06 (652 → 3, 812 → 4).
  * The markdown is a Nitro server asset, so the page cannot count the words without either
@@ -153,14 +140,6 @@ onBeforeUnmount(() => {
     <div class="relative z-10 w-full max-w-7xl mx-auto px-6 py-20 lg:px-8 lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
       <!-- Identity column. -->
       <div class="lg:col-span-7 max-w-3xl">
-        <span class="glass-card rounded-full inline-flex items-center gap-2 mb-6 px-4 py-1.5 text-sm text-primary">
-          <span
-            class="size-2 shrink-0 rounded-full bg-primary"
-            aria-hidden="true"
-          />
-          {{ pill }}
-        </span>
-
         <h1 class="font-teko font-bold text-5xl lg:text-[6rem] leading-[.86] tracking-[-0.025em] text-default">
           Claude Code,<br>
           set up the way<br>
@@ -179,7 +158,7 @@ onBeforeUnmount(() => {
         </p>
 
         <p class="mt-4 max-w-xl text-base/relaxed lg:text-lg/relaxed text-muted">
-          Nine bundles, fourteen questions, one CLAUDE.md. Take the whole setup or one bundle.. the browser and the CLI write the same files, and the lockfile records every one.
+          This is the Claude Code setup I use on my own projects: a CLAUDE.md, some rules, skills and hooks. It is split into bundles so you can take the parts that fit and leave the rest. The web builder and the CLI write the same files.
         </p>
 
         <div class="flex flex-wrap items-center gap-3 lg:gap-4 mt-7">
@@ -269,7 +248,7 @@ onBeforeUnmount(() => {
               >{{ chip }}</span>
             </div>
             <p class="m-0 text-xl/[1.35] font-semibold text-white">
-              31 files land in the repo, and the lockfile lists every one.
+              One run into an empty project, and what it wrote.
             </p>
             <p class="m-0 font-mono text-xs text-dimmed">
               pnpx @patrity/skills init · --yes --profile nuxt-app

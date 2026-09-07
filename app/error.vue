@@ -10,7 +10,7 @@ const props = defineProps<{ error: NuxtError }>()
 
 const code = computed(() => props.error.statusCode || 500)
 const line = computed(() => (code.value === 404
-  ? 'That page is not here. The bundle may have moved, or the link was never right.'
+  ? 'That page is not here. The bundle may have moved, or the link may never have been right.'
   : props.error.statusMessage || 'Something on my side broke. Try again in a minute.'))
 
 useHead({

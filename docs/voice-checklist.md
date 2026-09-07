@@ -1,49 +1,50 @@
 # Voice checklist
 
-Tick this before any copy ships. The rules are `docs/voice.md` §6, unchanged, plus the calibration
-line at the bottom. Eleven rules, not ten: §6 grew a swearing rule after the first draft.
+Tick this before any copy ships. The rules are `docs/voice.md`, "The register" and "Do and don't",
+unchanged. Walk it once per surface, not once per pull request. A surface is a page, a doc, a
+README, or one command's `--help`.
 
-Walk it once per surface, not once per pull request. A surface is a page, a doc, a README, or one
-command's `--help`.
+## The register
 
-## The eleven
+- [ ] **1. First person, plain statements.** "I keep rules and skills apart because.." · "This is
+  what I use" · "You might not want this." Never a general truth stated on the reader's behalf.
+- [ ] **2. No counts that describe the registry.** No "nine bundles", "fourteen questions", "six
+  commands", "five opinions", "thirty-one files", "three things". A number survives only inside
+  quoted real output or as part of a thing's own name (three-tier docs).
+- [ ] **3. No verdicts, and no this-not-that.** Not "A line in CLAUDE.md is a suggestion. A hook is
+  not." Say what it does and why I like it.
+- [ ] **4. Headings describe.** No promises, no jokes. "Commands", not "Six commands, and what each
+  one touches".
+- [ ] **5. `..` is the pause mark.** `grep -rn -- '—\|–' <files>` prints nothing outside quoted
+  real output.
+- [ ] **6. Humanizer pass on every sentence.** `/Users/tony/.claude/skills/humanizer/SKILL.md`.
+- [ ] **7. Nothing is lost.** Every command, flag, path and behaviour claim the page carried before
+  is still there.
 
-- [ ] **1. Opens on a concrete object, number, or moment.** No thesis sentence.
-  Not "Setting up Claude Code properly is surprisingly difficult."
-  Try "A 923 MB model landed in my lap with one question attached: what's actually in there?"
-- [ ] **2. `..` is the pause mark.** No em dash, no en dash, anywhere.
-  `grep -rn -- '—\|–' <files>` prints nothing.
-- [ ] **3. An exact, sourced number sits where the adjective wanted to go.**
-  Not "saves a ton of money". Try "6.67 billion tokens, $35.85 in electricity."
-- [ ] **4. The failure is named, and so is its size.** Not only the win.
-  "Our published developed length was inflated 7.2% and looked plausible the entire time."
-- [ ] **5. The tech is deflated with a blue-collar comparison.** No awe.
-  "no magic, just grep with a paycheck."
-- [ ] **6. Every section ends on a short punch line.** No recap sentence.
-  Not "So, in summary, the configuration was the root cause."  Try "The model was fine. The config was drunk."
-- [ ] **7. The softest number is disclosed by me, first.**
-  "Honesty corner: this is marginal cost, and the prefill throughput is estimated."
-- [ ] **8. Written to a peer who has been burned.** Never teaching down.
-  "Learn from my bruises: a uniform value is a red flag, not a convenience."
-- [ ] **9. Tools are named exactly once, with the version or the flag.** Never "modern tooling".
-  "vLLM 0.20.0, the stable sweet spot on Ampere right now."
-- [ ] **10. The joke is at my own expense.** Never at the reader or at a vendor's people.
-- [ ] **11. Swearing stays implied or quoted.** No f-bombs in body copy; that is the 2025 voice.
+## Do and don't
 
-## Calibration line
+- [ ] Opens on the thing, not on a claim about it.
+- [ ] Where a count wanted to go, there is a description.
+- [ ] The reader is left a door: an answer they can change, a bundle they can leave out.
+- [ ] Sections end on a fact, not on a punch line.
+- [ ] Tools are named exactly, with the flag or the version. Never "modern tooling".
+- [ ] Written to a peer. No teaching down, no selling.
+- [ ] The failure that caused a rule is still on the page, stated plainly.
+- [ ] No swearing, quoted or otherwise.
 
-- [ ] Zero em dashes.
-- [ ] At least one exact number.
-- [ ] At least one thing that broke or cost something.
-- [ ] One self-deprecating aside.
-- [ ] Zero words from {powerful, seamless, unlock, leverage, empower, revolutionary, cutting-edge}.
+## Words that fail the pass
+
+- [ ] None of: powerful, seamless, unlock, leverage, empower, revolutionary, cutting-edge,
+  game-changing, robust, effortless.
+- [ ] No rule of three, no "-ing" tails ("ensuring", "highlighting"), no "It is not just X, it is
+  Y", no "at its core", no "let's dive in".
+- [ ] Straight quotes, no emoji, no bold used as a bullet header.
 - [ ] Average sentence under about 15 words.
-- [ ] The last line is a fact or an invitation, never a summary.
 
-## Headings
+## Facts
 
-- [ ] Every `##` promises something or makes a joke. Never "Introduction", "Overview",
-  "Conclusion", "Key Takeaways".
-- [ ] Commands, flags, paths and identifiers are in backticks.
+- [ ] Commands, flags, paths and identifiers are in backticks and checked against the repo:
+  `cli/src/commands` for flags, the working tree for paths.
+- [ ] Every external link resolves and points where the sentence says it does.
 
-Reference copy for the samples above: `docs/voice.md`.
+Reference copy for the samples: `docs/voice.md`.

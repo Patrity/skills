@@ -7,13 +7,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="max-w-3xl mb-7 lg:mb-10">
         <MicroLabel class="block mb-2.5">
-          What the run writes
+          In your repo
         </MicroLabel>
         <h2 class="font-teko font-semibold text-4xl lg:text-[46px] leading-[.9] tracking-[-0.01em] m-0">
-          Three things land in the repo.
+          What the run writes
         </h2>
         <p class="mt-3.5 text-base/[1.65] text-muted">
-          Thirty-one files for the <code class="font-mono text-sm">nuxt-app</code> profile, and no wrapper directory to dig them out of.
+          A file, a directory and a record. The paths are already relative to your project root, so there is no wrapper directory to dig anything out of.
         </p>
       </div>
 

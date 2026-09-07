@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import type { SkillSummary } from '~~/shared/types/skills'
 
-const props = defineProps<{
+defineProps<{
   /** In the order /api/skills returns them, which is the order the CLI installs them (slug, ascending). */
   bundles: SkillSummary[]
 }>()
-
-const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty']
-
-/** Spelled out up to twenty, digits above that. */
-const count = computed(() => WORDS[props.bundles.length] ?? String(props.bundles.length))
-const label = computed(() => `${count.value.charAt(0).toUpperCase()}${count.value.slice(1)} bundles`)
 </script>
 
 <template>
@@ -18,13 +12,13 @@ const label = computed(() => `${count.value.charAt(0).toUpperCase()}${count.valu
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="max-w-3xl mb-7 lg:mb-10">
         <MicroLabel class="block mb-2.5">
-          {{ label }}
+          The registry
         </MicroLabel>
         <h2 class="font-teko font-semibold text-4xl lg:text-[46px] leading-[.9] tracking-[-0.01em] m-0">
-          {{ label }}, in the order they install.
+          The bundles
         </h2>
         <p class="mt-3.5 text-base/[1.65] text-muted">
-          Every one of them is also a zip you can take on its own, with the CLAUDE.md lines that make it make sense.
+          Listed in the order the CLI installs them. Every one is also a zip you can take on its own, with the CLAUDE.md lines that make it make sense.
         </p>
       </div>
 

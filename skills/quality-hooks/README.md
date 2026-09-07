@@ -10,7 +10,7 @@ requires: [bash, jq, git]
 
 # Quality Hooks
 
-Three checks the harness runs for you, so they hold on the turn where Claude is in a hurry.
+The checks I keep forgetting, moved into hooks so the harness runs them instead of me.
 
 ## What's inside
 

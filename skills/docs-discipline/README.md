@@ -9,7 +9,7 @@ icon: i-lucide-book-check
 
 # Docs Discipline
 
-Three tiers, one job each, and a test that stops the living tier from rotting.
+Three tiers of documentation, one job each, and a test that keeps the living tier honest.
 
 | Tier | Path | Answers | Lifetime |
 | --- | --- | --- | --- |

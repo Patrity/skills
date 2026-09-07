@@ -156,6 +156,32 @@ describe('error page', () => {
   })
 })
 
+describe('/', () => {
+  it('opens on the plain first-person paragraph, with no status pill', async () => {
+    const html = withoutComments(await (await fetch('/')).text())
+    expect(html).toContain('This is the Claude Code setup I use on my own projects: a CLAUDE.md, some rules, skills and hooks. It is split into bundles so you can take the parts that fit and leave the rest. The web builder and the CLI write the same files.')
+    // The pill counted the registry ("9 bundles · 14 questions"); the copy rules dropped it.
+    expect(html).not.toMatch(/\d+ bundles? · \d+ questions?/)
+  })
+
+  it('captions the transcript without a file count', async () => {
+    const html = withoutComments(await (await fetch('/')).text())
+    expect(html).toContain('One run into an empty project, and what it wrote.')
+  })
+
+  it('gives every section a heading that describes it', async () => {
+    const html = withoutComments(await (await fetch('/')).text())
+    for (const heading of ['What the run writes', 'Why the setup looks like this', 'The bundles', 'Take what you want']) {
+      expect(html, heading).toMatch(new RegExp(`<h2[^>]*>\\s*${escapeRe(heading)}\\s*</h2>`))
+    }
+  })
+
+  it('closes on the invitation, not on a verdict', async () => {
+    const html = withoutComments(await (await fetch('/')).text())
+    expect(html).toContain('Take the whole thing, or just the bundle you came for.')
+  })
+})
+
 describe('/skills', () => {
   it('renders one row per bundle the API returns', async () => {
     const list = await $fetch<SkillsListResponse>('/api/skills')
@@ -301,6 +327,16 @@ describe('/docs/start-here', () => {
     expect(html).toContain('href="https://github.com/Patrity/skills/edit/main/content/docs/start-here.md"')
     expect(html).toContain('Edit on GitHub')
     expect(html).toMatch(/<a[^>]*href="\/docs\/philosophy"[^>]*>[\s\S]*?Philosophy/)
+  })
+
+  it('recommends Superpowers before the first step, with both marketplaces', async () => {
+    const html = withoutComments(await (await fetch('/docs/start-here')).text())
+    expect(html).toMatch(/<h2[^>]*>\s*Before you start\s*<\/h2>/)
+    expect(html).toContain('href="https://github.com/obra/superpowers"')
+    expect(html).toContain('href="https://claude.com/plugins/superpowers"')
+    expect(html).toContain('/plugin install superpowers@claude-plugins-official')
+    expect(html).toContain('/plugin marketplace add obra/superpowers-marketplace')
+    expect(html).toContain('/plugin install superpowers@superpowers-marketplace')
   })
 
   it('drops the next link on the last doc', async () => {

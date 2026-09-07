@@ -14,7 +14,7 @@ With no command it runs `init`. Node 22 or newer is required. `npx` and `bunx` w
 
 Releases are tagged `cli-vX.Y.Z` and published to [npmjs.com/package/@patrity/skills](https://www.npmjs.com/package/@patrity/skills) with npm provenance.
 
-## Six commands, and what each one touches
+## Commands
 
 | Command | What it does |
 | --- | --- |
@@ -96,7 +96,7 @@ No local drift: same files, same hashes on record. From there `add`, `remove` an
 
 Re-running `init` works too, and is how you change an answer you got wrong in the browser.
 
-## Updating without losing your edits
+## Updating
 
 `update` re-renders everything and reports what changed. It compares the hash of each marker block with the hash in `.claude/skills.lock.json`: a block you edited by hand no longer matches, so the CLI keeps your version and lists it as hand-edited rather than overwriting it. Pass `--force` when you want your edit replaced by the upstream version.
 
@@ -109,9 +109,9 @@ pnpx @patrity/skills diff     # what drifted, locally and upstream
 pnpx @patrity/skills update   # apply, with a confirmation
 ```
 
-## Every prompt has a flag
+## Running it unattended
 
-So the wizard runs unattended, in a script or a CI job:
+Every prompt has a flag, so the wizard runs in a script or a CI job:
 
 ```bash
 pnpx @patrity/skills init --yes --profile nuxt-app
@@ -129,7 +129,7 @@ pnpx @patrity/skills init --yes \
 
 `--answer` is repeatable and takes `axis=option` pairs; `--with` takes a comma-separated list of bundle slugs. With `--yes`, conflicting files are skipped rather than prompted for, and the summary at the end lists them one per line (`conflict: .claude/hooks/pre-commit.sh (kept yours)`). Add `--json` when a script needs to read the result: skipped paths come back in its `skipped` array.
 
-## Point it at your own registry
+## Another registry
 
 The CLI talks to `https://skills.patrity.com` by default. Any host that serves the same API works instead: a fork, a staging deploy, or a local `pnpm dev`.
 

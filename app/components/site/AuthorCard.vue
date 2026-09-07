@@ -4,7 +4,7 @@
  * (docs/design/previews/components/author-card.html).
  *
  * The mark stands in for a portrait, so the card costs no image request wherever it lands.
- * The blog link stays in the same tab — it is the other half of the same body of work — while
+ * The blog link stays in the same tab (it is the other half of the same body of work) while
  * X is a profile and gets the `rel="me"` every other profile link on the site carries.
  */
 import { LINKS } from '~~/shared/utils/links'
@@ -35,7 +35,7 @@ const LINK_CLASS = 'inline-flex items-center gap-1.5 rounded-md border border-de
         TechHive Labs
       </p>
       <p class="m-0 mb-3.5 text-sm/[1.6] text-muted">
-        I run Claude Code on billion-dollar construction data by day and a rack of GPUs at night, and I write down what breaks.. this setup is the part that kept working.
+        I run Claude Code on billion-dollar construction data by day and a rack of GPUs at night, and I write down what breaks. This setup is the part I kept using.
       </p>
 
       <div class="flex flex-wrap gap-2">

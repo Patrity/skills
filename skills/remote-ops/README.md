@@ -10,7 +10,7 @@ requires: [ssh]
 
 # Remote Ops Quoting
 
-One skill about one bug, because that bug produces a confident, detailed, completely wrong report.
+One skill about one bug: the report it produces reads as confident and detailed while being wrong.
 
 ## What's inside
 

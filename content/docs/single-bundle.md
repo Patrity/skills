@@ -1,10 +1,10 @@
 # Single bundle
 
-Sometimes you want the browser-testing workflow and none of my opinions about git. Take that one bundle and leave the rest of the setup alone. A bundle is a slice of a `.claude/` directory: skills, rules, hooks, settings and a `CLAUDE.md` snippet, published on its own page with a download button. No `CLAUDE.md` gets assembled, no lockfile is written, and nothing you already have is merged. Three steps and some copying.
+You might want the browser-testing workflow and none of my opinions about git. Take that one bundle and leave the rest of the setup alone. A bundle is a slice of a `.claude/` directory: skills, rules, hooks, settings and a `CLAUDE.md` snippet, published on its own page with a download button. No `CLAUDE.md` is assembled, no lockfile is written, and nothing you already have is merged, so the copying is yours to do.
 
 Taking the whole setup instead is [Start here](/docs/start-here). Adding a bundle to a project that already has the setup is `pnpx @patrity/skills add <slug>`.
 
-## 1. Pick the one you actually want
+## 1. Pick the bundle you want
 
 Browse the [skills index](/skills). Each card shows what the bundle contains (Skills, Rules, Hooks, Settings, CLAUDE.md), its tags, and anything it needs on your machine, such as `python3` for the doc-fetcher skills.
 
@@ -42,8 +42,8 @@ A bundle that writes a cache declares the path in its frontmatter, and the bundl
 .claude/skills/nuxt-docs/cache/
 ```
 
-A bundle that reads configuration lists it under **Environment** instead: create `.claude/.env` and set the variables it names. Skills read that file, never the repo root `.env`, and it belongs in `.gitignore` too. The CLI does all of this for you. By hand it is on you.
+A bundle that reads configuration lists it under **Environment** instead: create `.claude/.env` and set the variables it names. Skills read that file rather than the repo root `.env`, and it belongs in `.gitignore` too. The CLI does all of this for you, so installing by hand is the one path where it is yours to remember.
 
-## Updating is you, re-downloading
+## Updating
 
-Bundles have no versions. Re-download and overwrite when you want the latest; the **Source** button opens the exact GitHub tree, so you can diff before you do.
+Bundles have no versions. Re-download and overwrite when you want the latest, and the **Source** button opens the exact GitHub tree, so you can diff before you do.

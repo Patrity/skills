@@ -2,7 +2,7 @@
 
 This is a personal registry first. Pull requests for genuinely reusable bundles are still welcome.
 
-## Add a bundle in five steps
+## Add a bundle
 
 1. Fork the repository and create `skills/<slug>/` (see [Bundle structure](/docs/bundle-structure)).
 2. Write `README.md` with valid [frontmatter](/docs/frontmatter) and a body that explains what the bundle does and how to install it.
@@ -22,7 +22,7 @@ This is a personal registry first. Pull requests for genuinely reusable bundles 
 
 5. Open a pull request. CI runs the same validator plus the app's lint, typecheck, tests and build.
 
-## What happens the second it merges
+## What happens when it merges
 
 Bundle content is read from GitHub **at runtime**. Merging to `main`:
 
@@ -31,13 +31,13 @@ Bundle content is read from GitHub **at runtime**. Merging to `main`:
 
 Your bundle is live within seconds of the merge.
 
-## Three files a bundle must not own
+## Files a bundle must not own
 
 The habits below are what keep a bundle composable with the others.
 
-**Read configuration from `.claude/.env`, never the repo root `.env`.** That separation is the
-whole point: a project can hand Claude a read-only database replica while the app keeps its own
-connection string. Declare each variable in the [`env` frontmatter](/docs/frontmatter) and let the
+**Read configuration from `.claude/.env`, never the repo root `.env`.** That separation is what
+lets a project hand Claude a read-only database replica while the app keeps its own connection
+string. Declare each variable in the [`env` frontmatter](/docs/frontmatter) and let the
 tool write `.claude/.env.example`.
 
 ```bash
@@ -86,8 +86,8 @@ level deeper needs `parents[3]`. Take an explicit path argument if it can be run
 **Cache under your own skill directory, and declare it.** A skill that downloads or generates
 anything writes it beside its own `SKILL.md`, so removing the skill removes the cache. Put the path
 in the [`gitignore` frontmatter](/docs/frontmatter) and the tool adds it to the project's managed
-block. The site never zips or serves a `cache/` directory anyway, so a committed cache is dead
-weight in the repo and nothing else.
+block. The site never zips or serves a `cache/` directory anyway, so a committed cache only adds
+weight to the repo.
 
 **Never ship a `.env.example` file.** The project gets exactly one, assembled from every installed
 bundle, and a bundle that ships its own fails validation with a pointer to the `env` key.

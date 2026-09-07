@@ -48,19 +48,13 @@ function clearFilters() {
   q.value = ''
 }
 
-const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty']
-
-/** "Nine bundles." Spelled out up to twenty, digits above that, singular at one. */
-const headline = computed(() => {
-  const n = skills.value.length
-  const word = WORDS[n] ?? String(n)
-  return `${word.charAt(0).toUpperCase()}${word.slice(1)} ${n === 1 ? 'bundle' : 'bundles'}.`
-})
-
-/** The eyebrow narrows to the filtered count so the list never lies about what it shows. */
+/**
+ * The eyebrow is live filter state, not a headline count: it says how many rows the
+ * list is showing you and nothing about how big the registry is.
+ */
 const countLabel = computed(() => (isFiltered.value
-  ? `${filtered.value.length} of ${skills.value.length} bundles`
-  : `${skills.value.length} bundles · ${tags.value.length} tags`))
+  ? `${filtered.value.length} ${filtered.value.length === 1 ? 'match' : 'matches'}`
+  : 'All bundles'))
 
 const description = 'Every Claude Code bundle in the registry. Filter by name or tag, read the files before you trust them, take the zip.'
 const { public: { siteUrl } } = useRuntimeConfig()
@@ -87,10 +81,10 @@ useSiteSeo({
               {{ countLabel }}
             </MicroLabel>
             <h1 class="m-0 font-teko text-[40px] font-semibold leading-[.9] tracking-[-0.015em] lg:text-[64px]">
-              {{ headline }} <span class="text-primary">Take what you want.</span>
+              The bundles. <span class="text-primary">Take what you want.</span>
             </h1>
             <p class="mt-3.5 max-w-[44rem] text-base/[1.65] text-muted">
-              Each one is a slice of a <code class="font-mono text-sm text-default">.claude/</code> directory that runs on a real project every day: skills, rules, hooks, settings, and the CLAUDE.md lines that make them make sense together.
+              Each one is a slice of the <code class="font-mono text-sm text-default">.claude/</code> directory I run on my own projects: skills, rules, hooks, settings, and the CLAUDE.md lines that make them make sense together.
             </p>
           </div>
 
