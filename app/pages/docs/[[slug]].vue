@@ -151,7 +151,7 @@ useSiteSeo({
 }
 
 .docs-prose :deep(a) {
-  color: var(--color-green-500);
+  color: var(--ui-text-primary);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--color-green-500) 35%, transparent);
 }

@@ -22,6 +22,13 @@
   --color-green-800: #1d520a;
   --color-green-900: #174209;
   --color-green-950: #0c2604;
+
+  /*
+    Tailwind resolves `text-primary` from this namespace, so accent TEXT can sit a step
+    darker than the accent FILL without moving the ramp. Both halves are set per mode in
+    the `:root` / `.dark` blocks below.
+  */
+  --text-color-primary: var(--ui-text-primary);
 }
 
 /*
@@ -34,7 +41,18 @@
   --ui-border: rgba(0, 0, 0, 0.08);
   --ui-text: #171717;
   --ui-text-muted: #525252;
-  --ui-text-dimmed: #737373;
+  /* #737373 was 4.35:1 on .glass-card. #6b6b6b is 5.10:1 on --ui-bg, 4.89:1 on .glass-card. */
+  --ui-text-dimmed: #6b6b6b;
+
+  /*
+    Accent split, measured against --ui-bg (#fafaf9) and .glass-card (#f5f5f4):
+    green-500 as text was 3.20:1 and white on a green-500 fill was 3.34:1, both under AA.
+    Fill: green-600, so white on it is 4.69:1. Text: green-700, 6.39:1 on --ui-bg.
+    Nuxt UI sets --ui-primary from an unlayered :root/.dark pair that our stylesheet
+    outranks by source order, so both modes must be spelled out here.
+  */
+  --ui-primary: var(--color-green-600);
+  --ui-text-primary: var(--color-green-700);
 
   /* Consumed by app/components/CodeView.client.vue (Task 8). */
   --cm-bg: var(--ui-bg-elevated);
@@ -48,7 +66,12 @@
   --ui-border: rgba(255, 255, 255, 0.08);
   --ui-text: #fafafa;
   --ui-text-muted: #a3a3a3;
-  --ui-text-dimmed: #737373;
+  /* #737373 was 3.82:1 on --ui-bg-elevated. #8c8c8c is 5.82:1 on --ui-bg, 5.38:1 elevated. */
+  --ui-text-dimmed: #8c8c8c;
+
+  /* Nuxt UI's own dark value, restated because the :root pair above would otherwise win. */
+  --ui-primary: var(--color-green-400);
+  --ui-text-primary: var(--color-green-400);
 }
 
 @layer base {

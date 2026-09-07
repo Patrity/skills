@@ -32,7 +32,7 @@ const model = defineModel<T>({ required: true })
       :aria-pressed="String(model === item.value)"
       class="inline-flex items-center gap-1.5 rounded-md px-3 py-[0.3125rem] text-[0.8125rem] cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       :class="model === item.value
-        ? 'bg-(--color-green-500) text-white font-semibold'
+        ? 'bg-(--color-green-600) text-white font-semibold'
         : 'text-muted hover:text-default'"
       @click="model = item.value"
     >

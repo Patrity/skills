@@ -91,6 +91,9 @@ async function messageFor(e: unknown): Promise<string> {
 const downloading = ref(false)
 
 async function download() {
+  // `:loading` disables the button while the zip is built, and a disabled button drops focus
+  // to <body>: a keyboard user would restart the whole tab order after every download.
+  const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null
   downloading.value = true
   try {
     const blob = await $fetch<Blob>('/api/build', {
@@ -112,6 +115,8 @@ async function download() {
     toast.add({ title: 'Could not build the zip', description: await messageFor(e), icon: 'i-lucide-triangle-alert', color: 'error' })
   } finally {
     downloading.value = false
+    await nextTick()
+    if (trigger?.isConnected) trigger.focus()
   }
 }
 

@@ -31,8 +31,8 @@
             <p class="m-0 mb-3.5 text-sm/[1.55] text-muted">
               Composed from the answers you gave and the bundles you picked. Your own paragraphs stay where you put them.
             </p>
-            <pre class="m-0 pt-3 border-t border-default font-mono text-[0.6875rem]/[1.8] text-dimmed whitespace-pre overflow-x-auto [font-variant-ligatures:none]"><b class="font-normal text-(--color-green-500)"># acme-web</b>
-<b class="font-normal text-(--color-green-500)">## Git</b>
+            <pre class="m-0 pt-3 border-t border-default font-mono text-[0.6875rem]/[1.8] text-dimmed whitespace-pre overflow-x-auto [font-variant-ligatures:none]"><b class="font-normal text-primary"># acme-web</b>
+<b class="font-normal text-primary">## Git</b>
 &lt;!-- skills:base:pushes=ask --&gt;
 - Never push without explicit
   approval, even after a commit
@@ -47,7 +47,7 @@
             <p class="m-0 mb-3.5 text-sm/[1.55] text-muted">
               Rules scoped to paths, skills with their scripts, hooks, and the settings that wire them up.
             </p>
-            <pre class="m-0 pt-3 border-t border-default font-mono text-[0.6875rem]/[1.8] text-dimmed whitespace-pre overflow-x-auto [font-variant-ligatures:none]"><b class="font-normal text-(--color-green-500)">.claude/</b>
+            <pre class="m-0 pt-3 border-t border-default font-mono text-[0.6875rem]/[1.8] text-dimmed whitespace-pre overflow-x-auto [font-variant-ligatures:none]"><b class="font-normal text-primary">.claude/</b>
   rules/web-nuxt.md
   skills/nuxt-docs/SKILL.md
   hooks/protect-env.sh

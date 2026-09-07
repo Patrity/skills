@@ -185,7 +185,7 @@ onBeforeUnmount(() => {
         <div class="flex flex-wrap items-center gap-3 lg:gap-4 mt-7">
           <NuxtLink
             to="/build"
-            class="glow inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold bg-(--color-green-500) text-white hover:bg-(--color-green-600) transition-colors"
+            class="glow inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold bg-(--color-green-600) text-white hover:bg-(--color-green-700) transition-colors"
           >
             Build it on the web
             <UIcon

@@ -67,7 +67,13 @@ const isCurrent = (to: string) => route.path === to || route.path.startsWith(`${
       </nav>
 
       <div class="flex items-center gap-0.5 ms-auto md:ms-0">
-        <UColorModeButton />
+        <!--
+          Nuxt UI binds the aria-label to the live mode, and Vue does not patch attributes
+          during production hydration: a dark-mode visitor's first paint keeps the label the
+          server rendered ("Switch to dark mode") until something else re-renders the button.
+          A mode-independent name is correct in both states; the icon still swaps in CSS.
+        -->
+        <UColorModeButton aria-label="Toggle dark mode" />
         <SocialLinks
           :only="['GitHub', 'X']"
           class="hidden md:flex"

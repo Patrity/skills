@@ -157,11 +157,11 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
 }
 
 .install:hover .copy {
-  color: var(--color-green-400);
+  color: var(--ui-text-primary);
   background: color-mix(in srgb, var(--color-green-500) 10%, transparent);
 }
 
 .copy.is-done {
-  color: var(--color-green-400);
+  color: var(--ui-text-primary);
 }
 </style>
