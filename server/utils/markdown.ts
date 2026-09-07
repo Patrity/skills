@@ -1,7 +1,7 @@
 import { parseMarkdown } from '@nuxtjs/mdc/runtime'
 import type { Highlighter } from '@nuxtjs/mdc'
 import type { MarkdownRender } from '~~/shared/types/skills'
-import { dropLeadingH1 } from '~~/server/lib/skills/markdown-body'
+import { demoteLeadingH1, dropLeadingH1 } from '~~/server/lib/skills/markdown-body'
 
 // `#mdc-highlighter` is the Shiki instance @nuxtjs/mdc generates from `mdc.highlight`
 // in nuxt.config. The module aliases it into the Nitro bundle (module.mjs pushes it onto
@@ -17,12 +17,20 @@ function getHighlighter(): Promise<Highlighter> {
 
 export interface RenderMarkdownOptions {
   /**
-   * Remove the body's leading top-level `h1`, for a caller that renders the title itself:
-   * the skill page's header owns the `<h1>` for every file under `/skill/`, and the docs
-   * page takes its `<h1>` from the nav entry. Without this those pages print the same words
-   * twice and carry two `<h1>`s. A `#` further down the document is the author's, and stays.
+   * Remove the body's leading top-level `h1`, for a caller whose own title says the same
+   * words: a bundle README (the skill page header renders the bundle name) and a doc (the
+   * docs page takes its `<h1>` from the nav entry). Without this those pages print the
+   * title twice and carry two `<h1>`s. A `#` further down the document is the author's,
+   * and stays.
    */
   dropLeadingH1?: boolean
+  /**
+   * Turn the body's leading top-level `h1` into an `h2`, for every other markdown file
+   * under a bundle. Its title is not the page's title, so it cannot stay an `h1`, but it
+   * is the only thing naming the file and dropping it would leave the reader with the
+   * bundle header alone. Ignored when `dropLeadingH1` is set.
+   */
+  demoteLeadingH1?: boolean
 }
 
 /**
@@ -32,7 +40,7 @@ export interface RenderMarkdownOptions {
  *
  * `toc`/`contentHeading` are off because nothing renders a table of contents and no page
  * wants a synthesised title; the page's own `<h1>` comes from its header, not the markdown
- * (see `dropLeadingH1`).
+ * (see `dropLeadingH1` and `demoteLeadingH1`).
  *
  * Throws with `label` in the message; the caller picks the status code.
  */
@@ -44,6 +52,7 @@ export async function renderMarkdown(md: string, label: string, options: RenderM
       contentHeading: false
     })
     if (options.dropLeadingH1) dropLeadingH1(body)
+    else if (options.demoteLeadingH1) demoteLeadingH1(body)
     // `data` is the frontmatter (contentHeading is off, so no synthesised title/description).
     // <MDC> handed the same object to <MDCRenderer :data>, which interpolates {{ }} with it.
     return { body, data: data as Record<string, unknown> }

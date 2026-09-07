@@ -1,7 +1,7 @@
 import type { MarkdownBody, SkillFileResponse } from '~~/shared/types/skills'
 import { detectLanguage } from '~~/shared/utils/language'
 import { findFile } from '~~/server/lib/skills/tree'
-import { isSafeRelativePath } from '~~/server/lib/skills/paths'
+import { isBundleReadmePath, isSafeRelativePath } from '~~/server/lib/skills/paths'
 import { splitFrontmatter } from '~~/server/lib/skills/frontmatter'
 
 const decoder = new TextDecoder()
@@ -42,9 +42,16 @@ export default defineEventHandler(async (event): Promise<SkillFileResponse> => {
       if (bytes.byteLength <= MAX_RENDER_BYTES) {
         try {
           // Rendering here is what keeps the parser and Shiki out of the browser.
-          // `dropLeadingH1`: the skill page's header renders the bundle name as the page's
-          // single <h1>, so the file's own leading `# Title` would be a duplicate heading.
-          ({ body, data } = await renderMarkdown(content, `${slug}/${path}`, { dropLeadingH1: true }))
+          // The skill page header renders the bundle name as the page's single <h1>, so no
+          // file may keep one of its own. For the README that heading IS the bundle name,
+          // so it is dropped; every other file has a title of its own worth reading, so it
+          // is demoted to <h2> instead of vanishing under a header naming the bundle.
+          const heading = isBundleReadmePath(path)
+            ? { dropLeadingH1: true }
+            : { demoteLeadingH1: true }
+          const rendered = await renderMarkdown(content, `${slug}/${path}`, heading)
+          body = rendered.body
+          data = rendered.data
         } catch (err) {
           // 5xx, not a null body: ISR caches 200s, so a bad render must not be pinned
           // as an empty page (same reasoning as getBundleFilesOr503).

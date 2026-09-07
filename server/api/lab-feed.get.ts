@@ -7,12 +7,14 @@ import fallback from '~~/content/lab-feed.fallback.json'
  * The two newest lab notes, for the home page's "From the lab" section.
  *
  * Server-side only, on purpose: the browser never talks to techhivelabs.net, so no visitor
- * pays for that round trip and no third-party origin sees them. The route is ISR-cached for
- * an hour (nuxt.config routeRules) and tagged `skills`, so at most one request an hour per
- * region reaches the feed and a purge re-warms it (server/lib/skills/warm-urls.ts).
+ * pays for that round trip and no third-party origin sees them.
  *
- * A slow or broken feed must not take the home page down, so the budget is short and every
- * failure lands on the snapshot in content/lab-feed.fallback.json.
+ * The `isr: 3600` route rule (nuxt.config, tagged `skills`) only covers the URL a client
+ * navigation fetches. The home page's `useFetch('/api/lab-feed')` calls this handler
+ * directly during SSR, so every regeneration of the home page hits the feed again. What
+ * bounds that is not the cache: it is the 5 s timeout and the fallback below, which are
+ * also what keeps a slow or broken feed from taking the home page down. Every failure
+ * lands on the snapshot in content/lab-feed.fallback.json.
  */
 const TIMEOUT_MS = 5_000
 

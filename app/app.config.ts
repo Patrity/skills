@@ -6,7 +6,7 @@ export default defineAppConfig({
     input: { slots: { base: 'font-mono text-sm' } },
     select: { slots: { base: 'font-mono text-sm' } },
     tabs: { slots: { list: 'bg-(--ui-bg-elevated) border border-(--ui-border) rounded-lg p-1', trigger: 'font-medium' } },
-    tree: { slots: { link: 'font-mono text-sm', linkTrailingIcon: 'text-green-500' } },
+    tree: { slots: { link: 'font-mono text-sm', linkTrailingIcon: 'text-primary' } },
     checkbox: { slots: { label: 'text-sm' } }
   }
 })

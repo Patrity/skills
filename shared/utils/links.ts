@@ -45,3 +45,17 @@ export const NAV: readonly NavItem[] = [
   { label: 'Docs', to: '/docs' },
   { label: 'Blog', to: LINKS.blog, external: true }
 ] as const
+
+/**
+ * Is `to` the nav item the visitor is on? Shared by the header and the drawer so the two
+ * cannot drift.
+ *
+ * A prefix match, so `/docs/start-here` marks Docs rather than only an exact `/docs`. The
+ * one special case is the bundle pages: they live at `/skill/<slug>`, singular, and the
+ * list they came from is `/skills`, so nothing would be current on a bundle page without
+ * naming that here.
+ */
+export function isNavCurrent(path: string, to: string): boolean {
+  if (to === '/skills' && (path === '/skill' || path.startsWith('/skill/'))) return true
+  return path === to || path.startsWith(`${to}/`)
+}

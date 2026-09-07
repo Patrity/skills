@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dropLeadingH1 } from '../../server/lib/skills/markdown-body'
+import { demoteLeadingH1, dropLeadingH1 } from '../../server/lib/skills/markdown-body'
 import type { MarkdownBody } from '../../shared/types/skills'
 
 function element(tag: string, text: string) {
@@ -45,5 +45,37 @@ describe('dropLeadingH1', () => {
     const doc = body({ type: 'text', value: '\n' }, element('h1', 'Nuxt'))
     expect(dropLeadingH1(doc)).toBe(false)
     expect(doc.children).toHaveLength(2)
+  })
+})
+
+describe('demoteLeadingH1', () => {
+  it('turns a leading h1 into an h2, keeping its content', () => {
+    const doc = body(element('h1', 'Demo rule'), element('p', 'Always demo.'))
+    expect(demoteLeadingH1(doc)).toBe(true)
+    expect(doc.children).toEqual([element('h2', 'Demo rule'), element('p', 'Always demo.')])
+  })
+
+  it('leaves an h1 that is not the first node', () => {
+    const doc = body(element('p', 'Intro'), element('h1', 'Later'))
+    expect(demoteLeadingH1(doc)).toBe(false)
+    expect(doc.children).toEqual([element('p', 'Intro'), element('h1', 'Later')])
+  })
+
+  it('leaves a document that opens at h2 alone', () => {
+    const doc = body(element('h2', 'Stack'), element('p', 'Nuxt 4.'))
+    expect(demoteLeadingH1(doc)).toBe(false)
+    expect(doc.children).toEqual([element('h2', 'Stack'), element('p', 'Nuxt 4.')])
+  })
+
+  it('demotes only the first of two leading h1s', () => {
+    const doc = body(element('h1', 'One'), element('h1', 'Two'))
+    expect(demoteLeadingH1(doc)).toBe(true)
+    expect(doc.children).toEqual([element('h2', 'One'), element('h1', 'Two')])
+  })
+
+  it('handles an empty body', () => {
+    const doc = body()
+    expect(demoteLeadingH1(doc)).toBe(false)
+    expect(doc.children).toEqual([])
   })
 })

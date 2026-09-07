@@ -104,15 +104,55 @@ describe('site shell', () => {
     expect([...order].sort((a, b) => a - b)).toEqual(order)
   })
 
-  it('marks the current nav item with aria-current', async () => {
-    const header = section(await (await fetch('/skills')).text(), 'header')
-    expect(header).toMatch(/<a[^>]*(href="\/skills"[^>]*aria-current="page"|aria-current="page"[^>]*href="\/skills")/)
-  })
+  // A bundle lives at /skill/<slug>, singular, so the prefix rule alone would leave nothing
+  // current there. isNavCurrent names that case; both paths have to light Skills up.
+  for (const path of ['/skills', '/skill/demo']) {
+    it(`marks the current nav item with aria-current on ${path}`, async () => {
+      const header = section(await (await fetch(path)).text(), 'header')
+      expect(header).toMatch(/<a[^>]*(href="\/skills"[^>]*aria-current="page"|aria-current="page"[^>]*href="\/skills")/)
+    })
+  }
 
   it('opens the header socials in a new tab, marked rel="me noopener"', async () => {
     const header = section(await (await fetch('/')).text(), 'header')
     expect(header).toMatch(/<a[^>]*href="https:\/\/github\.com\/Patrity"[^>]*rel="me noopener"/)
     expect(header).toMatch(/<a[^>]*href="https:\/\/x\.com\/Patrity"[^>]*rel="me noopener"/)
+  })
+})
+
+/**
+ * Nuxt renders error.vue INSTEAD of app.vue, so none of the shell the layout mounts comes
+ * for free here. It has to be built by hand, and this is what proves it still is.
+ */
+describe('error page', () => {
+  /**
+   * Nuxt's error handler answers JSON unless the request says it takes HTML, and the bare
+   * test fetch sends only the wildcard accept header, which does not qualify. A browser
+   * always asks for text/html, so that is what these send.
+   */
+  const page = (path = '/definitely-not-a-page') => fetch(path, { headers: { accept: 'text/html' } })
+
+  it('answers 404 on an unknown URL', async () => {
+    expect((await page()).status).toBe(404)
+  })
+
+  it('takes its single h1 from the status code', async () => {
+    const html = withoutComments(await (await page()).text())
+    expect(html.match(/<h1[\s>]/g) ?? []).toHaveLength(1)
+    expect(html).toMatch(/<h1[^>]*>\s*404\s*<\/h1>/)
+  })
+
+  it('renders the site header and footer', async () => {
+    const html = await (await page()).text()
+    expect(section(html, 'header')).toContain('href="https://www.techhivelabs.net/blog"')
+    expect(section(html, 'footer')).toContain('href="https://x.com/Patrity"')
+  })
+
+  it('titles and favicons itself, which app.vue never gets to do', async () => {
+    const html = await (await page()).text()
+    expect(html).toContain('<title>404 · Skills</title>')
+    expect(html).toContain('href="/favicon.svg"')
+    expect(html).toContain('href="/favicon.ico"')
   })
 })
 
@@ -170,9 +210,18 @@ describe('/skill/demo', () => {
     expect(html).toMatch(/<h1[^>]*>\s*Demo\s*<\/h1>/)
   })
 
+  it('demotes a non-README file title to h2 under the bundle header', async () => {
+    const html = withoutComments(await (await fetch('/skill/demo/rules/demo.md')).text())
+    // rules/demo.md opens `# Demo rule`. The header owns the page's h1, so the file's own
+    // title is demoted rather than dropped: losing it would leave the rule unnamed.
+    expect(html).toMatch(/<h2[^>]*>[^<]*Demo rule/)
+    expect(html).not.toMatch(/<h1[^>]*>[^<]*Demo rule/)
+  })
+
   // A CLAUDE.md opens at `##`, settings.json is not markdown at all and a shell script
-  // renders as code: none of them can supply a heading, so the header has to.
-  for (const path of ['CLAUDE.md', 'settings.json', 'hooks/pre-commit.sh']) {
+  // renders as code: none of them can supply a heading, so the header has to. rules/demo.md
+  // does open at `#`, and still leaves the header's h1 the only one on the page.
+  for (const path of ['CLAUDE.md', 'settings.json', 'hooks/pre-commit.sh', 'rules/demo.md']) {
     it(`renders exactly one h1 on /skill/demo/${path}`, async () => {
       const res = await fetch(`/skill/demo/${path}`)
       expect(res.status).toBe(200)

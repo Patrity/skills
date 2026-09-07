@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NAV } from '~~/shared/utils/links'
+import { isNavCurrent, NAV } from '~~/shared/utils/links'
 
 /**
  * The `< md` menu: the hamburger *and* the slide-over it opens.
@@ -11,8 +11,7 @@ import { NAV } from '~~/shared/utils/links'
 const open = ref(false)
 
 const route = useRoute()
-/** `/docs/start-here` marks Docs, not just an exact `/docs`. */
-const isCurrent = (to: string) => route.path === to || route.path.startsWith(`${to}/`)
+const isCurrent = (to: string) => isNavCurrent(route.path, to)
 </script>
 
 <template>

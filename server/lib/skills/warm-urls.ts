@@ -35,8 +35,10 @@ function filePaths(nodes: TreeNode[], out: string[] = []): string[] {
  * has to fetch those to build this list, which warms them already.
  */
 export function buildWarmUrls(sitemapXml: string, details: SkillDetailResponse[], buildId?: string): string[] {
-  // /api/lab-feed is the home page's only off-site read: cold, the first visitor after a
-  // purge waits on techhivelabs.net, so it is warmed with everything else.
+  // /api/lab-feed is the home page's only off-site read. Its `isr: 3600` rule covers the
+  // URL a client navigation fetches, which is what this warms; the home page's own SSR
+  // calls the handler directly and is bounded by that route's 5 s timeout and fallback,
+  // not by this cache.
   const urls = new Set<string>(['/api/base', '/api/profiles', '/api/cli/manifest', '/api/lab-feed'])
   const query = buildId ? `?_b=${encodeURIComponent(buildId)}` : ''
   // The site root's payload is /_payload.json, not //_payload.json.

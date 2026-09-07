@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NAV } from '~~/shared/utils/links'
+import { isNavCurrent, NAV } from '~~/shared/utils/links'
 
 /**
  * Sticky top bar. Transparent over the hero, frosted once the page has scrolled; the
@@ -19,8 +19,7 @@ onMounted(() => {
 onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 
 const route = useRoute()
-/** `/docs/start-here` marks Docs current, not just an exact `/docs`. */
-const isCurrent = (to: string) => route.path === to || route.path.startsWith(`${to}/`)
+const isCurrent = (to: string) => isNavCurrent(route.path, to)
 </script>
 
 <template>
