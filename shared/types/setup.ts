@@ -23,6 +23,8 @@ export interface BaseAxis {
   description?: string
   /** Follow-up axis: asked only when `axis` was answered with `option`. */
   when?: { axis: string, option: string }
+  /** An aside about what the question is really asking. The builder tooltips it; the CLI prints it. */
+  info?: { text: string, href?: string, label?: string }
   /** Select-style axis. */
   options?: BaseOption[]
   default?: string

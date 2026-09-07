@@ -253,6 +253,13 @@ describe('/build', () => {
     // From the base schema the fixtures and the real repo share.
     expect(html).toContain('How is the repo laid out?')
   })
+
+  it('puts an axis with an info block behind a focusable glyph', async () => {
+    const html = withoutComments(await (await fetch('/build')).text())
+    // The tooltip content is rendered on open, so the button is what the HTML can prove.
+    expect(html).toMatch(/<button[^>]*data-axis-info="layout"/)
+    expect(html).toContain('About this question')
+  })
 })
 
 describe('/docs/start-here', () => {

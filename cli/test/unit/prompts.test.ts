@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { summarize } from '../../src/prompts'
+import { axisMessage, summarize } from '../../src/prompts'
 import { emptyLockfile } from '../../src/lockfile'
 import { GITIGNORE_UNTERMINATED } from '../../../shared/setup/gitignore'
 import type { FileOp, SetupPlan } from '../../src/plan'
@@ -76,5 +76,24 @@ describe('summarize', () => {
     expect(out.split('\n')[0]).toBe('create 1 · update 0 · unchanged 0 · conflicts 0 · protected 0')
     expect(out).toContain('remove 1: .claude/rules/old.md')
     expect(out).toContain('⚠ ghost is gone')
+  })
+})
+
+describe('axisMessage', () => {
+  const axis = { id: 'memory', question: 'Use the MyMind memory server?' }
+
+  it('leaves an axis without an info block alone', () => {
+    expect(axisMessage(axis)).toBe('Use the MyMind memory server?')
+  })
+
+  it('puts the info on its own line under the question, with the link named', () => {
+    expect(axisMessage({ ...axis, info: { text: 'It only helps if you run it.', href: 'https://github.com/Patrity/mymind', label: 'Repo' } }))
+      .toBe('Use the MyMind memory server?\nIt only helps if you run it. Repo: https://github.com/Patrity/mymind')
+  })
+
+  it('names the link Repo by default and says nothing when there is no href', () => {
+    expect(axisMessage({ ...axis, info: { text: 'Read me.', href: 'https://example.com' } }))
+      .toBe('Use the MyMind memory server?\nRead me. Repo: https://example.com')
+    expect(axisMessage({ ...axis, info: { text: 'Read me.' } })).toBe('Use the MyMind memory server?\nRead me.')
   })
 })

@@ -9,6 +9,7 @@ axes:
   - id: layout
     question: How is the repo laid out?
     default: single
+    info: { text: "The layout decides which globs every rule is written with.", href: https://example.com/layout, label: "Docs" }
     options:
       - { id: single, label: Single app }
       - { id: monorepo, label: Monorepo, fragment: layout/monorepo.md, selects: [demo] }

@@ -296,6 +296,12 @@ describe('setup endpoints', () => {
     expect(res.base!.axes.map(a => a.id)).toEqual(['pm', 'layout', 'appDir'])
     expect(res.base!.sections.map(s => s.id)).toContain('skills-and-rules')
     expect(res.base!.fragments['pm/pnpm.md']).toContain('{{pm}}')
+    // The aside the builder tooltips beside the question.
+    expect(res.base!.axes[1]!.info).toEqual({
+      text: 'The layout decides which globs every rule is written with.',
+      href: 'https://example.com/layout',
+      label: 'Docs'
+    })
   })
   it('GET /api/profiles returns the fixture profiles', async () => {
     const res = await $fetch<ProfilesResponse>('/api/profiles')

@@ -19,6 +19,8 @@ const axisSchema = z.object({
   question: z.string().min(1),
   description: z.string().optional(),
   when: z.object({ axis: z.string(), option: z.string() }).optional(),
+  // An aside the question itself should not carry: what the thing is, and where to read more.
+  info: z.object({ text: z.string().min(1), href: z.url().optional(), label: z.string().optional() }).optional(),
   options: z.array(optionSchema).min(1).optional(),
   default: z.string().optional(),
   input: z.object({ placeholder: z.string(), default: z.string() }).optional()

@@ -1,5 +1,5 @@
 import { cancel, confirm, groupMultiselect, isCancel, note, select, text } from '@clack/prompts'
-import type { BaseSchema, Profile } from '../../shared/types/setup'
+import type { BaseAxis, BaseSchema, Profile } from '../../shared/types/setup'
 import type { SkillSummary } from '../../shared/types/skills'
 import { ENV_EXAMPLE_PATH } from '../../shared/setup/env-example'
 import { GITIGNORE_UNTERMINATED } from '../../shared/setup/gitignore'
@@ -16,6 +16,18 @@ function bail<T>(value: T | symbol): T {
   return value as T
 }
 
+/**
+ * The message a prompt shows for one axis. An `info` block is an aside the question itself should
+ * not carry, so it goes on its own line under it rather than in a `note()` box: @clack prefixes
+ * every wrapped line with the same guide bar, so the aside stays attached to the question it is
+ * about instead of sitting above the prompt as a separate block.
+ */
+export function axisMessage(axis: BaseAxis): string {
+  if (!axis.info) return axis.question
+  const link = axis.info.href ? ` ${axis.info.label ?? 'Repo'}: ${axis.info.href}` : ''
+  return `${axis.question}\n${axis.info.text}${link}`
+}
+
 export async function askAxes(schema: BaseSchema, answers: Record<string, string>): Promise<Record<string, string>> {
   const out = { ...answers }
   // Re-evaluate after every answer so follow-ups appear as soon as their condition holds.
@@ -23,9 +35,9 @@ export async function askAxes(schema: BaseSchema, answers: Record<string, string
     const axis = activeAxes(schema, out)[i]
     if (!axis) break
     if (axis.options) {
-      out[axis.id] = bail(await select({ message: axis.question, initialValue: out[axis.id] ?? axis.default, options: axis.options.map(o => ({ value: o.id, label: o.label, hint: o.description })) }))
+      out[axis.id] = bail(await select({ message: axisMessage(axis), initialValue: out[axis.id] ?? axis.default, options: axis.options.map(o => ({ value: o.id, label: o.label, hint: o.description })) }))
     } else if (axis.input) {
-      out[axis.id] = bail(await text({ message: axis.question, placeholder: axis.input.placeholder, initialValue: out[axis.id] ?? axis.input.default })) || axis.input.default
+      out[axis.id] = bail(await text({ message: axisMessage(axis), placeholder: axis.input.placeholder, initialValue: out[axis.id] ?? axis.input.default })) || axis.input.default
     }
   }
   return out

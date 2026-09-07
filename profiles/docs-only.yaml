@@ -1,4 +1,4 @@
 name: docs-only
-description: A documentation or notes repo.. docs discipline and memory, nothing else.
-answers: { pm: pnpm, layout: single, workflow: none, docs: mechanical, memory: "on", commits: proactive, pushes: ask, browser: none, enforcement: prose, deploy: none, domain: "off" }
+description: A documentation or notes repo.. docs discipline, nothing else.
+answers: { pm: pnpm, layout: single, workflow: none, docs: mechanical, memory: "off", commits: proactive, pushes: ask, browser: none, enforcement: prose, deploy: none, domain: "off" }
 bundles: [docs-discipline]

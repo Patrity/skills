@@ -34,6 +34,32 @@ describe('parseBaseSchema', () => {
     expect(schema!.templates['browser-testing-project.md']).toContain('{{projectName}}')
   })
 
+  it('carries an axis info block and rejects a bad one', () => {
+    const { schema } = parseBaseSchema(baseFiles)
+    expect(schema!.axes[1]!.info).toEqual({
+      text: 'The layout decides which globs every rule is written with.',
+      href: 'https://example.com/layout',
+      label: 'Docs'
+    })
+    // Optional, and an axis without one says nothing extra.
+    expect(schema!.axes[0]!.info).toBeUndefined()
+
+    const files = { ...baseFiles }
+    files['questions.yaml'] = enc(`version: 1
+axes:
+  - id: pm
+    question: Q
+    default: pnpm
+    info: { text: "", href: not-a-url }
+    options:
+      - { id: pnpm, label: pnpm, fragment: pm/pnpm.md }
+`)
+    const { schema: bad, errors } = parseBaseSchema(files)
+    expect(bad).toBeNull()
+    expect(errors.some(e => e.startsWith('questions.yaml: axes.0.info.text:'))).toBe(true)
+    expect(errors.some(e => e.startsWith('questions.yaml: axes.0.info.href:'))).toBe(true)
+  })
+
   it('reports a missing fragment, a bad default and an unknown follow-up axis', () => {
     const files = { ...baseFiles }
     files['questions.yaml'] = enc(`version: 1

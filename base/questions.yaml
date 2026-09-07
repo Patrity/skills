@@ -41,7 +41,11 @@ axes:
 
   - id: memory
     question: Use the MyMind memory server?
-    default: on
+    default: off
+    info:
+      text: MyMind is my own open-source memory server for Claude Code. It only helps if you run it.
+      href: https://github.com/Patrity/mymind
+      label: Repo
     options:
       - { id: on, label: Yes, fragment: memory/on.md }
       - { id: off, label: No }

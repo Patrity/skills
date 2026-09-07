@@ -1,7 +1,5 @@
 # CLI
 
-[![npm](https://img.shields.io/npm/v/@patrity/skills)](https://www.npmjs.com/package/@patrity/skills)
-
 `@patrity/skills` installs bundles from this registry into a project and keeps them current. It writes the same files you would otherwise download and unzip by hand, plus a `CLAUDE.md` assembled from your answers.
 
 ## Nothing to install
