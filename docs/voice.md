@@ -60,8 +60,8 @@ described at the bottom, as background, not as a target for this repo.
    - After: "I read the file before I trust it, which is why every bundle page shows the files."
 9. **Do keep the failure in.** The thing that bit me stays on the page, stated plainly, because it
    is the reason a rule exists. It just does not get a drum roll.
-10. **Do keep my own name out of the claim.** No "the setup I actually run" energy in body copy.
-    The pages are about the files, not about me being right.
+10. **Do keep the claim off myself.** "The Claude Code setup I use" is as far as it goes. The
+    pages are about the files, not about me being right about them.
 11. **Swearing stays out.** Not even quoted. That is the blog.
 
 ## Sample rewrites

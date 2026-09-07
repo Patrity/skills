@@ -17,11 +17,11 @@ That is the official marketplace. obra's own marketplace works too:
 /plugin install superpowers@superpowers-marketplace
 ```
 
-The [plugin page](https://claude.com/plugins/superpowers) lists what is in it. Answer `none` to the workflow question and none of this matters.
+The [plugin page](https://claude.com/plugins/superpowers) lists what is in it. Answer `none` to the workflow question and you can skip it.
 
 ## 1. Answer the questions in a browser
 
-Open [the builder](/build). Pick a preset (`nuxt-app`, `library`, `docs-only`, or Custom), name the project, and work down the list. Some of the questions only appear once an earlier answer calls for them: a monorepo is asked where the app directory lives, browser validation is asked whether the app has a login, and a domain Claude must not guess about is asked for its name. The right pane composes the `CLAUDE.md` while you answer, and the Files tab lists everything the zip will hold.
+Open [the builder](/build). Pick a preset (`nuxt-app`, `library`, `docs-only`, or Custom), name the project, and work down the list. Some of the questions only appear once an earlier answer calls for them: say monorepo and it asks where the app directory lives; say you validate in a browser and it asks whether the app has a login; say there is a domain Claude must not guess about and it asks for its name. The right pane composes the `CLAUDE.md` while you answer, and the Files tab lists everything the zip will hold.
 
 **Download setup** gives you a zip of exactly that:
 

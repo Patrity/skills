@@ -440,7 +440,7 @@ describe('page meta', () => {
   }
 
   const TITLES: Record<string, string> = {
-    '/': 'The Claude Code setup I actually run · Skills',
+    '/': 'The Claude Code setup I use · Skills',
     '/skills': 'All skills · Skills',
     '/skill/demo': 'Demo · Skills',
     '/build': 'Build your setup · Skills',
@@ -466,7 +466,7 @@ describe('page meta', () => {
   // fitOgTitle() cuts the card's title at 42 characters, so a title carrying the site name
   // twice comes back with an ellipsis. The card draws the wordmark already.
   it('draws each card title whole, without the site suffix', async () => {
-    expect(ogCardTitle(await (await fetch('/')).text())).toBe('The Claude Code setup I actually run')
+    expect(ogCardTitle(await (await fetch('/')).text())).toBe('The Claude Code setup I use')
     expect(ogCardTitle(await (await fetch('/skill/demo')).text())).toBe('Demo')
     expect(ogCardTitle(await (await fetch('/docs/start-here')).text())).toBe('Start here')
   })

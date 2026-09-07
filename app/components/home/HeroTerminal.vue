@@ -141,10 +141,9 @@ onBeforeUnmount(() => {
       <!-- Identity column. -->
       <div class="lg:col-span-7 max-w-3xl">
         <h1 class="font-teko font-bold text-5xl lg:text-[6rem] leading-[.86] tracking-[-0.025em] text-default">
-          Claude Code,<br>
-          set up the way<br>
-          I <span class="gradient-text">actually</span><br>
-          run it.
+          The Claude Code<br>
+          setup I<br>
+          <span class="gradient-text">use</span>.
         </h1>
 
         <p class="flex items-baseline gap-2 mt-6 font-mono">

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fitOgTitle } from '../../shared/utils/og'
 
 const SHORT = 'Nuxt bundle, ready' // 18 chars
-const LONG = 'The Claude Code setup I actually run, as bundles you can take one at a time' // 74 chars
+const LONG = 'The Claude Code setup I use, as bundles you can take one at a time' // 66 chars
 
 describe('fitOgTitle', () => {
   it('leaves a title that already fits alone', () => {

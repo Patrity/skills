@@ -19,10 +19,10 @@ useSiteSeo({
   // The app-level titleTemplate appends " · Skills". A shared link carries no template, so
   // the og:title spells the site out; the card itself already draws the wordmark, so it
   // takes the bare title rather than a suffixed one that would not fit.
-  title: 'The Claude Code setup I actually run',
+  title: 'The Claude Code setup I use',
   description,
-  ogTitle: 'The Claude Code setup I actually run · Skills',
-  ogImageTitle: 'The Claude Code setup I actually run'
+  ogTitle: 'The Claude Code setup I use · Skills',
+  ogImageTitle: 'The Claude Code setup I use'
 })
 </script>
 
